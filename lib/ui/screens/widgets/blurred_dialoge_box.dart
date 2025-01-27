@@ -1,16 +1,15 @@
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-
-abstract mixin class BlurDialoge {}
+abstract mixin class BlurDialog {}
 
 ///This dialoge box will blur background of screen
 ///This is normaly a screen which blurs its background we don't show builtin dialog box here instead we push to new route and show container in middle of screen
-class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
+class BlurredDialogBox extends StatelessWidget implements BlurDialog {
   final String? cancelButtonName;
   final bool? divider;
   final String? acceptButtonName;
@@ -25,9 +24,9 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
   final Color? acceptButtonColor;
   final Color? acceptTextColor;
   final bool? backAllowedButton;
-  final bool? showCancleButton;
-  final bool? barrierDismissable;
-  final bool? isAcceptContainesPush;
+  final bool? showCancelButton;
+  final bool? barrierDismissible;
+  final bool? isAcceptContainerPush;
 
   const BlurredDialogBox({
     super.key,
@@ -42,11 +41,11 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
     this.acceptButtonColor,
     this.acceptTextColor,
     this.backAllowedButton,
-    this.showCancleButton,
+    this.showCancelButton,
     this.svgImagePath,
     this.svgImageColor,
-    this.barrierDismissable,
-    this.isAcceptContainesPush,
+    this.barrierDismissible,
+    this.isAcceptContainerPush,
     this.divider,
   });
 
@@ -58,23 +57,23 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
     return AnnotatedRegion(
       value: SystemUiOverlayStyle(
           systemNavigationBarDividerColor: Colors.transparent,
-          statusBarColor: Colors.black.withOpacity(0)),
+          statusBarColor: Colors.black.withValues(alpha: 0)),
       child: Stack(
         children: [
           //Make dialoge box's background lighter black
           GestureDetector(
             onTap: () {
-              if (barrierDismissable ?? false) {
+              if (barrierDismissible ?? false) {
                 Navigator.pop(context);
               }
             },
             child: Container(
-              color: Colors.black.withOpacity(0.14),
+              color: Colors.black.withValues(alpha: 0.14),
             ),
           ),
           PopScope(
             canPop: isBack,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, result) {
               if (backAllowedButton == false) {
                 isBack = false;
                 return;
@@ -91,10 +90,7 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
 
             child: LayoutBuilder(builder: (context, constraints) {
               return AlertDialog(
-                backgroundColor: context.color.secondaryColor ??
-                    makeColorDark(
-                      context.color.primaryColor,
-                    ),
+                backgroundColor: context.color.secondaryColor,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
                 title: Column(
@@ -103,7 +99,7 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                       CircleAvatar(
                         radius: 186 / 2,
                         backgroundColor:
-                            context.color.territoryColor.withOpacity(0.1),
+                            context.color.territoryColor.withValues(alpha: 0.1),
                         child: SizedBox(
                             // width: 87 / 2,
                             // height: 87 / 2,
@@ -117,7 +113,7 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                       ),
                     ],
                     title != null
-                        ? Text(title!.firstUpperCase(),
+                        ? CustomText(title!.firstUpperCase(),
                             textAlign: TextAlign.center)
                         : SizedBox.shrink(),
                     if (divider == true) Divider(),
@@ -127,7 +123,7 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                 actionsOverflowAlignment: OverflowBarAlignment.center,
                 actionsAlignment: MainAxisAlignment.center,
                 actions: [
-                  if (showCancleButton ?? true) ...[
+                  if (showCancelButton ?? true) ...[
                     button(
                       context,
                       constraints: constraints,
@@ -145,7 +141,7 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                     // const Spacer(),
                   ],
                   Builder(builder: (context) {
-                    if (showCancleButton == false) {
+                    if (showCancelButton == false) {
                       return Center(
                         child: SizedBox(
                           width: context.screenWidth / 2,
@@ -161,8 +157,8 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                             onTap: () async {
                               await onAccept?.call();
 
-                              if (isAcceptContainesPush == false ||
-                                  isAcceptContainesPush == null) {
+                              if (isAcceptContainerPush == false ||
+                                  isAcceptContainerPush == null) {
                                 Future.delayed(
                                   Duration.zero,
                                   () {
@@ -185,8 +181,8 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
                           const Color.fromARGB(255, 255, 255, 255),
                       onTap: () async {
                         await onAccept?.call();
-                        if (isAcceptContainesPush == false ||
-                            isAcceptContainesPush == null) {
+                        if (isAcceptContainerPush == false ||
+                            isAcceptContainerPush == null) {
                           Future.delayed(
                             Duration.zero,
                             () {
@@ -226,25 +222,26 @@ class BlurredDialogBox extends StatelessWidget implements BlurDialoge {
     return SizedBox(
       width: (constraints.maxWidth / 3),
       child: MaterialButton(
-        elevation: 0,
+          elevation: 0,
+          height: 39,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(color: context.color.borderColor)),
+          color: buttonColor,
+          // minWidth: (constraints.maxWidth / 2) - 10,
 
-        height: 39.rh(context),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-            side: BorderSide(color: context.color.borderColor)),
-        color: buttonColor,
-        // minWidth: (constraints.maxWidth / 2) - 10,
-
-        onPressed: onTap,
-        child: Text(buttonName).color(textColor),
-      ),
+          onPressed: onTap,
+          child: CustomText(
+            buttonName,
+            color: textColor,
+          )),
     );
   }
 }
 
 ///This dialoge box will blur background of screen
 ///This is normaly a screen which blurs its background we don't show builtin dialog box here instead we push to new route and show container in middle of screen
-class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
+class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialog {
   final String? cancelButtonName;
   final String? acceptButtonName;
   final VoidCallback? onCancel;
@@ -289,17 +286,15 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
     return AnnotatedRegion(
       value: SystemUiOverlayStyle(
           systemNavigationBarDividerColor: Colors.transparent,
-          statusBarColor: Colors.black.withOpacity(0)),
+          statusBarColor: Colors.black.withValues(alpha: 0)),
       child: Stack(
         children: [
-          //Make dialoge box's background lighter black
           Container(
-            color: Colors.black.withOpacity(0.14),
+            color: Colors.black.withValues(alpha: 0.14),
           ),
-
           PopScope(
             canPop: isBack,
-            onPopInvoked: (didPop) async {
+            onPopInvokedWithResult: (didPop, result) async {
               if (backAllowedButton == false) {
                 isBack = false;
                 return;
@@ -318,7 +313,7 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
                       CircleAvatar(
                         radius: 98 / 2,
                         backgroundColor:
-                            context.color.territoryColor.withOpacity(0.1),
+                            context.color.territoryColor.withValues(alpha: 0.1),
                         child: SizedBox(
                             width: 87 / 2,
                             height: 87 / 2,
@@ -329,7 +324,8 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
                         height: 20,
                       ),
                     ],
-                    Text(title.firstUpperCase(), textAlign: TextAlign.center),
+                    CustomText(title.firstUpperCase(),
+                        textAlign: TextAlign.center),
                   ],
                 ),
                 content: contentBuilder.call(context, constraints),
@@ -341,7 +337,7 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
                       context,
                       constraints: constraints,
                       buttonColor: cancelButtonColor ??
-                          context.color.territoryColor.withOpacity(.10),
+                          context.color.territoryColor.withValues(alpha: .10),
                       buttonName:
                           cancelButtonName ?? "cancelBtnLbl".translate(context),
                       textColor: cancelTextColor ?? context.color.textColorDark,
@@ -418,12 +414,12 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
   Color makeColorDark(Color color) {
     Color color0 = color;
 
-    int red = color0.red - 10;
-    int green = color0.green - 10;
-    int blue = color0.blue - 10;
+    int red = color0.r.toInt() - 10;
+    int green = color0.g.toInt() - 10;
+    int blue = color0.b.toInt() - 10;
 
-    return Color.fromARGB(color0.alpha, red.clamp(0, 255), green.clamp(0, 255),
-        blue.clamp(0, 255));
+    return Color.fromARGB(color0.a.toInt(), red.clamp(0, 255),
+        green.clamp(0, 255), blue.clamp(0, 255));
   }
 
   Widget button(BuildContext context,
@@ -436,19 +432,22 @@ class BlurredDialogBuilderBox extends StatelessWidget implements BlurDialoge {
       width: (constraints.maxWidth / 3),
       child: MaterialButton(
         elevation: 0,
-        height: 39.rh(context),
+        height: 39,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         color: buttonColor,
         // minWidth: (constraints.maxWidth / 2) - 10,
 
         onPressed: onTap,
-        child: Text(buttonName).color(textColor),
+        child: CustomText(
+          buttonName,
+          color: textColor,
+        ),
       ),
     );
   }
 }
 
-class EmptyDialogBox extends StatelessWidget with BlurDialoge {
+class EmptyDialogBox extends StatelessWidget with BlurDialog {
   final Widget child;
   final bool? barrierDismisable;
 
@@ -465,7 +464,7 @@ class EmptyDialogBox extends StatelessWidget with BlurDialoge {
             if (barrierDismisable ?? true) Navigator.pop(context);
           },
           child: Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
           ),
         ),
         Center(child: child),

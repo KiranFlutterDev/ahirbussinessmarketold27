@@ -1,17 +1,17 @@
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_language_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/language_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/system_settings_model.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 
 class LanguagesListScreen extends StatelessWidget {
   const LanguagesListScreen({super.key});
@@ -60,8 +60,11 @@ class LanguagesListScreen extends StatelessWidget {
             map.remove("file_name");
 
             HiveUtils.storeLanguage(map);
-            context.read<LanguageCubit>().emit(LanguageLoader(map));
+            context.read<LanguageCubit>().changeLanguages(map);
             context.read<FetchCategoryCubit>().fetchCategories();
+          }
+          if (state is FetchLanguageFailure) {
+            Widgets.hideLoder(context);
           }
         },
         child: ListView.builder(
@@ -72,7 +75,7 @@ class LanguagesListScreen extends StatelessWidget {
               Color color = (language as LanguageLoader).language['code'] ==
                       setting[index]['code']
                   ? context.color.territoryColor
-                  : context.color.textLightColor.withOpacity(0.03);
+                  : context.color.textLightColor.withValues(alpha: 0.03);
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -103,26 +106,24 @@ class LanguagesListScreen extends StatelessWidget {
                     title: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(setting[index]['name'])
-                            .color((language).language['code'] ==
-                                    setting[index]['code']
-                                ? context.color.buttonColor
-                                : context.color.textColorDark)
-                            .bold(),
-                        Text(setting[index]['name_in_english'])
-                            .color((language).language['code'] ==
-                                    setting[index]['code']
-                                ? context.color.buttonColor.withOpacity(0.7)
-                                : context.color.textColorDark.withOpacity(0.6))
-                            .size(context.font.small)
-                      ],
-                    ),
-                    /*   subtitle: Text(setting[index]['name'])
-                          .color((language).language['code'] ==
+                        CustomText(
+                          setting[index]['name'],
+                          color: (language).language['code'] ==
                                   setting[index]['code']
                               ? context.color.buttonColor
-                              : context.color.textColorDark)
-                          .size(context.font.small)*/
+                              : context.color.textColorDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        CustomText(
+                          setting[index]['name_in_english'],
+                          color: (language).language['code'] ==
+                                  setting[index]['code']
+                              ? context.color.buttonColor.withValues(alpha: 0.7)
+                              : context.color.textColorDark,
+                          fontSize: context.font.small,
+                        )
+                      ],
+                    ),
                   ),
                 ),
               );

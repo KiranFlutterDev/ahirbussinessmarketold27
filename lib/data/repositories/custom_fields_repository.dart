@@ -1,7 +1,5 @@
-
 import 'package:eClassify/data/model/custom_field/custom_field_model.dart';
 import 'package:eClassify/utils/api.dart';
-
 
 class CustomFieldRepository {
   Future<List<CustomFieldModel>> getCustomFields(String categoryIds) async {
@@ -12,7 +10,6 @@ class CustomFieldRepository {
 
       Map<String, dynamic> response = await Api.get(
           url: Api.getCustomFieldsApi, queryParameters: parameters);
-
 
       List<CustomFieldModel> modelList = (response['data'] as List)
           .map((e) => CustomFieldModel.fromMap(e))

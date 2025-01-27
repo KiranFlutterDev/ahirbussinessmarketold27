@@ -30,10 +30,10 @@ class DeleteMessageCubit extends Cubit<DeleteMessageState> {
     try {
       emit(DeleteMessageInProgress());
 
-      await Api.post(url: Api.deleteChatMessageApi, parameter: {"message_id": id});
+      await Api.post(
+          url: Api.deleteChatMessageApi, parameter: {"message_id": id});
       emit(DeleteMessageSuccess(id: id));
     } catch (e) {
-
       emit(DeleteMessageFail(error: e.toString()));
     }
   }

@@ -43,7 +43,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
        we wait, If we try to write in that field again so timer is already active and it is
         on 300 miliseconds , Now we have not completed our writing and API will call on 500 miliseconds
          , To prevent this we cancel timer when we write again in that field
-     *//*
+     */ /*
 
       if (delayTimer?.isActive ?? false) delayTimer?.cancel();
 
@@ -56,7 +56,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
           if (_searchLocation.text.length != previousLength) {
             context
                 .read<GooglePlaceAutocompleteCubit>()
-                .getLocationFromText(text: _searchLocation.text);
+                .getLocationFromCustomText(text: _searchLocation.text);
 
             ///set previous text length
             previousLength = _searchLocation.text.length;
@@ -89,7 +89,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
+            CustomText(
               "selectLocation".translate(context),
               style: TextStyle(fontSize: context.font.larger),
             ),
@@ -102,7 +102,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
                     focusedBorder: OutlineInputBorder(
                         borderSide:
                             BorderSide(color: context.color.territoryColor)),
-                    fillColor: context.color.territoryColor.withOpacity(0.01),
+                    fillColor: context.color.territoryColor.withValues(alpha: 0.01),
                     filled: true,
                     prefixIcon: Icon(
                       Icons.search,
@@ -156,7 +156,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
                               );
                             },
                             leading: const Icon(Icons.location_city),
-                            title: Text(googlePlaceState
+                            title: CustomText(googlePlaceState
                                 .autocompleteResult[i].description
                                 .toString()),
                           );
@@ -165,7 +165,7 @@ class ChooseLocatonBottomSheetState extends State<ChooseLocatonBottomSheet> {
                   return Padding(
                     padding: const EdgeInsetsDirectional.only(top: 8.0),
                     child:
-                        Center(child: Text('nodatafound'.translate(context))),
+                        Center(child: CustomText('nodatafound'.translate(context))),
                   );
                 }
 

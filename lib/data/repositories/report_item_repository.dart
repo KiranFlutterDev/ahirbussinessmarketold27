@@ -32,7 +32,6 @@ class ReportItemRepository {
         },
       );
 
-
       return response;
     } catch (e) {
       rethrow;

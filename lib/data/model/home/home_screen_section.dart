@@ -136,14 +136,12 @@ class SectionData {
       data['user_details'] = userDetails!.toJson();
     }
     if (galleryImages != null) {
-      data['gallery_images'] =
-          galleryImages!.map((v) => v.toJson()).toList();
+      data['gallery_images'] = galleryImages!.map((v) => v.toJson()).toList();
     }
     data['clicks'] = clicks;
     data['likes'] = likes;
     if (customFields != null) {
-      data['custom_fields'] =
-          customFields!.map((v) => v.toJson()).toList();
+      data['custom_fields'] = customFields!.map((v) => v.toJson()).toList();
     }
     return data;
   }

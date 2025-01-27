@@ -1,9 +1,7 @@
 import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:flutter/material.dart';
 
 class SliderShimmer extends StatelessWidget {
   const SliderShimmer({super.key});
@@ -20,7 +18,7 @@ class SliderShimmer extends StatelessWidget {
             height: 10,
           ),
           CustomShimmer(
-            height: 130.rh(context),
+            height: 130,
             width: context.screenWidth,
           ),
           const SizedBox(
@@ -53,8 +51,8 @@ class PromotedItemsShimmer extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: index == 0 ? 0 : 8),
                 child: CustomShimmer(
-                  height: 272.rh(context),
-                  width: 250.rw(context),
+                  height: 272,
+                  width: 250,
                 ),
               );
             }));
@@ -73,7 +71,7 @@ class MostLikedItemsShimmer extends StatelessWidget {
       ),
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: 162.rw(context) / 274.rh(context),
+          childAspectRatio: 162 / 274,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           crossAxisCount: 2),
@@ -127,7 +125,7 @@ class MostViewdItemsShimmer extends StatelessWidget {
         ),
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            childAspectRatio: 162.rw(context) / 274.rh(context),
+            childAspectRatio: 162 / 274,
             mainAxisSpacing: 15,
             crossAxisCount: 2),
         itemCount: 5,
@@ -154,8 +152,8 @@ class CategoryShimmer extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           return CustomShimmer(
-            width: 100.rw(context),
-            height: 44.rh(context),
+            width: 100,
+            height: 44,
             margin: const EdgeInsetsDirectional.only(end: 10, bottom: 5),
           );
         });

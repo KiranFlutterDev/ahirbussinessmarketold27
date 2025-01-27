@@ -1,12 +1,11 @@
+import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/utils/validator.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:flutter/material.dart';
 
 class CustomRadioField extends CustomField {
   @override
@@ -24,20 +23,9 @@ class CustomRadioField extends CustomField {
       if (parameters['value'] != null) {
         if ((parameters['value'] as List).isNotEmpty) {
           selectedRadioValue = parameters['value'][0];
-        } /*else {
-          selectedRadioValue = (selectedCustomFieldValue[0]);
-        }*/
-      } /*else {
-        selectedRadioValue = (selectedCustomFieldValue[0]);
-      }*/
+        }
+      }
     }
-    /*else {
-      selectedRadioValue = (selectedCustomFieldValue[0]);
-      AbstractField.fieldsData.addAll({
-        parameters['id'].toString(): [selectedRadioValue]
-      });
-    }*/
-
     validation?.didChange((selectedCustomFieldValue[0]));
 
     update(() {});
@@ -66,10 +54,11 @@ class CustomRadioField extends CustomField {
               children: [
                 if (parameters['image'] != null) ...[
                   Container(
-                    width: 48.rw(context),
-                    height: 48.rh(context),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: context.color.territoryColor.withOpacity(0.1),
+                      color:
+                          context.color.territoryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: SizedBox(
@@ -86,19 +75,19 @@ class CustomRadioField extends CustomField {
                     ),
                   ),
                   SizedBox(
-                    width: 10.rw(context),
+                    width: 10,
                   ),
                 ],
-                Text(parameters['name'])
-                    .size(context.font.large)
-                    .bold(weight: FontWeight.w500)
-                    .color(state.hasError
-                        ? context.color.error
-                        : context.color.textColorDark)
+                CustomText(
+                  parameters['name'],
+                  fontSize: context.font.large,
+                  fontWeight: FontWeight.w500,
+                  color: context.color.textColorDark,
+                )
               ],
             ),
             SizedBox(
-              height: 14.rh(context),
+              height: 14,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +96,7 @@ class CustomRadioField extends CustomField {
                     alignment: WrapAlignment.start,
                     runAlignment: WrapAlignment.start,
                     crossAxisAlignment: WrapCrossAlignment.start,
-                    children: List.generate(values!.length ?? 0, (index) {
+                    children: List.generate(values!.length, (index) {
                       var element = values![index];
 
                       return Padding(
@@ -137,35 +126,34 @@ class CustomRadioField extends CustomField {
                             });
                           },
                           child: Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: context.color.borderColor,
-                                    width: 1.5),
-                                color: selectedRadioValue == element
-                                    ? context.color.territoryColor
-                                        .withOpacity(0.1)
-                                    : context.color.secondaryColor,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 15),
-                                child: Text(values![index]).color(
-                                    (selectedRadioValue == element
-                                        ? context.color.territoryColor
-                                        : context.color.textDefaultColor
-                                            .withOpacity(0.5)))),
-                          ),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: context.color.borderColor,
+                                      width: 1.5),
+                                  color: selectedRadioValue == element
+                                      ? context.color.territoryColor
+                                          .withValues(alpha: 0.1)
+                                      : context.color.secondaryColor,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 15),
+                                  child: CustomText(values![index],
+                                      color: (selectedRadioValue == element
+                                          ? context.color.territoryColor
+                                          : context.color.textDefaultColor)))),
                         ),
                       );
                     })),
                 if (state.hasError)
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.symmetric(horizontal: 8.0),
-                    child: Text(state.errorText ?? "")
-                        .size(context.font.small)
-                        .color(context.color.error),
-                  )
+                      padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 8.0),
+                      child: CustomText(
+                        state.errorText ?? "",
+                        color: context.color.error,
+                        fontSize: context.font.small,
+                      ))
               ],
             )
           ],
@@ -183,15 +171,6 @@ class CustomRadioField extends CustomField {
         // If a valid selection is made, return null to indicate no error
         return null;
       },
-      /* validator: (String? value) {
-        ///This will check only when the filed is required so we should validate
-        if (parameters['required'] != 1) {
-          return null;
-        }
-        if (value != null) return null;
-
-        return "Selecting this is required";
-      },*/
     );
   }
 }

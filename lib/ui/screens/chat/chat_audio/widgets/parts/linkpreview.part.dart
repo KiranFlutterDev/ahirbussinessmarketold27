@@ -61,13 +61,15 @@ class _LinkPreviwState extends State<LinkPreviw> {
                       ),
                     );
                   }),
-              Text((widget.snapshot.data as Metadata).title ?? "")
-                  .color(context.color.primaryColor.withOpacity(0.9))
-                  .size(context.font.small),
-              Text((widget.snapshot.data as Metadata).desc ?? "")
-                  .setMaxLines(lines: 1)
-                  .color(context.color.primaryColor.withOpacity(0.8))
-                  .size(context.font.smaller)
+              CustomText(
+                (widget.snapshot.data as Metadata).title ?? "",
+                color: context.color.primaryColor.withValues(alpha: 0.9),
+                fontSize: context.font.small,
+              ),
+              CustomText((widget.snapshot.data as Metadata).desc ?? "",
+                  maxLines: 1,
+                  color: context.color.primaryColor.withValues(alpha: 0.8),
+                  fontSize: context.font.smaller),
             ],
           ),
         ),

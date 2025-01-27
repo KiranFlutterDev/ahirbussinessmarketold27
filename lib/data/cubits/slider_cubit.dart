@@ -1,12 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+
 import 'package:eClassify/data/helper/custom_exception.dart';
 import 'package:eClassify/data/model/home_slider.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/network/networkAvailability.dart';
+import 'package:eClassify/utils/network/network_availability.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 abstract class SliderState {}
 
 class SliderInitial extends SliderState {}
@@ -49,7 +51,7 @@ class SliderFetchFailure extends SliderState {
       this.errorMessage, this.isUserDeactivated); //, this.isUserDeactivated
 }
 
-class SliderCubit extends Cubit<SliderState>{
+class SliderCubit extends Cubit<SliderState> {
   SliderCubit() : super(SliderInitial());
 
   void fetchSlider(BuildContext context,
@@ -135,8 +137,6 @@ class SliderCubit extends Cubit<SliderState>{
     List<HomeSlider> sliderlist = [];
     Map<String, String> body = {};
 
-
-
     var response = await Api.get(url: Api.getSliderApi, queryParameters: body);
 
     if (!response[Api.error]) {
@@ -149,7 +149,6 @@ class SliderCubit extends Cubit<SliderState>{
     return sliderlist;
   }
 
-  @override
   SliderState? fromJson(Map<String, dynamic> json) {
     try {
       var state = json['cubit_state'];
@@ -157,14 +156,11 @@ class SliderCubit extends Cubit<SliderState>{
       if (state == "SliderFetchSuccess") {
         return SliderFetchSuccess.fromMap(json);
       }
-    } catch (e) {
-
-    }
+    } catch (e) {}
 
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(SliderState state) {
     if (state is SliderFetchSuccess) {
       Map<String, dynamic> map = state.toMap();

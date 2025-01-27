@@ -1,10 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:eClassify/utils/extensions/lib/adaptive_type.dart';
 
 class UserModel {
   String? address;
   String? createdAt;
-  int? customertotalpost;
+  int? customerTotalPost;
   String? email;
   String? fcmId;
   String? firebaseId;
@@ -24,7 +23,7 @@ class UserModel {
   UserModel(
       {this.address,
       this.createdAt,
-      this.customertotalpost,
+      this.customerTotalPost,
       this.email,
       this.fcmId,
       this.firebaseId,
@@ -44,17 +43,16 @@ class UserModel {
   UserModel.fromJson(Map<String, dynamic> json) {
     address = json['address'];
     createdAt = json['created_at'];
-    customertotalpost = Adapter.forceInt(json['customertotalpost']);
+    customerTotalPost = json['customertotalpost'] as int?;
     email = json['email'];
     fcmId = json['fcm_id'];
     firebaseId = json['firebase_id'];
     id = json['id'];
-    isActive = Adapter.forceInt(json['isActive']);
+    isActive = json['isActive'] as int?;
     isProfileCompleted = json['isProfileCompleted'];
     type = json['type'];
     mobile = json['mobile'];
     name = json['name'];
-    //notification = json['notification'];
 
     notification = (json['notification'] != null
         ? (json['notification'] is int)
@@ -76,7 +74,7 @@ class UserModel {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['address'] = address;
     data['created_at'] = createdAt;
-    data['customertotalpost'] = customertotalpost;
+    data['customertotalpost'] = customerTotalPost;
     data['email'] = email;
     data['fcm_id'] = fcmId;
     data['firebase_id'] = firebaseId;
@@ -97,7 +95,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(address: $address, createdAt: $createdAt, customertotalpost: $customertotalpost, email: $email, fcmId: $fcmId, firebaseId: $firebaseId, id: $id, isActive: $isActive, isProfileCompleted: $isProfileCompleted, type: $type, mobile: $mobile, name: $name, profile: $profile, token: $token, updatedAt: $updatedAt,notification:$notification,isPersonalDetailShow:$isPersonalDetailShow,isVerified:$isVerified)';
+    return 'UserModel(address: $address, createdAt: $createdAt, customertotalpost: $customerTotalPost, email: $email, fcmId: $fcmId, firebaseId: $firebaseId, id: $id, isActive: $isActive, isProfileCompleted: $isProfileCompleted, type: $type, mobile: $mobile, name: $name, profile: $profile, token: $token, updatedAt: $updatedAt,notification:$notification,isPersonalDetailShow:$isPersonalDetailShow,isVerified:$isVerified)';
   }
 }
 

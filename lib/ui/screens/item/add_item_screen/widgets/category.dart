@@ -1,8 +1,8 @@
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
@@ -41,9 +41,9 @@ class CategoryCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(18),
                 child: Container(
-                  height: MediaQuery.of(context).size.height*0.11,//94,
+                  height: MediaQuery.of(context).size.height * 0.11, //94,
                   width: double.infinity,
-                  color: context.color.territoryColor.withOpacity(0.1),
+                  color: context.color.territoryColor.withValues(alpha: 0.1),
                   child: UiUtils.imageType(url,
                       fit: BoxFit.fill, color: context.color.territoryColor),
                 ),
@@ -52,8 +52,8 @@ class CategoryCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(18),
                 child: Container(
-                  height: MediaQuery.of(context).size.height*0.11,//94,
-                  color: context.color.territoryColor.withOpacity(0.1),
+                  height: MediaQuery.of(context).size.height * 0.11, //94,
+                  color: context.color.territoryColor.withValues(alpha: 0.1),
                   child: Center(
                     child: SizedBox(
                       // color: Colors.blue,
@@ -69,17 +69,14 @@ class CategoryCard extends StatelessWidget {
             ],
             Expanded(
                 child: Padding(
-              padding:  EdgeInsets.all(10.0),
-              child: Text(title/*,style: Theme.of(context).textTheme.titleMedium,*/)
-                  .centerAlign()
-                  .setMaxLines(
-                    lines: 2,
-                  )
-              .size(context.font.small)
-                  .color(
-                    context.color.textColorDark,
-                  ),
-            ))
+                    padding: EdgeInsets.all(10.0),
+                    child: CustomText(
+                      title,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      color: context.color.textColorDark,
+                      fontSize: context.font.small,
+                    )))
           ],
         ),
       ),

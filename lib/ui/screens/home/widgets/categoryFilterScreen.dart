@@ -1,14 +1,13 @@
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
+import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-
-import 'package:eClassify/data/model/category_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class CategoryFilterScreen extends StatefulWidget {
   final List<CategoryModel> categoryList;
@@ -81,18 +80,17 @@ class _CategoryFilterScreenState extends State<CategoryFilterScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 18),
-                          child: Text(
-                            "allInClassified".translate(context),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                              .color(context.color.textDefaultColor)
-                              .size(context.font.normal)
-                              .bold(weight: FontWeight.w600),
-                        ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 18),
+                            child: CustomText(
+                              "allInClassified".translate(context),
+                              color: context.color.textDefaultColor,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              fontWeight: FontWeight.bold,
+                              fontSize: context.font.normal,
+                            )),
                         const Divider(
                           thickness: 1.2,
                           height: 10,
@@ -138,20 +136,20 @@ class _CategoryFilterScreenState extends State<CategoryFilterScreen>
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20),
                                         color: context.color.territoryColor
-                                            .withOpacity(0.1)),
+                                            .withValues(alpha: 0.1)),
                                     child: UiUtils.imageType(
                                       category.url!,
                                       color: context.color.territoryColor,
                                       fit: BoxFit.cover,
                                     )),
-                                title: Text(
+                                title: CustomText(
                                   category.name!,
                                   textAlign: TextAlign.start,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                )
-                                    .color(context.color.textDefaultColor)
-                                    .size(context.font.normal),
+                                  color: context.color.textDefaultColor,
+                                  fontSize: context.font.normal,
+                                ),
                                 trailing: Container(
                                     width: 32,
                                     height: 32,
@@ -167,7 +165,8 @@ class _CategoryFilterScreenState extends State<CategoryFilterScreen>
                             },
                           ),
                         ),
-                        if (state.isLoadingMore) Center(child: UiUtils.progress())
+                        if (state.isLoadingMore)
+                          Center(child: UiUtils.progress())
                       ],
                     ),
                   ),

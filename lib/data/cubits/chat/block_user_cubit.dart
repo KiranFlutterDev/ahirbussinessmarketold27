@@ -3,7 +3,6 @@
 import 'package:eClassify/data/repositories/chat_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class BlockUserState {}
 
 class BlockUserInitial extends BlockUserState {}
@@ -29,7 +28,7 @@ class BlockUserFail extends BlockUserState {
 class BlockUserCubit extends Cubit<BlockUserState> {
   BlockUserCubit() : super(BlockUserInitial());
 
-  final ChatRepostiory _chatRepository = ChatRepostiory();
+  final ChatRepository _chatRepository = ChatRepository();
 
   void blockUser({required int blockUserId}) async {
     try {

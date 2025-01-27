@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/repositories/advertisement_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,9 +10,7 @@ class GetPaymentIntentInProgress extends GetPaymentIntentState {}
 class GetPaymentIntentInSuccess extends GetPaymentIntentState {
   final dynamic paymentIntent;
 
-
-  GetPaymentIntentInSuccess(
-      this.paymentIntent);
+  GetPaymentIntentInSuccess(this.paymentIntent);
 }
 
 class GetPaymentIntentFailure extends GetPaymentIntentState {
@@ -33,12 +30,8 @@ class GetPaymentIntentCubit extends Cubit<GetPaymentIntentState> {
     repository
         .getPaymentIntent(packageId: packageId, paymentMethod: paymentMethod)
         .then((value) {
-
-      emit(GetPaymentIntentInSuccess(
-
-          value['data']['payment_intent']));
+      emit(GetPaymentIntentInSuccess(value['data']['payment_intent']));
     }).catchError((e) {
-
       emit(GetPaymentIntentFailure(e.toString()));
     });
   }

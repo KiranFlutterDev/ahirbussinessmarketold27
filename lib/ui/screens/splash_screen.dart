@@ -1,5 +1,3 @@
-// import 'dart:async';
-
 import 'dart:async';
 import 'dart:developer';
 
@@ -8,40 +6,33 @@ import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/system/fetch_language_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/language_cubit.dart';
+import 'package:eClassify/data/model/system_settings_model.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/repositories/system_repository.dart';
-
-// import 'package:flutter/services.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
-
-// import '../app/routes.dart';
-import 'package:eClassify/data/model/system_settings_model.dart';
-
-// import 'package:eClassify/main.dart';
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({this.itemSlug, super.key});
 
+  //Used when the app is terminated and then is opened using deep link, in which case
+  //the main route needs to be added to navigation stack, previously it directly used to
+  //push adDetails route.
+  final String? itemSlug;
   @override
   SplashScreenState createState() => SplashScreenState();
 }
 
 class SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  //late OldAuthenticationState authenticationState;
-
   bool isTimerCompleted = false;
   bool isSettingsLoaded = false; //TODO: temp
   bool isLanguageLoaded = false;
@@ -56,12 +47,11 @@ class SplashScreenState extends State<SplashScreen>
     subscription = Connectivity().onConnectivityChanged.listen((result) {
       setState(() {
         hasInternet = (!result.contains(ConnectivityResult.none));
-        //hasInternet = result != ConnectivityResult.none;
       });
       if (hasInternet) {
-        getDefaultLanguage();
-
-        checkIsUserAuthenticated();
+        context
+            .read<FetchSystemSettingsCubit>()
+            .fetchSettings(forceRefresh: true);
         startTimer();
       }
     });
@@ -73,18 +63,8 @@ class SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-/*  Future<void> locationPermission() async {
-    if ((await Permission.location.status) == PermissionStatus.denied) {
-      await Permission.location.request();
-    }
-  }*/
-
-  Future getDefaultLanguage() async {
+  Future getDefaultLanguage(String code) async {
     try {
-      Map result = await SystemRepository().fetchSystemSettings();
-
-      var code = (result['data']['default_language']);
-
       if (HiveUtils.getLanguage() == null ||
           HiveUtils.getLanguage()?['data'] == null) {
         context.read<FetchLanguageCubit>().getLanguage(code);
@@ -98,10 +78,6 @@ class SplashScreenState extends State<SplashScreen>
     } catch (e) {
       log("Error while load default language $e");
     }
-  }
-
-  void checkIsUserAuthenticated() async {
-    context.read<FetchSystemSettingsCubit>().fetchSettings(forceRefresh: true);
   }
 
   Future<void> startTimer() async {
@@ -134,30 +110,31 @@ class SplashScreenState extends State<SplashScreen>
         }
       });
     } else if (HiveUtils.isUserAuthenticated()) {
-      if ((HiveUtils.getUserDetails().name == null ||
-              HiveUtils.getUserDetails().name == "") ||
-          (HiveUtils.getUserDetails().email == null ||
-              HiveUtils.getUserDetails().email == "")) {
-        Future.delayed(
-          const Duration(seconds: 1),
-          () {
-            Navigator.pushReplacementNamed(
-              context,
-              Routes.completeProfile,
-              arguments: {
-                "from": "login",
-              },
-            );
-          },
-        );
-      } else {
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            Navigator.of(context)
-                .pushReplacementNamed(Routes.main, arguments: {'from': "main"});
-          }
-        });
-      }
+      // if ((HiveUtils.getUserDetails().name == null ||
+      //         HiveUtils.getUserDetails().name == "") ||
+      //     (HiveUtils.getUserDetails().email == null ||
+      //         HiveUtils.getUserDetails().email == "")) {
+      //   Future.delayed(
+      //     const Duration(seconds: 1),
+      //     () {
+      //       Navigator.pushReplacementNamed(
+      //         context,
+      //         Routes.completeProfile,
+      //         arguments: {
+      //           "from": "login",
+      //         },
+      //       );
+      //     },
+      //   );
+      // } else {
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          //We pass slug only when the user is authenticated otherwise drop the slug
+          Navigator.of(context).pushReplacementNamed(Routes.main,
+              arguments: {'from': "main", "slug": widget.itemSlug});
+        }
+      });
+      //}
     } else {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
@@ -174,13 +151,7 @@ class SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    /* SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
-    );*/
-
     navigateCheck();
-
     return hasInternet
         ? BlocListener<FetchLanguageCubit, FetchLanguageState>(
             listener: (context, state) {
@@ -192,7 +163,7 @@ class SplashScreenState extends State<SplashScreen>
                 map.remove("file_name");
 
                 HiveUtils.storeLanguage(map);
-                context.read<LanguageCubit>().emit(LanguageLoader(map));
+                context.read<LanguageCubit>().changeLanguages(map);
                 isLanguageLoaded = true;
                 if (mounted) {
                   setState(() {});
@@ -206,7 +177,8 @@ class SplashScreenState extends State<SplashScreen>
                   Constant.isDemoModeOn = context
                       .read<FetchSystemSettingsCubit>()
                       .getSetting(SystemSetting.demoMode);
-
+                  getDefaultLanguage(
+                      state.settings['data']['default_language']);
                   isSettingsLoaded = true;
                   setState(() {});
                 }
@@ -229,27 +201,31 @@ class SplashScreenState extends State<SplashScreen>
                       Align(
                         alignment: AlignmentDirectional.center,
                         child: Padding(
-                          padding: EdgeInsets.only(top: 10.0.rh(context)),
+                          padding: EdgeInsets.only(top: 10.0),
                           child: SizedBox(
-                            width: 150.rw(context),
-                            height: 150.rh(context),
+                            width: 150,
+                            height: 150,
                             child: UiUtils.getSvg(AppIcons.splashLogo),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(top: 10.0.rh(context)),
+                        padding: EdgeInsets.only(top: 10.0),
                         child: Column(
                           children: [
-                            Text(AppSettings.applicationName)
-                                .size(context.font.xxLarge)
-                                .color(context.color.secondaryColor)
-                                .centerAlign()
-                                .bold(weight: FontWeight.w600),
-                            Text("\"${"buyAndSellAnything".translate(context)}\"")
-                                .size(context.font.smaller)
-                                .color(context.color.secondaryColor)
-                                .centerAlign(),
+                            CustomText(
+                              AppSettings.applicationName,
+                              fontSize: context.font.xxLarge,
+                              color: context.color.secondaryColor,
+                              textAlign: TextAlign.center,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            CustomText(
+                              "\"${"buyAndSellAnything".translate(context)}\"",
+                              fontSize: context.font.smaller,
+                              color: context.color.secondaryColor,
+                              textAlign: TextAlign.center,
+                            )
                           ],
                         ),
                       ),

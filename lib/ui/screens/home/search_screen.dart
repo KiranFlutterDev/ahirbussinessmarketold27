@@ -3,37 +3,32 @@ import 'dart:convert';
 
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/item/fetch_popular_items_cubit.dart';
 import 'package:eClassify/data/cubits/item/search_item_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/hive_keys.dart';
-import 'package:eClassify/data/cubits/item/fetch_popular_items_cubit.dart';
-
-import 'package:eClassify/data/model/category_model.dart';
-import 'package:eClassify/data/model/item_filter_model.dart';
-
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/adapters.dart';
-
-import 'package:eClassify/utils/api.dart';
-
 import 'package:eClassify/data/helper/designs.dart';
+import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
-
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/data/model/item_filter_model.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/item_horizontal_card.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
+import 'package:eClassify/utils/hive_keys.dart';
 import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool autoFocus;
@@ -86,8 +81,6 @@ class SearchScreenState extends State<SearchScreen>
     super.initState();
     Constant.itemFilter = null;
     context.read<FetchPopularItemsCubit>().fetchPopularItems();
-    // context.read<ItemCubit>().fetchItem(context, {});
-    //context.read<SearchItemCubit>().searchItem("", page: 1);
     searchController = TextEditingController();
 
     searchController.addListener(searchItemListener);
@@ -147,7 +140,7 @@ class SearchScreenState extends State<SearchScreen>
       systemOverlayStyle:
           SystemUiOverlayStyle(statusBarColor: context.color.backgroundColor),
       bottom: PreferredSize(
-          preferredSize: Size.fromHeight(64.rh(context)),
+          preferredSize: Size.fromHeight(64),
           child: LayoutBuilder(builder: (context, c) {
             return SizedBox(
                 width: c.maxWidth,
@@ -160,8 +153,8 @@ class SearchScreenState extends State<SearchScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                            width: 270.rw(context),
-                            height: 50.rh(context),
+                            width: 270,
+                            height: 50,
                             alignment: AlignmentDirectional.center,
                             decoration: BoxDecoration(
                                 border: Border.all(
@@ -226,8 +219,8 @@ class SearchScreenState extends State<SearchScreen>
                             });
                           },
                           child: Container(
-                            width: 50.rw(context),
-                            height: 50.rh(context),
+                            width: 50,
+                            height: 50,
                             decoration: BoxDecoration(
                               border: Border.all(
                                   width: 1,
@@ -282,12 +275,12 @@ class SearchScreenState extends State<SearchScreen>
       shadowColor:
           context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
               ? null
-              : context.color.textDefaultColor.withOpacity(0.2),
+              : context.color.textDefaultColor.withValues(alpha: 0.2),
       backgroundColor: context.color.backgroundColor,
     );
   }
 
-  getFilterValue(ItemFilterModel model) {
+  void getFilterValue(ItemFilterModel model) {
     filter = model;
     setState(() {});
   }
@@ -375,7 +368,7 @@ class SearchScreenState extends State<SearchScreen>
     super.build(context);
     return PopScope(
       canPop: true,
-      onPopInvoked: (isPop) {
+      onPopInvokedWithResult: (isPop, result) {
         Constant.itemFilter = null;
       },
       child: Scaffold(
@@ -453,11 +446,16 @@ class SearchScreenState extends State<SearchScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("recentSearches".translate(context))
-                        .color(context.color.textDefaultColor.withOpacity(0.5)),
+                    CustomText(
+                      "recentSearches".translate(context),
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5),
+                    ),
                     InkWell(
-                      child: Text("clear".translate(context))
-                          .color(context.color.territoryColor),
+                      child: CustomText(
+                        "clear".translate(context),
+                        color: context.color.territoryColor,
+                      ),
                       onTap: () {
                         clearBoxData();
                       },
@@ -492,7 +490,7 @@ class SearchScreenState extends State<SearchScreen>
                               text: "${items[index].name!}\tin\t",
                               style: TextStyle(
                                   color: context.color.textDefaultColor
-                                      .withOpacity(0.5),
+                                      .withValues(alpha: 0.5),
                                   overflow: TextOverflow.ellipsis),
                               children: <TextSpan>[
                                 TextSpan(
@@ -611,11 +609,13 @@ class SearchScreenState extends State<SearchScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.only(start: 5.0),
-                  child: Text("searchedItems".translate(context))
-                      .color(context.color.textDefaultColor.withOpacity(0.5))
-                      .size(context.font.normal),
-                ),
+                    padding: EdgeInsetsDirectional.only(start: 5.0),
+                    child: CustomText(
+                      "searchedItems".translate(context),
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5),
+                      fontSize: context.font.normal,
+                    )),
                 SizedBox(
                   height: 3,
                 ),
@@ -702,11 +702,13 @@ class SearchScreenState extends State<SearchScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.only(start: 5.0),
-                  child: Text("popularAds".translate(context))
-                      .color(context.color.textDefaultColor.withOpacity(0.5))
-                      .size(context.font.normal),
-                ),
+                    padding: EdgeInsetsDirectional.only(start: 5.0),
+                    child: CustomText(
+                      "popularAds".translate(context),
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5),
+                      fontSize: context.font.normal,
+                    )),
                 SizedBox(
                   height: 3,
                 ),

@@ -27,18 +27,19 @@ class PaymentGateway {
 class AppSettings {
   /// Basic Settings
   static const String applicationName = 'eClassify';
-  static const String andoidPackageName = 'com.eclassify.wrteam';
+  static const String androidPackageName = 'com.eclassify.wrteam';
   static const String shareAppText = "Share this App";
 
-  static const String hostUrl = "PLACE_YOUR_HOST_URL_HERE"; //don't add / at end but https:// is required
+  static const String demoUrl = "https://eclassify.wrteam.me";
 
   ///API Setting
 
   static const int apiDataLoadLimit = 20;
   static const int maxCategoryShowLengthInHomeScreen = 5;
 
+  //TODO: Change to demo url when releasing
   static final String baseUrl =
-      "${HelperUtils.checkHost(hostUrl)}api/"; //don't change this
+      "${HelperUtils.checkHost(demoUrl)}api/"; //don't change this
 
   static const int hiddenAPIProcessDelay = 1;
 
@@ -52,17 +53,8 @@ it will call API in background without showing the process and when data availab
   static const DeepLinkType deepLinkingType = DeepLinkType.native;
 
   ///Native deep link
-  //static const String shareNavigationWebUrl = "eclassify.thewrteam.in";
-
-  //static const String shareNavigationWebUrl = "eclassify.wrteam.me";
-  static const String shareNavigationWebUrl = "eclassify-dev.vercel.app";
-
-  /// You will find this prefix from firebase console in dynamic link section
-  static const String deepLinkPrefix =
-      "https://eclassify.page.link"; //demo.page.link
-
-  //set anything you want
-  static const String deepLinkName = "eclassify.com"; //deeplink demo.com
+  //TODO: Change to Demo Url when releasing
+  static const String shareNavigationWebUrl = "eclassify.wrteam.me";
 
   static const MapType googleMapType =
       MapType.normal; //none , normal , satellite , terrain , hybrid

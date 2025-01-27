@@ -4,12 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-
-import 'package:eClassify/utils/ui_utils.dart';
+import 'package:path_provider/path_provider.dart';
 
 class PdfViewer extends StatefulWidget {
   final String url;
@@ -53,7 +52,6 @@ class _PDFViewerState extends State<PdfViewer> {
         Pfile = file;
       });
 
-
       setState(() {
         isLoading = false;
       });
@@ -92,4 +90,3 @@ class _PDFViewerState extends State<PdfViewer> {
     );
   }
 }
-

@@ -1,13 +1,11 @@
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
-
 import 'package:eClassify/data/model/user_model.dart';
-
+import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_keys.dart';
+import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 
 class HiveUtils {
   ///private constructor
@@ -17,23 +15,11 @@ class HiveUtils {
     return Hive.box(HiveKeys.userDetailsBox).get(HiveKeys.jwtToken);
   }
 
-  static void dontShowChooseLocationDialoge() {
+  static void dontShowChooseLocationDialog() {
     Hive.box(HiveKeys.userDetailsBox).put("showChooseLocationDialoge", false);
   }
 
-/*  static bool isGuest() {
-    return Hive.box(HiveKeys.userDetailsBox).get("isGuest") ?? true;
-  }*/
-
-/*  static void setIsNotGuest() {
-    Hive.box(HiveKeys.userDetailsBox).put("isGuest", false);
-  }*/
-
-  /* static void setIsGuest() {
-    Hive.box(HiveKeys.userDetailsBox).put("isGuest", true);
-  }*/
-
-  static bool isShowChooseLocationDialoge() {
+  static bool isShowChooseLocationDialog() {
     var value = Hive.box(HiveKeys.userDetailsBox).get(
       "showChooseLocationDialoge",
     );
@@ -73,7 +59,7 @@ class HiveUtils {
         .put(HiveKeys.isProfileCompleted, false);
   }
 
-  static setCurrentTheme(AppTheme theme) {
+  static dynamic setCurrentTheme(AppTheme theme) {
     String newTheme;
     if (theme == AppTheme.light) {
       newTheme = "light";
@@ -194,7 +180,8 @@ class HiveUtils {
       String? area,
       int? areaId,
       double? latitude,
-      double? longitude}) async {
+      double? longitude,
+      double? radius}) async {
     if (Constant.isDemoModeOn) {
       await Hive.box(HiveKeys.userDetailsBox).putAll({
         HiveKeys.city: "Bhuj",
@@ -203,7 +190,7 @@ class HiveUtils {
         HiveKeys.areaId: null,
         HiveKeys.area: null,
         HiveKeys.latitudeKey: 23.2533,
-        HiveKeys.longitudeKey: 69.6693
+        HiveKeys.longitudeKey: 69.6693,
       });
     } else {
       await Hive.box(HiveKeys.userDetailsBox).putAll({
@@ -213,7 +200,8 @@ class HiveUtils {
         HiveKeys.areaId: areaId ?? null,
         HiveKeys.area: area ?? null,
         HiveKeys.latitudeKey: latitude ?? null,
-        HiveKeys.longitudeKey: longitude ?? null
+        HiveKeys.longitudeKey: longitude ?? null,
+        HiveKeys.nearbyRadius: radius ?? null,
       });
     }
   }
@@ -258,25 +246,12 @@ class HiveUtils {
     dynamic data,
   ) async {
     Hive.box(HiveKeys.languageBox).put(HiveKeys.currentLanguageKey, data);
-    // ..put("language", data);
     return true;
   }
 
   static dynamic getLanguage() {
     return Hive.box(HiveKeys.languageBox).get(HiveKeys.currentLanguageKey);
   }
-
-  // static s(context) {
-  //   HiveUtils.setUserIsNotAuthenticated();
-  //   HiveUtils.clear();
-
-  //   Future.delayed(
-  //     Duration.zero,
-  //     () {
-  //       HelperUtils.killPreviousPages(context, Routes.login, {});
-  //     },
-  //   );
-  // }
 
   @visibleForTesting
   static Future<void> setUserIsNew() {
@@ -297,7 +272,7 @@ class HiveUtils {
     return Hive.box(HiveKeys.authBox).get(HiveKeys.isUserSkip) ?? false;
   }
 
-  static logoutUser(context,
+  static void logoutUser(context,
       {required VoidCallback onLogout, bool? isRedirect}) async {
     await Hive.box(HiveKeys.userDetailsBox).clear();
     HiveUtils.setUserIsAuthenticated(false);

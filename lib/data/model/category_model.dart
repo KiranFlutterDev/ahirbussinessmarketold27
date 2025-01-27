@@ -25,11 +25,11 @@ class CategoryModel {
   final int? subcategoriesCount;
 
   CategoryModel({
-     this.id,
-     this.name,
-     this.url,
-     this.description,
-     this.children,
+    this.id,
+    this.name,
+    this.url,
+    this.description,
+    this.children,
     this.subcategoriesCount,
     //required this.translatedName,
   });
@@ -45,7 +45,7 @@ class CategoryModel {
           //name: json['name'],
           name: json['translated_name'],
           url: json['image'],
-          subcategoriesCount: json['subcategories_count']??0,
+          subcategoriesCount: json['subcategories_count'] ?? 0,
           children: children,
           description: json['description'] ?? "");
     } catch (e) {

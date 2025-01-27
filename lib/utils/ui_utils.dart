@@ -1,14 +1,24 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eClassify/app/app_localization.dart';
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
+import 'package:eClassify/ui/screens/widgets/full_screen_image_view.dart';
+import 'package:eClassify/ui/screens/widgets/gallery_view.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-
+import 'package:eClassify/utils/network_to_localsvg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,20 +26,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:mime_type/mime_type.dart';
-
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
-import 'package:eClassify/ui/screens/widgets/full_screen_image_view.dart';
-import 'package:eClassify/ui/screens/widgets/gallery_view.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/network_to_localsvg.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'dart:ui' as ui;
 
 class UiUtils {
   static SvgPicture getSvg(String path,
@@ -44,7 +40,7 @@ class UiUtils {
     );
   }
 
-  static checkUser(
+  static void checkUser(
       {required Function() onNotGuest, required BuildContext context}) {
     if (!HiveUtils.isUserAuthenticated()) {
       _loginBox(context);
@@ -53,7 +49,7 @@ class UiUtils {
     }
   }
 
-  static _loginBox(BuildContext context) {
+  static void _loginBox(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: false,
@@ -68,14 +64,15 @@ class UiUtils {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("loginIsRequiredForAccessingThisFeatures"
-                        .translate(context))
-                    .size(context.font.larger),
+                CustomText(
+                  "loginIsRequiredForAccessingThisFeatures".translate(context),
+                  fontSize: context.font.larger,
+                ),
                 const SizedBox(
                   height: 5,
                 ),
-                Text("tapOnLoginToAuthorize".translate(context))
-                    .size(context.font.small),
+                CustomText("tapOnLoginToAuthorize".translate(context),
+                    fontSize: context.font.small),
                 const SizedBox(
                   height: 10,
                 ),
@@ -87,8 +84,9 @@ class UiUtils {
                     Navigator.pushNamed(context, Routes.login,
                         arguments: {"popToCurrent": true});
                   },
-                  child: Text("loginNow".translate(context)).color(
-                    context.color.buttonColor ?? Colors.white,
+                  child: CustomText(
+                    "loginNow".translate(context),
+                    color: context.color.buttonColor,
                   ),
                 )
               ],
@@ -97,12 +95,6 @@ class UiUtils {
         );
       },
     );
-  }
-
-  static String getTranslatedLabel(BuildContext context, String labelKey) {
-    return (AppLocalization.of(context)!.getTranslatedValues(labelKey) ??
-            labelKey)
-        .trim();
   }
 
   static Map<String, double> getWidgetInfo(
@@ -155,7 +147,7 @@ class UiUtils {
       placeholderBuilder: (context) {
         return Container(
             width: width,
-            color: context.color.territoryColor.withOpacity(0.1),
+            color: context.color.territoryColor.withValues(alpha: 0.1),
             height: height,
             alignment: AlignmentDirectional.center,
             child: SizedBox(
@@ -186,7 +178,7 @@ class UiUtils {
       placeholder: (context, url) {
         return Container(
             width: width,
-            color: context.color.territoryColor.withOpacity(0.1),
+            color: context.color.territoryColor.withValues(alpha: 0.1),
             height: height,
             alignment: AlignmentDirectional.center,
             child: SizedBox(
@@ -201,7 +193,7 @@ class UiUtils {
       errorWidget: (context, url, error) {
         return Container(
           width: width,
-          color: context.color.territoryColor.withOpacity(0.1),
+          color: context.color.territoryColor.withValues(alpha: 0.1),
           height: height,
           alignment: AlignmentDirectional.center,
           child: SizedBox(
@@ -225,7 +217,7 @@ class UiUtils {
       bool? showWhite}) {
     if (Constant.useLottieProgress) {
       return LottieBuilder.asset(
-        "assets/lottie/${showWhite == true ? Constant.progressLottieFileWhite : Constant.loadingSuccessLottieFile}",
+        "assets/lottie/${showWhite ?? false ? Constant.progressLottieFileWhite : Constant.loadingSuccessLottieFile}",
         width: width ?? 70,
         height: height ?? 70,
         delegates: const LottieDelegates(values: []),
@@ -260,7 +252,7 @@ class UiUtils {
                 : Brightness.dark);
   }
 
-  static setDefaultLocationValue(
+  static void setDefaultLocationValue(
       {required bool isCurrent,
       required bool isHomeUpdate,
       required BuildContext context}) {
@@ -330,7 +322,6 @@ class UiUtils {
                       vertical: (showBackButton ?? false) ? 0 : 18),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    //crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (showBackButton ?? false) ...[
                         Material(
@@ -364,17 +355,16 @@ class UiUtils {
                         ),
                       ],
                       Expanded(
-                        child: Text(
+                        child: CustomText(
                           title ?? "",
                           overflow: TextOverflow.ellipsis,
                           softWrap: true,
-                        
-                        )
-                            .color(context.color.textDefaultColor)
-                            .bold(weight: FontWeight.w600)
-                            .size(18),
+                          color: context.color.textDefaultColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
                       ),
-                      if (actions != null) ...[const Spacer(), ...actions],
+                      if (actions != null) ...actions,
                     ],
                   ),
                 ),
@@ -450,7 +440,7 @@ class UiUtils {
         },
         child: MaterialButton(
           minWidth: autoWidth == true ? null : (width ?? double.infinity),
-          height: height ?? 56.rh(context),
+          height: height ?? 56,
           padding: padding,
           shape: RoundedRectangleBorder(
               side: border ?? BorderSide.none,
@@ -477,26 +467,26 @@ class UiUtils {
               if (isInProgress != true) prefixWidget ?? const SizedBox.shrink(),
               if (isInProgress != true) ...[
                 Flexible(
-                  child: Text(
+                  child: CustomText(
                     title,
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
-                  )
-                      .color(textColor ?? context.color.buttonColor)
-                      .size(fontSize ?? context.font.larger)
-                      .centerAlign(),
-                ),
+                    color: textColor ?? context.color.buttonColor,
+                    fontSize: fontSize ?? context.font.larger,
+                    textAlign: TextAlign.center,
+                  ),
+                )
               ] else ...[
                 if (showProgressTitle ?? false)
                   Flexible(
-                    child: Text(
+                    child: CustomText(
                       title,
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
-                    )
-                        .color(context.color.buttonColor)
-                        .size(fontSize ?? context.font.larger)
-                        .centerAlign(),
+                      color: context.color.buttonColor,
+                      fontSize: fontSize ?? context.font.larger,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
               ]
             ],
@@ -555,9 +545,9 @@ class UiUtils {
         acceptButtonColor: context.color.territoryColor,
         acceptTextColor: context.color.secondaryColor,
         content: StatefulBuilder(builder: (context, update) {
-          return Text('plsSubscribe'.translate(context));
+          return CustomText('plsSubscribe'.translate(context));
         }),
-        isAcceptContainesPush: false,
+        isAcceptContainerPush: false,
         onAccept: () async {
           Future.delayed(Duration(seconds: 1), () {
             Navigator.pushNamed(context, Routes.subscriptionPackageListRoute);
@@ -577,7 +567,7 @@ class UiUtils {
   }
 
   static Future showBlurredDialoge(BuildContext context,
-      {required BlurDialoge dialoge, double? sigmaX, double? sigmaY}) async {
+      {required BlurDialog dialoge, double? sigmaX, double? sigmaY}) async {
     return await Navigator.push(
       context,
       BlurredRouter(
@@ -618,7 +608,7 @@ class UiUtils {
 
 // Counting the perceptive luminance - human eye favors green color...
     double luminance =
-        (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255;
+        (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255;
 
     if (luminance > 0.5) {
       d = 0;
@@ -626,7 +616,7 @@ class UiUtils {
       d = 255;
     } // dark colors - white font
 
-    return Color.fromARGB(color.alpha, d, d, d);
+    return Color.fromARGB(color.a.toInt(), d, d, d);
   }
 
   static String formatTimeWithDateTime(DateTime dateTime, {bool is24 = true}) {
@@ -662,8 +652,8 @@ extension FormatAmount on String {
   String formatDate({
     String? format,
   }) {
-    DateFormat dateFormat = DateFormat(format ?? "MMM d, yyyy");
-    String formatted = dateFormat.format(DateTime.parse(this));
+    DateFormat dateFormat = DateFormat(format ?? "MMM d, yyyy").add_jm();
+    String formatted = dateFormat.format(DateTime.parse(this).toLocal());
     return formatted;
   }
 

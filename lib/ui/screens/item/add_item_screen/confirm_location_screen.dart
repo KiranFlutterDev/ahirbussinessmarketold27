@@ -1,40 +1,34 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/item/manage_item_cubit.dart';
+import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/data/cubits/item/manage_item_cubit.dart';
-
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:eClassify/utils/validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:shimmer/shimmer.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/utils/validator.dart';
-
-import 'package:eClassify/data/helper/widgets.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-
-import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
-import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
 
 class ConfirmLocationScreen extends StatefulWidget {
   final bool? isEdit;
@@ -111,7 +105,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
     }
   }
 
-  preFillLocationWhileEdit() async {
+  void preFillLocationWhileEdit() async {
     if (widget.isEdit!) {
       ItemModel itemModel = getCloudData('edit_request') as ItemModel;
 
@@ -148,7 +142,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
       ].where((part) => part != null && part.isNotEmpty).join(', ');
       if (currentLocation == "") {
         Position position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
+            locationSettings:
+                LocationSettings(accuracy: LocationAccuracy.high));
         _cameraPosition = CameraPosition(
           target: LatLng(position.latitude, position.longitude),
           zoom: 14.4746,
@@ -187,7 +182,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
     setState(() {});
   }
 
-  getLocationFromLatitudeLongitude({LatLng? latLng}) async {
+  void getLocationFromLatitudeLongitude({LatLng? latLng}) async {
     try {
       await setLocaleIdentifier("en_US");
       Placemark? placeMark = (await placemarkFromCoordinates(
@@ -241,8 +236,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
   void _showLocationServiceInstructions() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text('pleaseEnableLocationServicesManually'.translate(context)),
+        content: CustomText(
+            'pleaseEnableLocationServicesManually'.translate(context)),
         action: SnackBarAction(
           label: 'ok'.translate(context),
           textColor: context.color.secondaryColor,
@@ -263,7 +258,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         Future.delayed(Duration(milliseconds: 500), () {
           return;
         });
@@ -340,7 +335,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
 
               return;
             },
-                height: 48.rh(context),
+                height: 48,
                 fontSize: context.font.large,
                 autoWidth: false,
                 radius: 8,
@@ -388,12 +383,12 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
               child: Column(children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Text(
+                  child: CustomText(
                     "locationItemSellingLbl".translate(context),
-                  )
-                      .bold(weight: FontWeight.bold)
-                      .size(context.font.larger)
-                      .centerAlign(),
+                    fontWeight: FontWeight.bold,
+                    fontSize: context.font.larger,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 20, right: 15, left: 15),
@@ -447,8 +442,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                       textColor: context.color.textDefaultColor,
                       buttonColor: context.color.secondaryColor,
                       border: BorderSide(
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.3),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.3),
                           width: 1.5),
                       radius: 5),
                 ),
@@ -542,8 +537,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                           onTap: () async {
                             Position position =
                                 await Geolocator.getCurrentPosition(
-                              desiredAccuracy: LocationAccuracy.high,
-                            );
+                                    locationSettings: LocationSettings(
+                                        accuracy: LocationAccuracy.high));
 
                             _cameraPosition = CameraPosition(
                               target:
@@ -584,7 +579,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                                       height: 25,
                                       decoration: BoxDecoration(
                                         color: context.color.territoryColor
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(5),
                                         border: Border.all(
                                             width: Constant.borderWidth,
@@ -602,38 +597,37 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                                           )),
                                     ),
                                     SizedBox(
-                                      width: 10.rw(context),
+                                      width: 10,
                                     ),
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(formatedAddress == null
-                                                ? "____" // Fallback text if formatedAddress is null
-                                                : (formatedAddress!.city ==
-                                                            null ||
-                                                        formatedAddress!
-                                                            .city!.isEmpty)
-                                                    ? (formatedAddress!.area !=
-                                                                null &&
-                                                            formatedAddress!
-                                                                .area!
-                                                                .isNotEmpty
-                                                        ? formatedAddress!.area!
-                                                        : "____")
-                                                    : (formatedAddress!.area !=
-                                                                null &&
-                                                            formatedAddress!
-                                                                .area!
-                                                                .isNotEmpty
-                                                        ? "${formatedAddress!.area!}, ${formatedAddress!.city!}"
-                                                        : formatedAddress!
-                                                            .city!))
-                                            .size(context.font.large),
+                                        CustomText(
+                                          formatedAddress == null
+                                              ? "____" // Fallback text if formatedAddress is null
+                                              : (formatedAddress!.city ==
+                                                          null ||
+                                                      formatedAddress!
+                                                          .city!.isEmpty)
+                                                  ? (formatedAddress!.area !=
+                                                              null &&
+                                                          formatedAddress!
+                                                              .area!.isNotEmpty
+                                                      ? formatedAddress!.area!
+                                                      : "____")
+                                                  : (formatedAddress!.area !=
+                                                              null &&
+                                                          formatedAddress!
+                                                              .area!.isNotEmpty
+                                                      ? "${formatedAddress!.area!}, ${formatedAddress!.city!}"
+                                                      : formatedAddress!.city!),
+                                          fontSize: context.font.large,
+                                        ),
                                         const SizedBox(
                                           height: 4,
                                         ),
-                                        Text(
+                                        CustomText(
                                             "${formatedAddress == null || (formatedAddress?.state == "" || formatedAddress?.state == null) ? "____" : formatedAddress?.state},${formatedAddress == null || formatedAddress!.country == "" ? "____" : formatedAddress!.country}")
                                       ],
                                     )
@@ -663,7 +657,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
       dialoge: BlurredDialogBox(
         content: dialogueWidget(title, controller, hintText),
         acceptButtonName: "add".translate(context),
-        isAcceptContainesPush: true,
+        isAcceptContainerPush: true,
         onAccept: () => Future.value().then((_) {
           if (_formKey.currentState!.validate()) {
             setState(() {
@@ -730,7 +724,12 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title).size(context.font.larger).centerAlign().bold(),
+              CustomText(
+                title,
+                fontSize: context.font.larger,
+                textAlign: TextAlign.center,
+                fontWeight: FontWeight.bold,
+              ),
               Divider(
                 thickness: 1,
                 color: context.color.borderColor.darken(30),
@@ -746,7 +745,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: context.color.textDefaultColor.withOpacity(0.5)),
+                      color: context.color.textDefaultColor
+                          .withValues(alpha: 0.5)),
                   controller: controller,
                   cursorColor: context.color.territoryColor,
                   validator: (val) {
@@ -765,8 +765,8 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                       hintText: hintText,
                       hintStyle: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.5)),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.5)),
                       focusColor: context.color.territoryColor,
                       enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),

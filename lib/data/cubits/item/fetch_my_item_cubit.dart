@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:eClassify/data/model/data_output.dart';
-import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FetchMyItemsState {}
@@ -43,6 +45,11 @@ class FetchMyItemsSuccess extends FetchMyItemsState {
       getItemsWithStatus: getItemsWithStatus ?? this.getItemsWithStatus,
     );
   }
+
+  @override
+  String toString() {
+    return 'FetchMyItemsSuccess{items: $items, getItemsWithStatus: $getItemsWithStatus}';
+  }
 }
 
 class FetchMyItemsFailed extends FetchMyItemsState {
@@ -57,7 +64,6 @@ class FetchMyItemsCubit extends Cubit<FetchMyItemsState> {
 
   void fetchMyItems({String? getItemsWithStatus}) async {
     try {
-
       emit(FetchMyItemsInProgress());
       DataOutput<ItemModel> result = await _itemRepository.fetchMyItems(
         page: 1,
@@ -91,22 +97,23 @@ class FetchMyItemsCubit extends Cubit<FetchMyItemsState> {
       items.removeWhere(((element) => (element.id == model.id)));
 
       emit((state as FetchMyItemsSuccess).copyWith(items: items));
-
     }
   }
 
-  edit(ItemModel item) {
+  void edit(ItemModel item) {
     if (state is FetchMyItemsSuccess) {
       List<ItemModel> items = (state as FetchMyItemsSuccess).items;
-      int index = items.indexWhere((element) => element.id == item.id);
+      log('$state');
+      int index = items.indexWhere((element) {
+        log('${element.id} - ${item.id}');
+        return element.id == item.id;
+      });
       items[index] = item;
       if (!isClosed) {
         emit((state as FetchMyItemsSuccess).copyWith(items: items));
       }
     }
   }
-
-
 
   Future<void> fetchMyMoreItems({String? getItemsWithStatus}) async {
     try {
@@ -129,8 +136,7 @@ class FetchMyItemsCubit extends Cubit<FetchMyItemsState> {
             hasError: false,
             items: myItemsState.items,
             page: (state as FetchMyItemsSuccess).page + 1,
-            getItemsWithStatus:
-                getItemsWithStatus,
+            getItemsWithStatus: getItemsWithStatus,
             total: result.total,
           ),
         );

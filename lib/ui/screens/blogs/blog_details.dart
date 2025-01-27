@@ -1,13 +1,11 @@
 import 'package:eClassify/data/model/blog_model.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-
 
 class BlogDetails extends StatelessWidget {
   final BlogModel blog;
@@ -53,9 +51,7 @@ class BlogDetails extends StatelessWidget {
                 ),
                 child: SizedBox(
                   width: context.screenWidth,
-                  height: 170.rh(
-                    context,
-                  ),
+                  height: 170,
                   child: UiUtils.getImage(
                     blog.image!,
                     fit: BoxFit.cover,
@@ -63,29 +59,27 @@ class BlogDetails extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: 15.rh(context),
+                height: 15,
               ),
-              Text(blog.createdAt.toString().formatDate())
-                  .size(context.font.smaller)
-                  .color(context.color.textColorDark.withOpacity(0.5)),
+              CustomText(
+                blog.createdAt.toString().formatDate(),
+                color: context.color.textColorDark.withValues(alpha: 0.5),
+                fontSize: context.font.smaller,
+              ),
               const SizedBox(
                 height: 12,
               ),
-              Text(
+              CustomText(
                 (blog.title ?? "").firstUpperCase(),
-              )
-                  .size(
-                    context.font.large,
-                  )
-                  .color(
-                    context.color.textColorDark,
-                  ),
+                color: context.color.textColorDark,
+                fontSize: context.font.large,
+              ),
               const SizedBox(
                 height: 14,
               ),
               HtmlWidget(blog.description ?? "")
               //Html(data: blog.description ?? "")
-              //Text(stripHtmlTags(blog.description ?? "").trim()).color(context.color.textColorDark.withOpacity(0.5))
+              //CustomText(stripHtmlTags(blog.description ?? "").trim()).color(context.color.textColorDark.withValues(alpha: 0.5))
               /* Html(
                 data: blog.description ?? "",
                 shrinkWrap: true,

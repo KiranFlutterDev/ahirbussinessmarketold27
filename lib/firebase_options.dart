@@ -63,8 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '6343732161',
     projectId: 'eclassify-wrteam',
     storageBucket: 'eclassify-wrteam.appspot.com',
-    androidClientId: '6343732161-dhn3si4lpio5bhr32iu9u6j6d8ja0npr.apps.googleusercontent.com',
-    iosClientId: '6343732161-tutdvlsj06eis0n3eli5c4985fi0lkht.apps.googleusercontent.com',
+    androidClientId:
+        '6343732161-dhn3si4lpio5bhr32iu9u6j6d8ja0npr.apps.googleusercontent.com',
+    iosClientId:
+        '6343732161-tutdvlsj06eis0n3eli5c4985fi0lkht.apps.googleusercontent.com',
     iosBundleId: 'com.eclassify.wrteam',
   );
 }

@@ -1,12 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:eClassify/utils/logger.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:eClassify/data/repositories/chat_repository.dart';
-import 'package:path/path.dart' as path;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http_parser/http_parser.dart';
 
 class SendMessageState {}
@@ -33,7 +31,7 @@ class SendMessageFailed extends SendMessageState {
 
 class SendMessageCubit extends Cubit<SendMessageState> {
   SendMessageCubit() : super(SendMessageInitial());
-  final ChatRepostiory _chatRepostiory = ChatRepostiory();
+  final ChatRepository _chatRepostiory = ChatRepository();
 
   void send(
       {required int itemOfferId,
@@ -45,10 +43,7 @@ class SendMessageCubit extends Cubit<SendMessageState> {
       MultipartFile? audioFile;
       MultipartFile? attachmentFile;
 
-
       if (audio != "") {
-        String? audioFileType = path.extension(audio).substring(1);
-
         audioFile = await MultipartFile.fromFile(
           audio,
           contentType: MediaType('audio', 'mpeg'),
@@ -68,12 +63,9 @@ class SendMessageCubit extends Cubit<SendMessageState> {
           attachment: attachmentFile,
           audio: audioFile);
 
-
-
       emit(SendMessageSuccess(messageId: result['data']['id']));
     } catch (e) {
-
-      Logger.error(e.toString());
+      log(e.toString());
       emit(SendMessageFailed(e.toString()));
     }
   }

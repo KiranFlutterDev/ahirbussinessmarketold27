@@ -1,9 +1,8 @@
-
 import 'package:eClassify/data/model/system_settings_model.dart';
 import 'package:eClassify/data/repositories/system_repository.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/network/networkAvailability.dart';
+import 'package:eClassify/utils/network/network_availability.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchSystemSettingsState {}
@@ -59,6 +58,10 @@ class FetchSystemSettingsCubit extends Cubit<FetchSystemSettingsState> {
         Map settings = await _systemRepository.fetchSystemSettings();
         Constant.currencySymbol =
             _getSetting(settings, SystemSetting.currencySymbol);
+        Constant.currencyPositionIsLeft =
+            _getSetting(settings, SystemSetting.currencySymbolPosition)
+                    as String ==
+                'left';
         Constant.maintenanceMode =
             _getSetting(settings, SystemSetting.maintenanceMode);
         Constant.isGoogleBannerAdsEnabled =
@@ -181,7 +184,7 @@ class FetchSystemSettingsCubit extends Cubit<FetchSystemSettingsState> {
               Constant.bannerAdIdIOS =
                   _getSetting(settings, SystemSetting.bannerAdiOSAd) ?? "";
               Constant.interstitialAdIdAndroid = _getSetting(
-                  settings, SystemSetting.interstitialAdAndroidAd) ??
+                      settings, SystemSetting.interstitialAdAndroidAd) ??
                   "";
               Constant.interstitialAdIdIOS =
                   _getSetting(settings, SystemSetting.interstitialAdiOSAd) ??
@@ -258,7 +261,7 @@ class FetchSystemSettingsCubit extends Cubit<FetchSystemSettingsState> {
 
       /// where selected is equals to type
       var selectedSettingData =
-      (settings[Constant.systemSettingKeys[selected]]);
+          (settings[Constant.systemSettingKeys[selected]]);
 
       return selectedSettingData;
     }
@@ -273,35 +276,8 @@ class FetchSystemSettingsCubit extends Cubit<FetchSystemSettingsState> {
 
   dynamic _getSetting(Map settings, SystemSetting selected) {
     var selectedSettingData =
-    settings['data'][Constant.systemSettingKeys[selected]];
+        settings['data'][Constant.systemSettingKeys[selected]];
 
     return selectedSettingData;
   }
-
-/*  @override
-  FetchSystemSettingsState? fromJson(Map<String, dynamic> json) {
-    try {
-      if (json['cubit_state'] == "FetchSystemSettingsSuccess") {
-        FetchSystemSettingsSuccess fetchSystemSettingsSuccess =
-            FetchSystemSettingsSuccess.fromMap(json);
-
-        return fetchSystemSettingsSuccess;
-      }
-    } catch (e) {}
-    return null;
-  }
-
-  @override
-  Map<String, dynamic>? toJson(FetchSystemSettingsState state) {
-    try {
-      if (state is FetchSystemSettingsSuccess) {
-        Map<String, dynamic> mapped = state.toMap();
-        mapped['cubit_state'] = "FetchSystemSettingsSuccess";
-        return mapped;
-      }
-    } catch (e) {}
-
-    return null;
-    }
-  */
 }

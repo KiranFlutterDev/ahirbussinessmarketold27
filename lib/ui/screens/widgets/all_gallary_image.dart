@@ -1,15 +1,14 @@
+import 'package:eClassify/ui/screens/widgets/video_view_screen.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/video_view_screen.dart';
-
-class AllGallaryImages extends StatelessWidget {
+class AllGalleryImages extends StatelessWidget {
   final List images;
   final String? youtubeThumbnail;
-  const AllGallaryImages(
+
+  const AllGalleryImages(
       {super.key, required this.images, this.youtubeThumbnail});
 
   @override
@@ -47,8 +46,8 @@ class AllGallaryImages extends StatelessWidget {
                   }
                 },
                 child: SizedBox(
-                  width: 76.rw(context),
-                  height: 76.rh(context),
+                  width: 76,
+                  height: 76,
                   child: images[index].isVideo == true
                       ? Stack(
                           fit: StackFit.expand,

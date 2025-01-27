@@ -1,10 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/repositories/chat_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 abstract class GetSellerChatListState {}
 
 class GetSellerChatListInitial extends GetSellerChatListState {}
@@ -18,7 +18,7 @@ class GetSellerChatListSuccess extends GetSellerChatListState {
   final bool isLoadingMore;
   final bool hasError;
   final int page;
-  final List<ChatedUser> chatedUserList;
+  final List<ChatUser> chatedUserList;
 
   GetSellerChatListSuccess({
     required this.total,
@@ -34,7 +34,7 @@ class GetSellerChatListSuccess extends GetSellerChatListState {
     bool? isLoadingMore,
     bool? hasError,
     int? page,
-    List<ChatedUser>? chatedUserList,
+    List<ChatUser>? chatedUserList,
   }) {
     return GetSellerChatListSuccess(
       total: total ?? this.total,
@@ -44,30 +44,6 @@ class GetSellerChatListSuccess extends GetSellerChatListState {
       page: page ?? this.page,
     );
   }
-
-/*  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'total': total,
-      'isLoadingMore': isLoadingMore,
-      'hasError': hasError,
-      'chatedUserList': chatedUserList.map((x) => x.toJson()).toList(),
-      'page':page
-    };
-  }
-
-  factory GetSellerChatListSuccess.fromMap(Map<String, dynamic> map) {
-    return GetSellerChatListSuccess(
-      total: map['total'] as int,
-      page: map['page'] as int,
-      isLoadingMore: map['isLoadingMore'] as bool,
-      hasError: map['hasError'] as bool,
-      chatedUserList: List<ChatedUser>.from(
-        (map['chatedUserList'] as List<int>).map<ChatedUser>(
-          (x) => ChatedUser.fromJson(x as Map<String, dynamic>),
-        ),
-      ),
-    );
-  }*/
 }
 
 class GetSellerChatListFailed extends GetSellerChatListState {
@@ -78,18 +54,13 @@ class GetSellerChatListFailed extends GetSellerChatListState {
 
 class GetSellerChatListCubit extends Cubit<GetSellerChatListState> {
   GetSellerChatListCubit() : super(GetSellerChatListInitial());
-  final ChatRepostiory _chatRepository = ChatRepostiory();
-
-  ///Setting build context for later use
-  void setContext(BuildContext context) {
-    _chatRepository.setContext(context);
-  }
+  final ChatRepository _chatRepository = ChatRepository();
 
   void fetch() async {
     try {
       emit(GetSellerChatListInProgress());
 
-      DataOutput<ChatedUser> result =
+      DataOutput<ChatUser> result =
           await _chatRepository.fetchSellerChatList(1);
 
       emit(
@@ -105,18 +76,40 @@ class GetSellerChatListCubit extends Cubit<GetSellerChatListState> {
     }
   }
 
-  void addNewChat(ChatedUser user) {
-    //this will create new chat in chat list if there is no already
-    if (state is GetSellerChatListSuccess) {
-      List<ChatedUser> chatedUserList =
-          (state as GetSellerChatListSuccess).chatedUserList;
-      bool contains = chatedUserList.any(
-        (element) => element.sellerId == user.sellerId,
-      );
-      if (contains == false) {
-        chatedUserList.insert(0, user);
+  void addOrUpdateChat(ChatUser user) {
+    if (state is! GetSellerChatListSuccess) return;
+    final chatList = (state as GetSellerChatListSuccess).chatedUserList;
+
+    for (final chat in chatList.indexed) {
+      if (chat.$2.id == user.id) {
+        final userChat = chatList.removeAt(chat.$1);
+
+        final newChat = userChat.copyWith(
+            unreadCount: (userChat.unreadCount ?? 0) + (user.unreadCount ?? 1),
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt);
         emit((state as GetSellerChatListSuccess)
-            .copyWith(chatedUserList: chatedUserList));
+            .copyWith(chatedUserList: [newChat, ...chatList]));
+        return;
+      }
+    }
+    chatList.insert(0, user);
+    emit(
+        (state as GetSellerChatListSuccess).copyWith(chatedUserList: chatList));
+  }
+
+  void removeUnreadCount(int itemOfferId) {
+    if (state is! GetSellerChatListSuccess) return;
+    final chatList = (state as GetSellerChatListSuccess).chatedUserList;
+
+    for (final chat in chatList.indexed) {
+      if (chat.$2.id == itemOfferId) {
+        final userChat = chatList.removeAt(chat.$1);
+
+        final newChat = userChat.copyWith(unreadCount: 0);
+        emit((state as GetSellerChatListSuccess)
+            .copyWith(chatedUserList: [newChat, ...chatList]));
+        return;
       }
     }
   }
@@ -129,8 +122,7 @@ class GetSellerChatListCubit extends Cubit<GetSellerChatListState> {
         }
         emit((state as GetSellerChatListSuccess).copyWith(isLoadingMore: true));
 
-        DataOutput<ChatedUser> result =
-            await _chatRepository.fetchSellerChatList(
+        DataOutput<ChatUser> result = await _chatRepository.fetchSellerChatList(
           (state as GetSellerChatListSuccess).page + 1,
         );
 
@@ -161,5 +153,4 @@ class GetSellerChatListCubit extends Cubit<GetSellerChatListState> {
 
     return false;
   }
-
 }

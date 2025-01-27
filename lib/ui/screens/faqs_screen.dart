@@ -1,18 +1,16 @@
-
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/data/cubits/fetch_faqs_cubit.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FaqsScreen extends StatefulWidget {
@@ -92,15 +90,18 @@ class _FaqsScreenState extends State<FaqsScreen> {
                             ExpansionPanelRadio(
                               backgroundColor: context.color.secondaryColor,
                               body: ListTile(
-                                title: Text(state.faqModel[index].answer!)
-                                    .size(context.font.normal),
+                                title: CustomText(
+                                  state.faqModel[index].answer!,
+                                  fontSize: context.font.normal,
+                                ),
                               ),
                               headerBuilder: (context, isExpanded) {
                                 return ListTile(
-                                  title: Text(state.faqModel[index].question!)
-                                      .bold()
-                                      .size(context.font.normal),
-                                );
+                                    title: CustomText(
+                                  state.faqModel[index].question!,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: context.font.normal,
+                                ));
                               },
                               value: index,
                               canTapOnHeader: true,
@@ -136,7 +137,7 @@ class _FaqsScreenState extends State<FaqsScreen> {
             child: CustomShimmer(
               borderRadius: 0,
               width: double.infinity,
-              height: 60.rh(context),
+              height: 60,
             ),
           );
         });

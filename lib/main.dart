@@ -5,6 +5,7 @@ import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/register_cubits.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/data/cubits/system/language_cubit.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/globals.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/hive_utils.dart';
@@ -13,10 +14,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-import 'package:eClassify/data/cubits/system/language_cubit.dart';
-
-
 
 /////////////
 ///V-1.0.0//
@@ -39,7 +36,6 @@ class EntryPointState extends State<EntryPoint> {
     super.initState();
     FirebaseMessaging.onBackgroundMessage(
         NotificationService.onBackgroundMessageHandler);
-    //ChatMessageHandler.handle();
     ChatGlobals.init();
   }
 
@@ -65,16 +61,8 @@ class _AppState extends State<App> {
   void initState() {
     context.read<LanguageCubit>().loadCurrentLanguage();
 
-
     AppTheme currentTheme = HiveUtils.getCurrentTheme();
 
-    // ///Initialized notification services
-    // LocalAwsomeNotification().init(context);
-    ///////////// 
-    // NotificationService.init(context);
-
-    /// Initialized dynamic links for share items feature
-    //DeepLinkManager.initDeepLinks();
     context.read<AppThemeCubit>().changeTheme(currentTheme);
 
     super.initState();

@@ -1,14 +1,13 @@
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/main_activity.dart';
 
 class SuccessItemScreen extends StatefulWidget {
   final ItemModel model;
@@ -127,7 +126,7 @@ class _SuccessItemScreenState extends State<SuccessItemScreen>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: isBack,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         // Handle back button press
         _handleBackButtonPressed();
       },
@@ -149,19 +148,21 @@ class _SuccessItemScreenState extends State<SuccessItemScreen>
                             children: [
                               SizedBox(height: 50),
                               if (!widget.isEdit)
-                                Text(
+                                CustomText(
                                   'congratulations'.translate(context),
-                                )
-                                    .size(context.font.extraLarge)
-                                    .color(context.color.territoryColor)
-                                    .bold(weight: FontWeight.w600),
+                                  fontSize: context.font.extraLarge,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.color.territoryColor,
+                                ),
                               SizedBox(height: 18),
-                              Text(widget.isEdit
-                                      ? 'updatedSuccess'.translate(context)
-                                      : 'submittedSuccess'.translate(context))
-                                  .centerAlign()
-                                  .size(context.font.larger)
-                                  .color(context.color.textDefaultColor),
+                              CustomText(
+                                widget.isEdit
+                                    ? 'updatedSuccess'.translate(context)
+                                    : 'submittedSuccess'.translate(context),
+                                color: context.color.textDefaultColor,
+                                fontSize: context.font.larger,
+                                textAlign: TextAlign.center,
+                              ),
                               SizedBox(height: 60),
                               InkWell(
                                 onTap: () {
@@ -182,31 +183,35 @@ class _SuccessItemScreenState extends State<SuccessItemScreen>
                                     );*/
                                 },
                                 child: Container(
-                                  height: 48,
-                                  alignment: AlignmentDirectional.center,
-                                  margin: EdgeInsets.symmetric(
-                                      horizontal: 65, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                          color: context.color.territoryColor),
-                                      color: context.color.secondaryColor),
-                                  child: Text("previewAd".translate(context))
-                                      .centerAlign()
-                                      .size(context.font.larger)
-                                      .color(context.color.territoryColor),
-                                ),
+                                    height: 48,
+                                    alignment: AlignmentDirectional.center,
+                                    margin: EdgeInsets.symmetric(
+                                        horizontal: 65, vertical: 10),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color:
+                                                context.color.territoryColor),
+                                        color: context.color.secondaryColor),
+                                    child: CustomText(
+                                      "previewAd".translate(context),
+                                      textAlign: TextAlign.center,
+                                      fontSize: context.font.larger,
+                                      color: context.color.territoryColor,
+                                    )),
                               ),
                               SizedBox(height: 15),
                               InkWell(
                                 onTap: () {
                                   _navigateBackToHome();
                                 },
-                                child: Text('backToHome'.translate(context))
-                                    .underline()
-                                    .centerAlign()
-                                    .size(context.font.larger)
-                                    .color(context.color.textDefaultColor),
+                                child: CustomText(
+                                  'backToHome'.translate(context),
+                                  textAlign: TextAlign.center,
+                                  fontSize: context.font.larger,
+                                  color: context.color.textDefaultColor,
+                                  showUnderline: true,
+                                ),
                               ),
                             ],
                           ),

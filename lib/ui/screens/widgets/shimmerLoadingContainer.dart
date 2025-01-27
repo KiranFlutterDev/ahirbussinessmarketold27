@@ -4,7 +4,6 @@ import 'package:eClassify/ui/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-
 class CustomShimmer extends StatelessWidget {
   final double? height;
   final double? width;

@@ -1,5 +1,3 @@
-
-
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/utils/api.dart';
@@ -10,7 +8,7 @@ class FavoriteRepository {
       Api.itemId: id,
     };
 
-    Map<String, dynamic> response = await Api.post(
+    await Api.post(
       url: Api.manageFavouriteApi,
       parameter: parameters,
       useBaseUrl: true,

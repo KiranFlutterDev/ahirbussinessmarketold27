@@ -1,21 +1,19 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:eClassify/ui/screens/widgets/promoted_widget.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/string_extenstion.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/app/app_theme.dart';
-import 'package:eClassify/data/repositories/favourites_repository.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
 import 'package:eClassify/data/cubits/favorite/manage_fav_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/repositories/favourites_repository.dart';
+import 'package:eClassify/ui/screens/widgets/promoted_widget.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ItemHorizontalCard extends StatelessWidget {
   final ItemModel item;
@@ -40,7 +38,6 @@ class ItemHorizontalCard extends StatelessWidget {
 
   Widget favButton(BuildContext context) {
     bool isLike = context.read<FavoriteCubit>().isItemFavorite(item.id!);
-
     return BlocProvider(
         create: (context) => UpdateFavoriteCubit(FavoriteRepository()),
         child: BlocConsumer<FavoriteCubit, FavoriteState>(
@@ -152,7 +149,7 @@ class ItemHorizontalCard extends StatelessWidget {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              // Text(item.promoted.toString()),
+                              // CustomText(item.promoted.toString()),
                               if (item.isFeature ?? false)
                                 const PositionedDirectional(
                                     start: 5,
@@ -172,10 +169,10 @@ class ItemHorizontalCard extends StatelessWidget {
                                 width: 80,
                                 height: 120 - 90 - 8,
                                 child: Center(
-                                    child: Text(statusButton!.lable)
-                                        .size(context.font.small)
-                                        .bold()
-                                        .color(statusButton?.textColor ??
+                                    child: CustomText(statusButton!.lable,
+                                        fontSize: context.font.small,
+                                        fontWeight: FontWeight.bold,
+                                        color: statusButton?.textColor ??
                                             Colors.black)),
                               ),
                             )
@@ -196,29 +193,21 @@ class ItemHorizontalCard extends StatelessWidget {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: Text(
-                                      Constant.currencySymbol +
-                                          item.price!
-                                              .toString()
-                                              .priceFormate(
-                                                  disabled: Constant
-                                                          .isNumberWithSuffix ==
-                                                      false)
-                                              .toString()
-                                    )
-                                        .size(context.font.large)
-                                        .color(context.color.territoryColor)
-                                        .bold(weight: FontWeight.w700),
-                                  ),
+                                      child: CustomText(
+                                    (item.price ?? 0.0).currencyFormat,
+                                    fontSize: context.font.large,
+                                    color: context.color.territoryColor,
+                                    fontWeight: FontWeight.w700,
+                                  )),
                                   if (showLikeButton ?? true) favButton(context)
                                 ],
                               ),
-                              Text(
+                              CustomText(
                                 item.name!.firstUpperCase(),
-                              )
-                                  .setMaxLines(lines: 2)
-                                  .size(context.font.normal)
-                                  .color(context.color.textDefaultColor),
+                                fontSize: context.font.normal,
+                                color: context.color.textDefaultColor,
+                                maxLines: 2,
+                              ),
                               //SizedBox(height: 5),
                               if (item.address != "")
                                 Row(
@@ -227,15 +216,16 @@ class ItemHorizontalCard extends StatelessWidget {
                                       Icons.location_on_outlined,
                                       size: 15,
                                       color: context.color.textDefaultColor
-                                          .withOpacity(0.5),
+                                          .withValues(alpha: 0.5),
                                     ),
                                     Expanded(
-                                      child: Text(item.address?.trim() ?? "")
-                                          .setMaxLines(lines: 1)
-                                          .color(context.color.textDefaultColor
-                                              .withOpacity(0.5))
-                                          .size(context.font.smaller),
-                                    )
+                                        child: CustomText(
+                                      item.address?.trim() ?? "",
+                                      fontSize: context.font.smaller,
+                                      color: context.color.textDefaultColor
+                                          .withValues(alpha: 0.5),
+                                      maxLines: 1,
+                                    ))
                                   ],
                                 )
                             ],

@@ -2,12 +2,11 @@
 
 import 'dart:convert';
 
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/repositories/category_repository.dart';
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
+import 'package:eClassify/data/repositories/category_repository.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class FetchSubCategoriesState {}
 
@@ -88,8 +87,7 @@ class FetchSubCategoriesFailure extends FetchSubCategoriesState {
   FetchSubCategoriesFailure(this.errorMessage);
 }
 
-class FetchSubCategoriesCubit extends Cubit<FetchSubCategoriesState>
-    {
+class FetchSubCategoriesCubit extends Cubit<FetchSubCategoriesState> {
   FetchSubCategoriesCubit() : super(FetchSubCategoriesInitial());
 
   final CategoryRepository _categoryRepository = CategoryRepository();
@@ -140,7 +138,8 @@ class FetchSubCategoriesCubit extends Cubit<FetchSubCategoriesState>
             (state as FetchSubCategoriesSuccess);
         categoryState.categories.addAll(result.modelList);
 
-        List<String> list = categoryState.categories.map((e) => e.url!).toList();
+        List<String> list =
+            categoryState.categories.map((e) => e.url!).toList();
         await HelperUtils.precacheSVG(list);
 
         emit(FetchSubCategoriesSuccess(
@@ -164,12 +163,10 @@ class FetchSubCategoriesCubit extends Cubit<FetchSubCategoriesState>
     return false;
   }
 
-  @override
   FetchSubCategoriesState? fromJson(Map<String, dynamic> json) {
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(FetchSubCategoriesState state) {
     return null;
   }

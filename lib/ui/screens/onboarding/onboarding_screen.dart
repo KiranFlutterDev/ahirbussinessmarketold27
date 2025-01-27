@@ -2,21 +2,18 @@ import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
+import 'package:eClassify/data/model/system_settings_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/hive_keys.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-
-import 'package:eClassify/data/model/system_settings_model.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/hive_keys.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -121,13 +118,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                                 return Row(
                                   children: [
-                                    Text(
+                                    CustomText(
                                       languageCode /*(value.data?.value == null ||
                                               defaultLanguage == "null")
                                           ? "En"
                                           : languageCode*/
                                       ,
-                                    ).color(context.color.textColorDark),
+                                      color: context.color.textColorDark,
+                                    ),
                                     Icon(
                                       Icons.keyboard_arrow_down_sharp,
                                       color: context.color.territoryColor,
@@ -139,29 +137,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       top: kPagingTouchSlop,
                       end: 26,
                       child: MaterialButton(
-                        onPressed: () {
-                          HiveUtils.setUserIsNotNew();
-                          HiveUtils.setUserSkip();
+                          onPressed: () {
+                            HiveUtils.setUserIsNotNew();
+                            HiveUtils.setUserSkip();
 
-                          Navigator.pushReplacementNamed(
-                            context,
-                            Routes.main,
-                            arguments: {
-                              "from": "login",
-                              "isSkipped": true,
-                            },
-                          );
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        color: context.color.forthColor.withOpacity(0.102),
-                        elevation: 0,
-                        height: 28,
-                        minWidth: 64,
-                        child: Text("skip".translate(context))
-                            .color(context.color.forthColor),
-                      )),
+                            Navigator.pushReplacementNamed(
+                              context,
+                              Routes.main,
+                              arguments: {
+                                "from": "login",
+                                "isSkipped": true,
+                              },
+                            );
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          color:
+                              context.color.forthColor.withValues(alpha: 0.102),
+                          elevation: 0,
+                          height: 28,
+                          minWidth: 64,
+                          child: CustomText(
+                            "skip".translate(context),
+                            color: context.color.forthColor,
+                          ))),
                   Positioned.directional(
                       textDirection: Directionality.of(context),
                       top: kPagingTouchSlop + 50,
@@ -238,42 +238,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             child: Column(
                               children: <Widget>[
                                 SizedBox(
-                                  height: 60.rh(context),
+                                  height: 60,
                                 ),
                                 SizedBox(
                                   width: context.screenWidth,
-                                  height: 221.rh(context),
+                                  height: 221,
                                   child: SvgPicture.asset(
                                       slidersList[currentPageIndex]['svg']),
                                 ),
                                 SizedBox(
-                                  height: 39.rh(context),
+                                  height: 39,
                                 ),
                                 SizedBox(
                                   width: context.screenWidth,
-                                  child: Text(slidersList[currentPageIndex]
-                                          ['title'])
-                                      .size(context.font.extraLarge)
-                                      .bold(weight: FontWeight.w600)
-                                      .color(context.color.textDefaultColor)
-                                      .centerAlign(),
+                                  child: CustomText(
+                                    slidersList[currentPageIndex]['title'],
+                                    fontSize: context.font.extraLarge,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.color.textDefaultColor,
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                                 SizedBox(
-                                  height: 14.rh(context),
+                                  height: 14,
                                 ),
                                 SizedBox(
                                   width: context.screenWidth,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 13),
-                                    child: Text(slidersList[currentPageIndex]
-                                            ['description'])
-                                        .centerAlign()
-                                        .size(context.font.larger),
+                                    child: CustomText(
+                                      slidersList[currentPageIndex]
+                                          ['description'],
+                                      textAlign: TextAlign.center,
+                                      fontSize: context.font.larger,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 24.rh(context),
+                                  height: 24,
                                 ),
                                 IndicatorBuilder(
                                   total: totalPages,
@@ -318,34 +321,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: Column(
                             children: <Widget>[
                               SizedBox(
-                                height: 60.rh(context),
+                                height: 60,
                               ),
                               SizedBox(
                                 width: context.screenWidth,
-                                height: 221.rh(context),
+                                height: 221,
                                 child: SvgPicture.asset(
                                     slidersList[currentPageIndex]['svg']),
                               ),
                               SizedBox(
-                                height: 39.rh(context),
+                                height: 39,
                               ),
-                              Text(slidersList[currentPageIndex]['title'])
+                              CustomText(slidersList[currentPageIndex]['title'])
                                   .size(context.font.extraLarge)
                                   .bold(weight: FontWeight.w600)
                                   .color(context.color.textDefaultColor),
                               SizedBox(
-                                height: 14.rh(context),
+                                height: 14,
                               ),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 13),
-                                child: Text(slidersList[currentPageIndex]
+                                child: CustomText(slidersList[currentPageIndex]
                                         ['description'])
                                     .centerAlign()
                                     .size(context.font.larger),
                               ),
                               SizedBox(
-                                height: 24.rh(context),
+                                height: 24,
                               ),
                               IndicatorBuilder(
                                 total: totalPages,
@@ -387,7 +390,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   : [
                                       BoxShadow(
                                           color: context.color.forthColor
-                                              .withOpacity(0.8),
+                                              .withValues(alpha: 0.8),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                           spreadRadius: 1)
@@ -412,32 +415,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ? null
                       : [
                           BoxShadow(
-                              color:
-                                  context.color.territoryColor.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                              /*spreadRadius: 1*/)
+                            color: context.color.territoryColor
+                                .withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8), /*spreadRadius: 1*/
+                          )
                         ],
                 ),
                 child: MaterialButton(
-                  onPressed: () {
-                    HiveUtils.setUserIsNotNew();
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        Routes.login, (route) => false);
-                  },
-                  height: 56,
-                  minWidth: 201,
-                  color: context.color.territoryColor,
-                  // Button color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: Text(currentPageIndex < slidersList.length - 1
+                    onPressed: () {
+                      HiveUtils.setUserIsNotNew();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          Routes.login, (route) => false);
+                    },
+                    height: 56,
+                    minWidth: 201,
+                    color: context.color.territoryColor,
+                    // Button color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: CustomText(
+                      currentPageIndex < slidersList.length - 1
                           ? "signIn".translate(context)
-                          : "getStarted".translate(context))
-                      .color(context.color.buttonColor)
-                      .size(context.font.larger),
-                ),
+                          : "getStarted".translate(context),
+                      color: context.color.buttonColor,
+                      fontSize: context.font.larger,
+                    )),
               ),
             ],
           )),
@@ -488,7 +492,7 @@ class IndicatorBuilder extends StatelessWidget {
 //     path_0.lineTo(0.2, 0);
 //     path_0.close();
 //     Paint paint_0_fill = Paint()..style = PaintingStyle.fill;
-//     paint_0_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_0_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawPath(path_0, paint_0_fill);
 //     Path path_1 = Path();
 //     path_1.moveTo(216, 0);
@@ -497,7 +501,7 @@ class IndicatorBuilder extends StatelessWidget {
 //     path_1.lineTo(216, 0);
 //     path_1.close();
 //     Paint paint_1_fill = Paint()..style = PaintingStyle.fill;
-//     paint_1_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_1_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawPath(path_1, paint_1_fill);
 //     Path path_2 = Path();
 //     path_2.moveTo(216, 0.2);
@@ -527,7 +531,7 @@ class IndicatorBuilder extends StatelessWidget {
 //         215.91, 0, 215.99999999999997, 0.09, 215.99999999999997, 0.2);
 //     path_2.close();
 //     Paint paint_2_fill = Paint()..style = PaintingStyle.fill;
-//     paint_2_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_2_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawPath(path_2, paint_2_fill);
 //   }
 //
@@ -541,11 +545,11 @@ class IndicatorBuilder extends StatelessWidget {
 //   @override
 //   void paint(Canvas canvas, Size size) {
 //     Paint paint_0_fill = Paint()..style = PaintingStyle.fill;
-//     paint_0_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_0_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawRect(
 //         Rect.fromLTWH(0, 0, size.width, size.height * 0.5555556), paint_0_fill);
 //     Paint paint_1_fill = Paint()..style = PaintingStyle.fill;
-//     paint_1_fill.color = Color(0xffffffff).withOpacity(1.0);
+//     paint_1_fill.color = Color(0xffffffff).withValues(alpha: 1.0);
 //     canvas.drawRRect(
 //         RRect.fromRectAndCorners(
 //             Rect.fromLTWH(size.width * 0.3333333, size.height * 0.1111111,
@@ -567,7 +571,7 @@ class IndicatorBuilder extends StatelessWidget {
 //     path_2.cubicTo(144, 0.09, 144.09, 0, 144.2, 0);
 //     path_2.close();
 //     Paint paint_2_fill = Paint()..style = PaintingStyle.fill;
-//     paint_2_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_2_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawPath(path_2, paint_2_fill);
 //     Path path_3 = Path();
 //     path_3.moveTo(0.2, 0);
@@ -581,7 +585,7 @@ class IndicatorBuilder extends StatelessWidget {
 //     path_3.cubicTo(0, 0.09, 0.09, 0, 0.2, 0);
 //     path_3.close();
 //     Paint paint_3_fill = Paint()..style = PaintingStyle.fill;
-//     paint_3_fill.color = Color(0xff606060).withOpacity(1.0);
+//     paint_3_fill.color = Color(0xff606060).withValues(alpha: 1.0);
 //     canvas.drawPath(path_3, paint_3_fill);
 //   }
 //
@@ -658,7 +662,7 @@ class BottomCurvePainter extends CustomPainter {
     path.cubicTo(0, 0, 0, 0, 0, 0);
     canvas.drawShadow(
       path,
-      Colors.grey.withOpacity(0.1),
+      Colors.grey.withValues(alpha: 0.1),
       6.0, // Shadow radius
       true, // Whether to include the shape itself in the shadow calculation
     );
@@ -741,7 +745,7 @@ class BottomCurvePainter extends CustomPainter {
 //     path_0.close();
 //
 //     Paint paint_0_fill = Paint()..style = PaintingStyle.fill;
-//     paint_0_fill.color = Color(0xffffffff).withOpacity(1.0);
+//     paint_0_fill.color = Color(0xffffffff).withValues(alpha: 1.0);
 //     canvas.drawPath(path_0, paint_0_fill);
 //   }
 //

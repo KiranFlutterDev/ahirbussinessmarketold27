@@ -1,8 +1,7 @@
-import 'package:eClassify/data/repositories/home/home_repository.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/repositories/home/home_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class FetchSectionItemsState {}
 
@@ -47,8 +46,7 @@ class FetchSectionItemsFail extends FetchSectionItemsState {
   FetchSectionItemsFail(this.error);
 }
 
-class FetchSectionItemsCubit extends Cubit<FetchSectionItemsState>
-  {
+class FetchSectionItemsCubit extends Cubit<FetchSectionItemsState> {
   FetchSectionItemsCubit() : super(FetchSectionItemsInitial());
 
   final HomeRepository _homeRepository = HomeRepository();
@@ -127,13 +125,11 @@ class FetchSectionItemsCubit extends Cubit<FetchSectionItemsState>
     return false;
   }
 
-  @override
   FetchSectionItemsState? fromJson(Map<String, dynamic> json) {
     // TODO: implement fromJson
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(FetchSectionItemsState state) {
     // TODO: implement toJson
     return null;

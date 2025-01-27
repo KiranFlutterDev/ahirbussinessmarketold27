@@ -1,12 +1,12 @@
-import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
 import 'package:eClassify/data/cubits/item/fetch_my_item_cubit.dart';
+import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ItemsScreen extends StatefulWidget {
   const ItemsScreen({super.key});
@@ -39,6 +39,7 @@ class MyItemState extends State<ItemsScreen> with TickerProviderStateMixin {
         "title": "allAds".translate(context),
         "status": "",
       },
+      {"title": "featured".translate(context), "status": "featured"},
       {
         "title": "live".translate(context),
         "status": "approved",
@@ -162,9 +163,14 @@ class MyItemState extends State<ItemsScreen> with TickerProviderStateMixin {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(name).size(context.font.large).color(isSelected
-                ? context.color.buttonColor
-                : context.color.textColorDark),
+            child: CustomText(
+              name,
+              color: isSelected
+                  ? context.color.buttonColor
+                  : context.color.textColorDark,
+              fontSize: context.font.large,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

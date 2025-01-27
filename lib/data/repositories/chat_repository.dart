@@ -1,44 +1,33 @@
-
 import 'package:dio/dio.dart';
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:flutter/material.dart';
 
-
-class ChatRepostiory {
-  BuildContext? _setContext;
-
-  void setContext(BuildContext context) {
-    _setContext = context;
-  }
-
-  Future<DataOutput<ChatedUser>> fetchBuyerChatList(int page) async {
-    /* Map<String, dynamic> response = await Api.get(
-        url: Api.getChatListApi, queryParameters: {*/ /*"page": page, */ /*"type": "buyer"});*/
-
+class ChatRepository {
+  Future<DataOutput<ChatUser>> fetchBuyerChatList(int page) async {
     Map<String, dynamic> response = await Api.get(
         url: Api.getChatListApi,
         queryParameters: {"type": "buyer", "page": page});
 
-    List<ChatedUser> modelList = (response['data']['data'] as List).map(
+    List<ChatUser> modelList = (response['data']['data'] as List).map(
       (e) {
-        return ChatedUser.fromJson(e);
+        return ChatUser.fromJson(e);
       },
     ).toList();
 
     return DataOutput(total: response['data']['total'], modelList: modelList);
   }
 
-  Future<DataOutput<ChatedUser>> fetchSellerChatList(int page) async {
+  Future<DataOutput<ChatUser>> fetchSellerChatList(int page) async {
     Map<String, dynamic> response = await Api.get(
         url: Api.getChatListApi,
         queryParameters: {"page": page, "type": "seller"});
 
-    List<ChatedUser> modelList = (response['data']["data"] as List).map(
+    List<ChatUser> modelList = (response['data']["data"] as List).map(
       (e) {
-        return ChatedUser.fromJson(e /*, context: _setContext*/);
+        return ChatUser.fromJson(e /*, context: _setContext*/);
       },
     ).toList();
 
@@ -132,26 +121,16 @@ class ChatRepostiory {
     return map;
   }
 
-
   Future<DataOutput<BlockedUserModel>> blockedUsersListApi() async {
-
-    Map<String, dynamic> response = await Api.get(
-        url: Api.blockedUsersListApi,
-        queryParameters: {});
+    Map<String, dynamic> response =
+        await Api.get(url: Api.blockedUsersListApi, queryParameters: {});
 
     List<BlockedUserModel> modelList = (response['data'] as List).map(
-          (e) {
+      (e) {
         return BlockedUserModel.fromJson(e);
       },
     ).toList();
 
     return DataOutput(modelList: modelList, total: modelList.length);
   }
-
-/*  Future<Map<String, dynamic>> blockedUsersListApi() async {
-    Map<String, dynamic> map =
-        await Api.get(url: Api.blockedUsersListApi, queryParameters: {});
-
-    return map;
-  }*/
 }

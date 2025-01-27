@@ -28,13 +28,9 @@ class CreateFeaturedAdCubit extends Cubit<CreateFeaturedAdState> {
   }) async {
     emit(CreateFeaturedAdInProgress());
 
-    repository
-        .createFeaturedAds(itemId: itemId)
-        .then((value) {
-
+    repository.createFeaturedAds(itemId: itemId).then((value) {
       emit(CreateFeaturedAdInSuccess(value['message']));
     }).catchError((e) {
-
       emit(CreateFeaturedAdFailure(e.toString()));
     });
   }

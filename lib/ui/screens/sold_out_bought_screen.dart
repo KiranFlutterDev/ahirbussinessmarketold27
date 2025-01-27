@@ -1,22 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eClassify/data/cubits/fetch_item_buyer_cubit.dart';
+import 'package:eClassify/data/cubits/item/change_my_items_status_cubit.dart';
+import 'package:eClassify/data/model/user_model.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/transparant_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
+import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/data/cubits/fetch_item_buyer_cubit.dart';
-import 'package:eClassify/data/model/user_model.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_hero_animation.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/utils/customHeroAnimation.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/cubits/item/change_my_items_status_cubit.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/transparant_route.dart';
-import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 
 class SoldOutBoughtScreen extends StatefulWidget {
   final int itemId;
@@ -109,7 +109,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                             buttonColor: context.color.backgroundColor,
                             border: BorderSide(
                                 color: context.color.textDefaultColor
-                                    .withOpacity(0.5)),
+                                    .withValues(alpha: 0.5)),
                             textColor: context.color.textDefaultColor,
                             onPressed: () async {
                           var soldOut = await UiUtils.showBlurredDialoge(
@@ -119,7 +119,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                               title: "confirmSoldOut".translate(context),
                               acceptButtonName:
                                   "comfirmBtnLbl".translate(context),
-                              content: Text(
+                              content: CustomText(
                                 "soldOutWarning".translate(context),
                               ),
                             ),
@@ -195,7 +195,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                                     ),
                                   ),
                                 ),
-                          title: Text(model.name!),
+                          title: CustomText(model.name!),
                           trailing: Radio(
                             activeColor: context.color.territoryColor,
                             value: index,
@@ -243,7 +243,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                             buttonColor: context.color.backgroundColor,
                             border: BorderSide(
                                 color: context.color.textDefaultColor
-                                    .withOpacity(0.5)),
+                                    .withValues(alpha: 0.5)),
                             textColor: context.color.textDefaultColor,
                             onPressed: () async {
                           var soldOut = await UiUtils.showBlurredDialoge(
@@ -253,7 +253,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                               title: "confirmSoldOut".translate(context),
                               acceptButtonName:
                                   "comfirmBtnLbl".translate(context),
-                              content: Text(
+                              content: CustomText(
                                 "soldOutWarning".translate(context),
                               ),
                             ),
@@ -309,7 +309,7 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                               title: "confirmSoldOut".translate(context),
                               acceptButtonName:
                                   "comfirmBtnLbl".translate(context),
-                              content: Text(
+                              content: CustomText(
                                 "soldOutWarning".translate(context),
                               ),
                             ),
@@ -327,8 +327,8 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                         },
                             buttonTitle: 'markAsSoldOut'.translate(context),
                             disabled: _selectedBuyerIndex == null,
-                            disabledColor:
-                                context.color.textLightColor.withOpacity(0.3)),
+                            disabledColor: context.color.textLightColor
+                                .withValues(alpha: 0.3)),
                       ),
                     ),
                   );
@@ -385,26 +385,24 @@ class _SoldOutBoughtScreenState extends State<SoldOutBoughtScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
-                                    child: Text(
+                                    child: CustomText(
                                       widget.itemName,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       softWrap: true,
-                                    )
-                                        .color(context.color.textDefaultColor)
-                                        .size(context.font.large),
+                                      fontSize: context.font.large,
+                                    ),
                                   ),
                                   Padding(
                                     padding:
                                         EdgeInsetsDirectional.only(start: 15.0),
-                                    child: Text(
+                                    child: CustomText(
                                       Constant.currencySymbol.toString() +
                                           widget.price
                                               .toString(), // Replace with your item price
-                                    )
-                                        .color(context.color.textDefaultColor)
-                                        .size(context.font.large)
-                                        .bold(),
+                                      fontSize: context.font.large,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),

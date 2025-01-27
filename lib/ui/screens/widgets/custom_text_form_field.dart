@@ -1,9 +1,8 @@
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/validator.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 enum CustomTextFieldValidator {
   nullCheck,
@@ -65,7 +64,8 @@ class CustomTextFormField extends StatelessWidget {
     this.hintTextStyle,
     this.minLength,
     this.capitalization,
-    this.isRequired, this.isMobileRequired=true,
+    this.isRequired,
+    this.isMobileRequired = true,
   });
 
   @override
@@ -98,17 +98,6 @@ class CustomTextFormField extends StatelessWidget {
             return null;
           }
         }
-
-        /* if (validator == CustomTextFieldValidator.minAndMixLen) {
-          if ((value == "") ||
-              (value!.length > maxLength!) ||
-              (value.length < minLength!)) {
-            return "${"youCanAddMinimum".translate(context)} \t $minLength \t ${"toMaximum".translate(context)} \t ${maxLength!} \t ${"numbersOnly".translate(context)}";
-          } else if (maxLength != null) {
-          } else {
-            return null;
-          }
-        }*/
 
         // Check if maxLength is not null and value length exceeds maxLength
         if (validator == CustomTextFieldValidator.minAndMixLen) {
@@ -164,7 +153,7 @@ class CustomTextFormField extends StatelessWidget {
           hintText: hintText,
           hintStyle: hintTextStyle ??
               TextStyle(
-                  color: context.color.textColorDark.withOpacity(0.7),
+                  color: context.color.textColorDark.withValues(alpha: 0.7),
                   fontSize: context.font.large),
           filled: true,
           fillColor: fillColor ?? context.color.secondaryColor,

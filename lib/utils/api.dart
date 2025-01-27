@@ -1,20 +1,17 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
+import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/error_filter.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/network_request_interseptor.dart';
-import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
-
-import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
-import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
-import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
-
-
-import 'package:eClassify/utils/errorFilter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ApiException implements Exception {
@@ -249,7 +246,7 @@ class Api {
   }) async {
     try {
       final Dio dio = Dio();
-      dio.interceptors.add(NetworkRequestInterseptor());
+      dio.interceptors.add(NetworkRequestInterceptor());
 
       late FormData formData;
 
@@ -352,7 +349,7 @@ class Api {
     try {
 //
       final Dio dio = Dio();
-      dio.interceptors.add(NetworkRequestInterseptor());
+      dio.interceptors.add(NetworkRequestInterceptor());
 
       final response =
           await dio.delete(((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
@@ -391,8 +388,7 @@ class Api {
     try {
 //
       final Dio dio = Dio();
-      dio.interceptors.add(NetworkRequestInterseptor());
-
+      dio.interceptors.add(NetworkRequestInterceptor());
 
       final response = await dio.get(
           ((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,

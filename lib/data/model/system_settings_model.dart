@@ -1,6 +1,8 @@
 enum SystemSetting {
   maintenanceMode,
   currencySymbol,
+  currencySymbolPosition,
+  freeAdListing,
   subscription,
   privacyPolicy,
   termsConditions,
@@ -30,4 +32,3 @@ enum SystemSetting {
   appleAuthentication,
   emailAuthentication
 }
-

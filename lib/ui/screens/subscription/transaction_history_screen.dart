@@ -1,17 +1,16 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'package:eClassify/data/cubits/utility/fetch_transactions_cubit.dart';
 import 'package:eClassify/data/model/transaction_model.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TransactionHistory extends StatefulWidget {
@@ -144,17 +143,20 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
-                        color: context.color.territoryColor.withOpacity(0.1)),
-                    padding: EdgeInsets.symmetric(vertical: 3,horizontal: 7),
-                    child: Text(
+                        color: context.color.territoryColor
+                            .withValues(alpha: 0.1)),
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
+                    child: CustomText(
                       transaction.paymentGateway!,
-                    ).size(context.font.small).color(context.color.territoryColor),
+                      fontSize: context.font.small,
+                      color: context.color.territoryColor,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: CustomText(
                           transaction.orderId != null
                               ? transaction.orderId.toString()
                               : "",
@@ -164,9 +166,10 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  CustomText(
                     transaction.createdAt.toString().formatDate(),
-                  ).size(context.font.small),
+                    fontSize: context.font.small,
+                  ),
                 ],
               ),
             ),
@@ -178,7 +181,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                 Clipboard.setData(clipboardData).then((_) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("copied".translate(context)),
+                      content: CustomText("copied".translate(context)),
                     ),
                   );
                 });
@@ -206,13 +209,16 @@ class _TransactionHistoryState extends State<TransactionHistory> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("${Constant.currencySymbol}\t${transaction.amount}")
-                    .bold(weight: FontWeight.w700)
-                    .color(context.color.territoryColor),
+                CustomText(
+                  "${Constant.currencySymbol}\t${transaction.amount}",
+                  fontWeight: FontWeight.w700,
+                  color: context.color.territoryColor,
+                ),
                 const SizedBox(
                   height: 6,
                 ),
-                Text(transaction.paymentStatus!.toString().firstUpperCase()),
+                CustomText(
+                    transaction.paymentStatus!.toString().firstUpperCase()),
               ],
             ),
           ],

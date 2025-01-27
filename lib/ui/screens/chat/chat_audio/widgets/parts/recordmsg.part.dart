@@ -78,8 +78,8 @@ class _RecordMessageState extends State<RecordMessage> {
               ? context.color.primaryColor
               : context.color.territoryColor,
           inactiveColor: widget.isSentByMe
-              ? context.color.primaryColor.withOpacity(0.3)
-              : context.color.territoryColor.withOpacity(0.3),
+              ? context.color.primaryColor.withValues(alpha: 0.3)
+              : context.color.territoryColor.withValues(alpha: 0.3),
           value: position.toDouble(),
           onChanged: (v) {
             audioPlayer.seek(Duration(seconds: v.toInt()));
@@ -89,9 +89,12 @@ class _RecordMessageState extends State<RecordMessage> {
           max: durationChanged.toDouble(),
         ),
         if ((durationChanged - position) != 0)
-          Text((durationChanged - position).toString()).color(widget.isSentByMe
-              ? context.color.primaryColor
-              : context.color.textColorDark)
+          CustomText(
+            (durationChanged - position).toString(),
+            color: widget.isSentByMe
+                ? context.color.primaryColor
+                : context.color.textColorDark,
+          ),
       ],
     );
   }

@@ -6,19 +6,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchItemReportReasonsListState {}
 
-class FetchItemReportReasonsInitial
-    extends FetchItemReportReasonsListState {}
+class FetchItemReportReasonsInitial extends FetchItemReportReasonsListState {}
 
 class FetchItemReportReasonsInProgress
     extends FetchItemReportReasonsListState {}
 
-class FetchItemReportReasonsSuccess
-    extends FetchItemReportReasonsListState {
+class FetchItemReportReasonsSuccess extends FetchItemReportReasonsListState {
   final int total;
   final List<ReportReason> reasons;
 
-  FetchItemReportReasonsSuccess(
-      {required this.total, required this.reasons});
+  FetchItemReportReasonsSuccess({required this.total, required this.reasons});
 
   Map<String, dynamic> toMap() {
     return {
@@ -36,17 +33,15 @@ class FetchItemReportReasonsSuccess
   }
 }
 
-class FetchItemReportReasonsFailure
-    extends FetchItemReportReasonsListState {
+class FetchItemReportReasonsFailure extends FetchItemReportReasonsListState {
   final dynamic error;
 
   FetchItemReportReasonsFailure(this.error);
 }
 
 class FetchItemReportReasonsListCubit
-    extends Cubit<FetchItemReportReasonsListState>{
-  FetchItemReportReasonsListCubit()
-      : super(FetchItemReportReasonsInitial());
+    extends Cubit<FetchItemReportReasonsListState> {
+  FetchItemReportReasonsListCubit() : super(FetchItemReportReasonsInitial());
   final ReportItemRepository _repository = ReportItemRepository();
   void fetch({bool? forceRefresh}) async {
     try {
@@ -89,7 +84,6 @@ class FetchItemReportReasonsListCubit
 
       // emit(FetchItemReportReasonsInProgress());
     } catch (e) {
-
       emit(FetchItemReportReasonsFailure(e));
     }
   }
@@ -101,7 +95,6 @@ class FetchItemReportReasonsListCubit
     return null;
   }
 
-  @override
   FetchItemReportReasonsListState? fromJson(Map<String, dynamic> json) {
     try {
       if (json['cubit_state'] == "FetchItemReportReasonsSuccess") {
@@ -110,13 +103,10 @@ class FetchItemReportReasonsListCubit
 
         return fetchItemReportReasonsSuccess;
       }
-    } catch (e) {
-
-    }
+    } catch (e) {}
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(FetchItemReportReasonsListState state) {
     try {
       if (state is FetchItemReportReasonsSuccess) {
@@ -124,9 +114,7 @@ class FetchItemReportReasonsListCubit
         mapped['cubit_state'] = "FetchItemReportReasonsSuccess";
         return mapped;
       }
-    } catch (e) {
-
-    }
+    } catch (e) {}
 
     return null;
   }

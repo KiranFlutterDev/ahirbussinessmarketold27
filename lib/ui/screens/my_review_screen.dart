@@ -1,29 +1,25 @@
+import 'dart:ui' as ui;
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eClassify/data/cubits/fetch_my_reviews_cubit.dart';
+import 'package:eClassify/data/cubits/my_item_review_report_cubit.dart';
+import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/data/model/my_review_model.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_hero_animation.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/model/my_review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/customHeroAnimation.dart';
-
-
-import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/cubits/fetch_my_reviews_cubit.dart';
-
-import 'package:eClassify/data/cubits/my_item_review_report_cubit.dart';
-import 'package:eClassify/data/helper/widgets.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 
 class MyReviewScreen extends StatefulWidget {
   const MyReviewScreen({
@@ -34,7 +30,6 @@ class MyReviewScreen extends StatefulWidget {
   MyReviewScreenState createState() => MyReviewScreenState();
 
   static Route route(RouteSettings routeSettings) {
-    Map? arguments = routeSettings.arguments as Map?;
     return BlurredRouter(builder: (_) => MyReviewScreen());
   }
 }
@@ -107,7 +102,7 @@ class MyReviewScreenState extends State<MyReviewScreen>
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        height: 120.rh(context),
+        height: 120,
         decoration: BoxDecoration(
             border: Border.all(width: 1.5, color: context.color.borderColor),
             color: context.color.secondaryColor,
@@ -115,33 +110,33 @@ class MyReviewScreenState extends State<MyReviewScreen>
         child: Row(
           children: [
             CustomShimmer(
-              height: 120.rh(context),
-              width: 100.rw(context),
+              height: 120,
+              width: 100,
             ),
             SizedBox(
-              width: 10.rw(context),
+              width: 10,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CustomShimmer(
-                  width: 100.rw(context),
+                  width: 100,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 150.rw(context),
+                  width: 150,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 120.rw(context),
+                  width: 120,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 80.rw(context),
+                  width: 80,
                   height: 10,
                   borderRadius: 7,
                 )
@@ -168,7 +163,7 @@ class MyReviewScreenState extends State<MyReviewScreen>
 
       if (state is FetchMyRatingsFail) {
         return Center(
-          child: Text(state.error),
+          child: CustomText(state.error),
         );
       }
       if (state is FetchMyRatingsSuccess) {
@@ -200,7 +195,7 @@ class MyReviewScreenState extends State<MyReviewScreen>
                   itemBuilder: (context, index) {
                     MyReviewModel ratings = state.ratings[index];
 
-                    return _buildReviewCard(ratings,index);
+                    return _buildReviewCard(ratings, index);
                   },
                 ),
               ),
@@ -241,13 +236,15 @@ class MyReviewScreenState extends State<MyReviewScreen>
                     CustomRatingBar(
                       rating: averageRating,
                       itemSize: 25.0,
-                      activeColor: Colors.orange.darken(20),
+                      activeColor: Colors.amber,
                       inactiveColor: context.color.backgroundColor.darken(10),
                       allowHalfRating: true,
                     ),
                     SizedBox(height: 3),
-                    Text("${total.toString()}\t${"ratings".translate(context)}")
-                        .size(context.font.large),
+                    CustomText(
+                      "${total.toString()}\t${"ratings".translate(context)}",
+                      fontSize: context.font.large,
+                    ),
                   ],
                 ),
                 SizedBox(width: 20),
@@ -276,20 +273,21 @@ class MyReviewScreenState extends State<MyReviewScreen>
   Widget _buildRatingBar(int starCount, int ratingCount, int total) {
     return Row(
       children: [
-        Row(
-          children: [
-            Text("$starCount")
-                .bold(weight: FontWeight.w500)
-                .color(context.color.textDefaultColor),
-            SizedBox(
-              width: 2,
-            ),
-            Icon(
-              Icons.star_rounded,
-              size: 15,
-              color: context.color.textDefaultColor,
-            )
-          ],
+        SizedBox(
+          width: 10,
+          child: CustomText(
+            "$starCount",
+            textAlign: TextAlign.center,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(
+          width: 2,
+        ),
+        Icon(
+          Icons.star_rounded,
+          size: 15,
+          color: context.color.textDefaultColor,
         ),
         SizedBox(width: 5),
         Expanded(
@@ -300,9 +298,15 @@ class MyReviewScreenState extends State<MyReviewScreen>
           ),
         ),
         SizedBox(width: 10),
-        Text(ratingCount.toString())
-            .bold(weight: FontWeight.w600)
-            .color(context.color.textDefaultColor.withOpacity(0.7)),
+        SizedBox(
+          width: 10,
+          child: CustomText(
+            ratingCount.toString(),
+            fontWeight: FontWeight.w600,
+            textAlign: TextAlign.center,
+            color: context.color.textDefaultColor.withValues(alpha: 0.7),
+          ),
+        ),
       ],
     );
   }
@@ -370,24 +374,24 @@ class MyReviewScreenState extends State<MyReviewScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      CustomText(
                         ratings.buyer!.name!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                       if (ratings.reportStatus == null)
                         InkWell(
                           child: UiUtils.getSvg(AppIcons.reportReviewIcon,
-                              height: 20, width: 20,color: context.color.textDefaultColor),
+                              height: 20,
+                              width: 20,
+                              color: context.color.textDefaultColor),
                           onTap: () {
                             reportAlertDialog(ratings.id!);
                           },
                         )
                     ],
                   ),
-                  itemDetails(ratings,index),
+                  itemDetails(ratings, index),
                 ],
               ),
             ),
@@ -408,7 +412,7 @@ class MyReviewScreenState extends State<MyReviewScreen>
           backgroundColor: context.color.secondaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Center(child: Text("reportReview".translate(context))),
+          title: Center(child: CustomText("reportReview".translate(context))),
           content: BlocListener<AddMyItemReviewReportCubit,
               AddMyItemReviewReportState>(
             listener: (context, state) {
@@ -453,8 +457,8 @@ class MyReviewScreenState extends State<MyReviewScreen>
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5),
                             borderSide: BorderSide(
-                              color:
-                                  context.color.textLightColor.withOpacity(0.7),
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -521,12 +525,10 @@ class MyReviewScreenState extends State<MyReviewScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 5),
-              Text(
+              CustomText(
                 ratings.item!.name!,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
               SizedBox(height: 5),
               Row(
@@ -539,14 +541,13 @@ class MyReviewScreenState extends State<MyReviewScreen>
                     allowHalfRating: true,
                   ),
                   SizedBox(width: 5),
-                  Text(ratings.ratings!.toString())
-                      .color(context.color.textDefaultColor)
+                  CustomText(ratings.ratings!.toString())
                 ],
               ),
               SizedBox(height: 5),
-              //Text(ratings.review!).color(context.color.textDefaultColor),
+              //CustomText(ratings.review!).color(context.color.textDefaultColor),
               SizedBox(
-                width: context.screenWidth * 0.63.rw(context),
+                width: context.screenWidth * 0.63,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     // Measure the rendered text
@@ -570,30 +571,31 @@ class MyReviewScreenState extends State<MyReviewScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: Text(
-                            "${ratings.review!}\t",
-                            maxLines: ratings.isExpanded! ? null : 2,
-                            softWrap: true,
-                            overflow: ratings.isExpanded!
-                                ? TextOverflow.visible
-                                : TextOverflow.ellipsis,
-                          ).color(context.color.textDefaultColor),
-                        ),
+                            child: CustomText(
+                          "${ratings.review!}\t",
+                          maxLines: ratings.isExpanded! ? null : 2,
+                          softWrap: true,
+                          overflow: ratings.isExpanded!
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
+                        )),
                         if (isOverflowing) // Conditionally show the button
                           Padding(
                             padding: EdgeInsetsDirectional.only(start: 3),
                             child: GestureDetector(
                               onTap: () {
-                                context.read<FetchMyRatingsCubit>().updateIsExpanded(index);
+                                context
+                                    .read<FetchMyRatingsCubit>()
+                                    .updateIsExpanded(index);
                               },
-                              child: Text(
+                              child: CustomText(
                                 ratings.isExpanded!
                                     ? "readLessLbl".translate(context)
                                     : "readMoreLbl".translate(context),
-                              )
-                                  .color(context.color.territoryColor)
-                                  .bold(weight: FontWeight.w400)
-                                  .size(context.font.small),
+                                color: context.color.territoryColor,
+                                fontWeight: FontWeight.w400,
+                                fontSize: context.font.small,
+                              ),
                             ),
                           ),
                       ],
@@ -603,20 +605,20 @@ class MyReviewScreenState extends State<MyReviewScreen>
               ),
               if (ratings.createdAt != null) ...[
                 SizedBox(height: 5),
-                Text(
+                CustomText(
                   dateTime(ratings.createdAt!),
-                )
-                    .size(context.font.small)
-                    .color(context.color.textDefaultColor.withOpacity(0.3)),
+                  fontSize: context.font.small,
+                  color: context.color.textDefaultColor.withValues(alpha: 0.3),
+                ),
               ],
               if (ratings.reportReason != null) ...[
                 SizedBox(height: 5),
                 Divider(),
-                Text(
+                CustomText(
                   "${"reportReason".translate(context)}: ${ratings.reportReason}",
-                )
-                    .size(context.font.small)
-                    .color(context.color.textDefaultColor.withOpacity(0.5)),
+                  fontSize: context.font.small,
+                  color: context.color.textDefaultColor.withValues(alpha: 0.5),
+                ),
               ],
             ],
           ),
@@ -641,14 +643,14 @@ class MyReviewScreenState extends State<MyReviewScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
-                width: 10.rw(context),
+                width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
             ],
@@ -659,14 +661,14 @@ class MyReviewScreenState extends State<MyReviewScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
-                width: 10.rw(context),
+                width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
             ],

@@ -579,5 +579,16 @@
   "selectPackage": "Select Package",
   "renewItem": "Renew Item",
   "pleasePurchasePackage": "Please purchase item listing subscription plan",
-  "expired": "Expired"
+  "expired": "Expired",
+  "restore": "Restore",
+  "purchased": "Purchased",
+  "locationServiceDisabled": "Location Service Disabled",
+  "locationPermissionDenied": "Location Permission Denied",
+  "unableToDetermineLocation": "Unable to determine location",
+  "locationFetchError": "Location Fetch Error",
+  "fetchLocation": "Fetch Location",
+  "loginWithPhoneNumber": "Login with Phone Number",
+  "continueWithMobile": "Continue With Mobile",
+  "loginWithEmail": "Login with Email",
+  "continueWithEmail": "Continue with Email"
 }

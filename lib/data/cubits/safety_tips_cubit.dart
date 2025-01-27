@@ -1,6 +1,6 @@
+import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/safety_tips_model.dart';
 import 'package:eClassify/data/repositories/safety_tips_repository.dart';
-import 'package:eClassify/data/model/data_output.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchSafetyTipsListState {}
@@ -38,8 +38,7 @@ class FetchSafetyTipsFailure extends FetchSafetyTipsListState {
   FetchSafetyTipsFailure(this.error);
 }
 
-class FetchSafetyTipsListCubit extends Cubit<FetchSafetyTipsListState>
-    {
+class FetchSafetyTipsListCubit extends Cubit<FetchSafetyTipsListState> {
   FetchSafetyTipsListCubit() : super(FetchSafetyTipsInitial());
   final SafetyTipsRepository _repository = SafetyTipsRepository();
 
@@ -68,7 +67,6 @@ class FetchSafetyTipsListCubit extends Cubit<FetchSafetyTipsListState>
     return null;
   }
 
-  @override
   FetchSafetyTipsListState? fromJson(Map<String, dynamic> json) {
     try {
       if (json['cubit_state'] == "FetchSafetyTipsSuccess") {
@@ -81,7 +79,6 @@ class FetchSafetyTipsListCubit extends Cubit<FetchSafetyTipsListState>
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(FetchSafetyTipsListState state) {
     try {
       if (state is FetchSafetyTipsSuccess) {

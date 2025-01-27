@@ -31,20 +31,6 @@ class Validator {
     return (value ?? "").trim().isEmpty ? errmsg : null;
   }
 
-/*  static String? validatePhoneNumber(
-      {String? value, required BuildContext context}) {
-    // return null;
-
-    final pattern = RegExp(r"^[0-9]{6,15}$");
-    if ((value ??= "").trim().isEmpty) {
-      return "pleaseEnterValidPhoneNumber".translate(context);
-    } else if (!pattern.hasMatch(value)) {
-      return "pleaseEnterValidPhoneNumber".translate(context);
-    } else {
-      return null;
-    }
-  }*/
-
   static String? validatePhoneNumber(
       {String? value,
       required BuildContext context,
@@ -109,31 +95,6 @@ class Validator {
     return null; // Slug is valid
   }
 
-  /* static String? validateSlug(String? slug, {required BuildContext context}) {
-    final RegExp slugRegExp = RegExp(r'^[\p{L}0-9\-]+$', unicode: true);
-
-    if (slug == null || slug.isEmpty) {
-      return "fieldMustNotBeEmpty".translate(context);
-    } else if (!slugRegExp.hasMatch(slug)) {
-      return "slugWarning".translate(context); // Customize the warning message
-    }
-
-    return null;
-  }*/
-
-/*  static String? validateSlug(String? slug, {required BuildContext context}) {
-    final RegExp slugRegExp = RegExp(r'^[a-z0-9\-]+$');
-
-    if (slug == null || slug.isEmpty) {
-      return "fieldMustNotBeEmpty".translate(context);
-    } else if (!slugRegExp.hasMatch(slug)) {
-      return "slugWarning".translate(context); // Customize the warning message
-    }
-
-    return null;
-  }*/
-
-//byAnish
   static String? validatePassword(String? password,
       {String? secondFieldValue, required BuildContext context}) {
     if (password!.isEmpty) {
@@ -188,4 +149,3 @@ class CustomValidator<T> extends FormField<T> {
           },
         );
 }
-// regex Strings.(.*?)(?=[,|\n|\)|}|'|"|])

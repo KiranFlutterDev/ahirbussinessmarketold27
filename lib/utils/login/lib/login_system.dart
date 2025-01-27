@@ -1,11 +1,9 @@
-
+import 'package:eClassify/utils/login/lib/login_status.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:eClassify/utils/login/lib/login_status.dart';
-
-
 int? forceResendingToken;
+
 abstract class LoginSystem {
   List<Function(MLoginState fn)> listeners = [];
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -80,7 +78,7 @@ class MMultiAuthentication {
     }
   }
 
-  requestVerification() {
+  void requestVerification() {
     systems.forEach((String key, LoginSystem value) async {
       //like assign the particular payload if key is matching to selected login system
       LoginSystem? selectedSystem;
@@ -100,16 +98,12 @@ class MMultiAuthentication {
   ///This will listen changes in state
   void listen(Function(MLoginState state) fn) {
     systems.forEach((String key, LoginSystem value) async {
-
       systems[key]?.listeners.add(fn);
-
     });
   }
 
   ///This method will called for login
   Future<UserCredential?>? login() async {
-
-
     if (_selectedLoginSystem == "" || _selectedLoginSystem == null) {
       throw "Please select login system using setActive method";
     }
@@ -125,14 +119,10 @@ class MMultiAuthentication {
       }
     });
 
-
     UserCredential? credential;
     if (selectedSystem != null) {
-
-
       credential = await selectedSystem?.login();
     }
-
 
     return credential;
   }

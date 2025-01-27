@@ -1,10 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-
-import 'package:eClassify/utils/constant.dart';
 
 class NativeAdWidget extends StatefulWidget {
   final TemplateType type;
@@ -32,6 +32,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
     if (Constant.isGoogleNativeAdsEnabled != "1") {
       return;
     }
+    log('loading');
     _nativeAd = NativeAd(
       adUnitId: Platform.isAndroid
           ? Constant.nativeAdIdAndroid //Android interstitial ad id
@@ -78,8 +79,6 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
           maxHeight: 350,
         ),
         margin: EdgeInsets.symmetric(horizontal: sidePadding, vertical: 10),
-        //padding: EdgeInsets.all(15),
-
         child: AdWidget(ad: _nativeAd!),
       );
     }

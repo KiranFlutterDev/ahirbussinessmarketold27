@@ -5,23 +5,21 @@ import 'package:country_picker/country_picker.dart';
 import 'package:device_region/device_region.dart';
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
-
 import 'package:eClassify/utils/login/lib/login_status.dart';
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,17 +67,10 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
   void initState() {
     super.initState();
     getSignature();
-    //mobileTextController.text = widget.mobile!;
 
     context.read<AuthenticationCubit>().init();
-    context.read<FetchSystemSettingsCubit>().fetchSettings();
     context.read<AuthenticationCubit>().listen((MLoginState state) {
-
-
       if (state is MFail) {
-        //Widgets.hideLoder(context);
-
-        //if (!isOtpSent && isMobileNumberField) {
         Widgets.hideLoder(context);
         //}
       }
@@ -153,15 +144,6 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
   }
 
   Future<void> sendVerificationCode() async {
-    /*isOtpSent = true;
-
-    context
-        .read<AuthenticationCubit>()
-        .setData(payload: phoneLoginPayload, type: AuthenticationType.phone);
-    context.read<AuthenticationCubit>().verify();
-
-    setState(() {});*/
-
     final form = _formKey.currentState;
 
     if (form == null) return;
@@ -186,7 +168,7 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: PopScope(
             canPop: isBack,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, result) {
               if (isOtpSent) {
                 setState(() {
                   isOtpSent = false;
@@ -235,8 +217,8 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("signupWithLbl".translate(context))
-                .color(context.color.textColorDark.brighten(50)),
+            CustomText("signupWithLbl".translate(context),
+                color: context.color.textColorDark.brighten(50)),
             const SizedBox(
               width: 5,
             ),
@@ -244,9 +226,11 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
               onTap: () {
                 Navigator.pushNamed(context, Routes.signupMainScreen);
               },
-              child: Text("emailLbl".translate(context))
-                  .underline()
-                  .color(context.color.territoryColor),
+              child: CustomText(
+                "emailLbl".translate(context),
+                color: context.color.territoryColor,
+                showUnderline: true,
+              ),
             )
           ],
         ),
@@ -283,29 +267,33 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    color: context.color.forthColor.withOpacity(0.102),
+                    color: context.color.forthColor.withValues(alpha: 0.102),
                     elevation: 0,
                     height: 28,
                     minWidth: 64,
-                    child: Text("skip".translate(context))
-                        .color(context.color.forthColor),
+                    child: CustomText(
+                      "skip".translate(context),
+                      color: context.color.forthColor,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(
                 height: 66,
               ),
-              Text("welcome".translate(context))
-                  .size(context.font.extraLarge)
-                  .color(context.color.textDefaultColor),
+              CustomText(
+                "welcome".translate(context),
+                fontSize: context.font.extraLarge,
+                color: context.color.textDefaultColor,
+              ),
               const SizedBox(
                 height: 8,
               ),
-              Text("signUpToeClassify".translate(context))
-                  .size(context.font.large)
-                  .color(
-                    context.color.textColorDark,
-                  ),
+              CustomText(
+                "signUpToeClassify".translate(context),
+                fontSize: context.font.large,
+                color: context.color.textColorDark,
+              ),
               const SizedBox(
                 height: 24,
               ),
@@ -321,15 +309,18 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                     // Display the country code as text
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text("+${widget.countryCode}")
-                          .size(context.font.large)
-                          .centerAlign(),
+                      child: CustomText(
+                        "+${widget.countryCode}",
+                        fontSize: context.font.large,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: CustomText(
                         widget.mobile!,
-                      ).size(context.font.large),
-                    ),
+                        fontSize: context.font.large,
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -354,8 +345,8 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("alreadyHaveAcc".translate(context))
-                          .color(context.color.textColorDark.brighten(50)),
+                      CustomText("alreadyHaveAcc".translate(context),
+                          color: context.color.textColorDark.brighten(50)),
                       const SizedBox(
                         width: 12,
                       ),
@@ -363,9 +354,11 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                         onTap: () {
                           Navigator.pushNamed(context, Routes.login);
                         },
-                        child: Text("login".translate(context))
-                            .underline()
-                            .color(context.color.territoryColor),
+                        child: CustomText(
+                          "login".translate(context),
+                          showUnderline: true,
+                          color: context.color.territoryColor,
+                        ),
                       )
                     ],
                   ),
@@ -400,7 +393,8 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
               border: context.watch<AppThemeCubit>().state.appTheme !=
                       AppTheme.dark
                   ? BorderSide(
-                      color: context.color.textDefaultColor.withOpacity(0.5))
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5))
                   : null,
               textColor: textDarkColor, onPressed: () {
             context.read<AuthenticationCubit>().setData(
@@ -425,7 +419,8 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
               border: context.watch<AppThemeCubit>().state.appTheme !=
                       AppTheme.dark
                   ? BorderSide(
-                      color: context.color.textDefaultColor.withOpacity(0.5))
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5))
                   : null,
               textColor: textDarkColor, onPressed: () {
             context.read<AuthenticationCubit>().setData(
@@ -447,26 +442,28 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("bySigningUpLoggingIn".translate(context))
-              .centerAlign()
-              .size(context.font.small)
-              .color(context.color.textLightColor.withOpacity(0.8)),
+          CustomText("bySigningUpLoggingIn".translate(context),
+              color: context.color.textLightColor.withValues(alpha: 0.8),
+              fontSize: context.font.small,
+              textAlign: TextAlign.center),
           const SizedBox(
             height: 3,
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             InkWell(
-                child: Text("termsOfService".translate(context))
-                    .underline()
-                    .color(context.color.territoryColor)
-                    .size(context.font.small),
+                child: CustomText(
+                  "termsOfService".translate(context),
+                  showUnderline: true,
+                  color: context.color.territoryColor,
+                  fontSize: context.font.small,
+                ),
                 onTap: () => Navigator.pushNamed(
                         context, Routes.profileSettings, arguments: {
                       'title': "termsConditions".translate(context),
                       'param': Api.termsAndConditions
                     })),
             /*CustomTextButton(
-                text:Text("termsOfService".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
+                text:CustomText("termsOfService".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
                 onPressed: () => Navigator.pushNamed(
                         context, Routes.profileSettings,
                         arguments: {
@@ -477,17 +474,21 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
             const SizedBox(
               width: 5.0,
             ),
-            Text("andTxt".translate(context))
-                .size(context.font.small)
-                .color(context.color.textLightColor.withOpacity(0.8)),
+            CustomText(
+              "andTxt".translate(context),
+              color: context.color.textLightColor.withValues(alpha: 0.8),
+              fontSize: context.font.small,
+            ),
             const SizedBox(
               width: 5.0,
             ),
             InkWell(
-                child: Text("privacyPolicy".translate(context))
-                    .underline()
-                    .color(context.color.territoryColor)
-                    .size(context.font.small),
+                child: CustomText(
+                  "privacyPolicy".translate(context),
+                  showUnderline: true,
+                  color: context.color.territoryColor,
+                  fontSize: context.font.small,
+                ),
                 onTap: () => Navigator.pushNamed(
                         context, Routes.profileSettings, arguments: {
                       'title': "privacyPolicy".translate(context),
@@ -495,7 +496,7 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                     })),
             /*CustomTextButton(
                 text:
-                    Text("privacyPolicy".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
+                    CustomText("privacyPolicy".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
                 onPressed: () => Navigator.pushNamed(
                       context,
                       Routes.profileSettings,
@@ -559,48 +560,55 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
             child: FittedBox(
               fit: BoxFit.none,
               child: MaterialButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    Routes.main,
-                    arguments: {
-                      "from": "login",
-                      "isSkipped": true,
-                    },
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                color: context.color.forthColor.withOpacity(0.102),
-                elevation: 0,
-                height: 28,
-                minWidth: 64,
-                child: Text("skip".translate(context))
-                    .color(context.color.forthColor),
-              ),
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routes.main,
+                      arguments: {
+                        "from": "login",
+                        "isSkipped": true,
+                      },
+                    );
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  color: context.color.forthColor.withValues(alpha: 0.102),
+                  elevation: 0,
+                  height: 28,
+                  minWidth: 64,
+                  child: CustomText(
+                    "skip".translate(context),
+                    color: context.color.forthColor,
+                  )),
             ),
           ),
           const SizedBox(
             height: 66,
           ),
-          Text("signInWithMob".translate(context))
-              .size(context.font.extraLarge),
+          CustomText(
+            "signInWithMob".translate(context),
+            fontSize: context.font.extraLarge,
+          ),
           const SizedBox(
             height: 8,
           ),
           Row(
             children: [
-              Text("+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}")
-                  .size(context.font.large),
+              CustomText(
+                "+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}",
+                fontSize: context.font.large,
+              ),
               const SizedBox(
                 width: 5,
               ),
               InkWell(
-                  child: Text("change".translate(context))
-                      .underline()
-                      .color(context.color.territoryColor)
-                      .size(context.font.large),
+                  child: CustomText(
+                    "change".translate(context),
+                    showUnderline: true,
+                    color: context.color.territoryColor,
+                    fontSize: context.font.large,
+                  ),
                   onTap: () => Navigator.pushNamed(context, Routes.login)),
             ],
           ),
@@ -627,8 +635,8 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                     );
                 context.read<AuthenticationCubit>().verify();
               },
-              child: Text("resendOTP".translate(context))
-                  .color(context.color.textColorDark.withOpacity(0.7)),
+              child: CustomText("resendOTP".translate(context)),
+              color: context.color.textColorDark.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(

@@ -6,50 +6,40 @@ import 'dart:io';
 import 'package:app_links/app_links.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/item/search_item_cubit.dart';
+import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
-import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/model/system_settings_model.dart';
+import 'package:eClassify/ui/screens/chat/chat_list_screen.dart';
+import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/home/search_screen.dart';
+import 'package:eClassify/ui/screens/item/my_items_screen.dart';
+import 'package:eClassify/ui/screens/user_profile/profile_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
+import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/error_filter.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/svg/svg_edit.dart';
-
-
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:eClassify/utils/app_icon.dart';
-
-
-import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
-
-import 'package:eClassify/data/model/item/item_model.dart';
-import 'package:eClassify/data/model/system_settings_model.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-
-import 'package:eClassify/utils/errorFilter.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/home/search_screen.dart';
-import 'package:eClassify/ui/screens/item/my_items_screen.dart';
-import 'package:eClassify/ui/screens/user_profile/profile_screen.dart';
-import 'package:eClassify/ui/screens/chat/chat_list_screen.dart';
-import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
-
-List<ItemModel> myItemlist = [];
-Map<String, dynamic> searchbody = {};
-String selectedcategoryId = "0";
-String selectedcategoryName = "";
+List<ItemModel> myItemList = [];
+Map<String, dynamic> searchBody = {};
+String selectedCategoryId = "0";
+String selectedCategoryName = "";
 dynamic selectedCategory;
 
 //this will set when i will visit in any category
@@ -71,10 +61,12 @@ List<ScrollController> controllerList = [
 //
 class MainActivity extends StatefulWidget {
   final String from;
+  final String? itemSlug;
   static final GlobalKey<MainActivityState> globalKey =
       GlobalKey<MainActivityState>();
 
-  MainActivity({Key? key, required this.from}) : super(key: globalKey);
+  MainActivity({Key? key, required this.from, this.itemSlug})
+      : super(key: globalKey);
 
   @override
   State<MainActivity> createState() => MainActivityState();
@@ -82,14 +74,17 @@ class MainActivity extends StatefulWidget {
   static Route route(RouteSettings routeSettings) {
     Map arguments = routeSettings.arguments as Map;
     return BlurredRouter(
-        builder: (_) => MainActivity(from: arguments['from'] as String));
+        builder: (_) => MainActivity(
+              from: arguments['from'] as String,
+              itemSlug: arguments['slug'] as String?,
+            ));
   }
 }
 
 class MainActivityState extends State<MainActivity>
     with TickerProviderStateMixin {
-  PageController pageCntrlr = PageController(initialPage: 0);
-  int currtab = 0;
+  PageController pageController = PageController(initialPage: 0);
+  int currentTab = 0;
   static final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final List _pageHistory = [];
 
@@ -121,9 +116,6 @@ class MainActivityState extends State<MainActivity>
       setState(() {});
     });
 
-    //GuestChecker.setContext(context);
-    //GuestChecker.set(isGuest: HiveUtils.isGuest());
-
     FetchSystemSettingsCubit settings =
         context.read<FetchSystemSettingsCubit>();
     if (!const bool.fromEnvironment("force-disable-demo-mode",
@@ -134,28 +126,23 @@ class MainActivityState extends State<MainActivity>
     var numberWithSuffix = settings.getSetting(SystemSetting.numberWithSuffix);
     Constant.isNumberWithSuffix = numberWithSuffix == "1" ? true : false;
 
-    ///this will check if your profile is complete or not if it is incomplete it will redirect you to the edit profile page
-    // completeProfileCheck();
-
     ///This will check for update
     versionCheck(settings);
 
-    ///This will check if location is set or not , If it is not set it will show popup dialoge so you can set for better result
-    /*   if (HiveUtils.isUserAuthenticated()) {
-      locationSetCheck();
-    }*/
-
 //This will init page controller
     initPageController();
+
+    if (widget.itemSlug != null) {
+      Navigator.of(context).pushNamed(Routes.adDetailsScreen,
+          arguments: {"slug": widget.itemSlug!});
+    }
   }
 
   Future<void> initAppLinks() async {
     _appLinks = AppLinks();
 
-
     // Listen for incoming deep links
     _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-
       if (uri != null) {
         handleDeepLink(uri);
       }
@@ -164,22 +151,18 @@ class MainActivityState extends State<MainActivity>
 
   void handleDeepLink(Uri uri) {
     if (uri.path.contains('/product-details/')) {
-      Navigator.push(
-        context,
-        Routes.onGenerateRouted(RouteSettings(name: uri.toString())),
-      );
+      // Navigator.push(
+      //   context,
+      //   Routes.onGenerateRouted(RouteSettings(name: uri.toString())),
+      // );
     } else {
       print('Received deep link: $uri');
       // Handle other deep link paths here if necessary
     }
   }
 
-
   void addHistory(int index) {
     List<int> stack = navigationStack;
-    // if (stack.length > 5) {
-    //   stack.removeAt(0);
-    // } else {
     if (stack.last != index) {
       stack.add(index);
       navigationStack = stack;
@@ -189,9 +172,9 @@ class MainActivityState extends State<MainActivity>
   }
 
   void initPageController() {
-    pageCntrlr
+    pageController
       ..addListener(() {
-        _pageHistory.insert(0, pageCntrlr.page);
+        _pageHistory.insert(0, pageController.page);
       });
   }
 
@@ -253,16 +236,17 @@ class MainActivityState extends State<MainActivity>
                     },
                     backAllowedButton: false,
                     svgImagePath: AppIcons.update,
-                    isAcceptContainesPush: true,
+                    isAcceptContainerPush: true,
                     svgImageColor: context.color.territoryColor,
-                    showCancleButton: false,
+                    showCancelButton: false,
                     title: "updateAvailable".translate(context),
                     acceptTextColor: context.color.buttonColor,
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("$current>$remote"),
-                        Text("newVersionAvailableForce".translate(context),
+                        CustomText("$current>$remote"),
+                        CustomText(
+                            "newVersionAvailableForce".translate(context),
                             textAlign: TextAlign.center),
                       ],
                     )));
@@ -276,9 +260,9 @@ class MainActivityState extends State<MainActivity>
                 },
                 svgImagePath: AppIcons.update,
                 svgImageColor: context.color.territoryColor,
-                showCancleButton: true,
+                showCancelButton: true,
                 title: "updateAvailable".translate(context),
-                content: Text(
+                content: CustomText(
                   "newVersionAvailable".translate(context),
                 ),
               ),
@@ -289,44 +273,21 @@ class MainActivityState extends State<MainActivity>
     }
   }
 
-
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     ErrorFilter.setContext(context);
-
     svgEdit.change("Path_11299-2",
         attribute: "fill",
         value: svgEdit.flutterColorToHexColor(context.color.territoryColor));
-    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    pageCntrlr.dispose();
+    pageController.dispose();
     _linkSubscription?.cancel();
     super.dispose();
   }
-
-/*  Future<void> checkForMaintenanceMode() async {
-    Map<String, String> body = {
-      Api.type: Api.maintenanceMode,
-    };
-
-    var response = await Api.get(
-      url: Api.getSystemSettingsApi,
-      queryParameters: body,
-    );
-    var getdata = json.decode(response);
-
-    if (getdata != null) {
-      if (!getdata[Api.error]) {
-        Constant.maintenanceMode = getdata['data'].toString();
-        if (Constant.maintenanceMode == "1") {
-          setState(() {});
-        }
-      }
-    }
-  }*/
 
   late List<Widget> pages = [
     HomeScreen(from: widget.from),
@@ -342,13 +303,13 @@ class MainActivityState extends State<MainActivity>
           context: context, statusBarColor: context.color.primaryColor),
       child: PopScope(
         canPop: isBack,
-        onPopInvoked: (didPop) {
-          if (currtab != 0) {
-            pageCntrlr.animateToPage(0,
+        onPopInvokedWithResult: (didPop, result) {
+          if (currentTab != 0) {
+            pageController.animateToPage(0,
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeInOut);
             setState(() {
-              currtab = 0;
+              currentTab = 0;
               isBack = false;
             });
             return;
@@ -381,7 +342,7 @@ class MainActivityState extends State<MainActivity>
             children: <Widget>[
               PageView(
                 physics: const NeverScrollableScrollPhysics(),
-                controller: pageCntrlr,
+                controller: pageController,
                 //onPageChanged: onItemSwipe,
                 children: pages,
               ),
@@ -396,20 +357,6 @@ class MainActivityState extends State<MainActivity>
   void onItemTapped(int index) {
     addHistory(index);
 
-    if (index == currtab) {
-      /* var xIndex = index;
-
-      if (xIndex == 3) {
-        xIndex = 2;
-      } else if (xIndex == 4) {
-        xIndex = 3;
-      }*/
-      if (controllerList[index].hasClients) {
-        controllerList[index].animateTo(0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.bounceOut);
-      }
-    }
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (index != 1) {
@@ -419,69 +366,24 @@ class MainActivityState extends State<MainActivity>
         SearchScreenState.searchController.text = "";
       }
     }
-    searchbody = {};
+    searchBody = {};
     if (index == 1 || index == 2) {
       UiUtils.checkUser(
           onNotGuest: () {
-            currtab = index;
-            pageCntrlr.jumpToPage(currtab);
+            currentTab = index;
+            pageController.jumpToPage(currentTab);
             setState(
               () {},
             );
           },
           context: context);
     } else {
-      currtab = index;
-      pageCntrlr.jumpToPage(currtab);
+      currentTab = index;
+      pageController.jumpToPage(currentTab);
 
       setState(() {});
     }
   }
-
-/*  void onItemTapped(int index) {
-    addHistory(index);
-
-    if (index == currtab) {
-      var xIndex = index;
-
-      if (xIndex == 3) {
-        xIndex = 2;
-      } else if (xIndex == 4) {
-        xIndex = 3;
-      }
-      if (controllerList[xIndex].hasClients) {
-        controllerList[xIndex].animateTo(0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.bounceOut);
-      }
-    }
-    FocusManager.instance.primaryFocus?.unfocus();
-    _forSellAnimationController.reverse();
-    _forRentController.reverse();
-
-    if (index != 1) {
-      context.read<SearchItemCubit>().clearSearch();
-
-      if (SearchScreenState.searchController.hasListeners) {
-        SearchScreenState.searchController.text = "";
-      }
-    }
-    searchbody = {};
-    if (index == 1 || index == 3) {
-      // GuestChecker.check(onNotGuest: () {
-      currtab = index;
-      pageCntrlr.jumpToPage(currtab);
-      setState(
-        () {},
-      );
-      // });
-    } else {
-      currtab = index;
-      pageCntrlr.jumpToPage(currtab);
-
-      setState(() {});
-    }
-  }*/
 
   BottomAppBar bottomBar() {
     return BottomAppBar(
@@ -523,7 +425,7 @@ class MainActivityState extends State<MainActivity>
                             context: context);
                       },
                       child: SizedBox(
-                        width: 53.rw(context),
+                        width: 53,
                         height: 58,
                         child: svgLoaded == false
                             ? Container()
@@ -559,18 +461,17 @@ class MainActivityState extends State<MainActivity>
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (currtab == index) ...{
+              if (currentTab == index) ...{
                 UiUtils.getSvg(activeSvg),
               } else ...{
                 UiUtils.getSvg(svgImage,
                     color: context.color.textLightColor.darken(30)),
               },
-              Text(
-                title,
-                textAlign: TextAlign.center,
-              ).color(currtab == index
-                  ? context.color.textDefaultColor
-                  : context.color.textLightColor.darken(30)),
+              CustomText(title,
+                  textAlign: TextAlign.center,
+                  color: currentTab == index
+                      ? context.color.textDefaultColor
+                      : context.color.textLightColor.darken(30)),
             ],
           ),
         ),

@@ -1,11 +1,3 @@
-import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
 import 'package:eClassify/data/helper/designs.dart';
@@ -15,7 +7,14 @@ import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dar
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -36,9 +35,7 @@ class FavoriteScreenState extends State<FavoriteScreen> {
   late final ScrollController _controller = ScrollController()
     ..addListener(
       () {
-
         if (_controller.offset >= _controller.position.maxScrollExtent) {
-
           if (context.read<FavoriteCubit>().hasMoreFavorite()) {
             setState(() {});
             context.read<FavoriteCubit>().getMoreFavorite();

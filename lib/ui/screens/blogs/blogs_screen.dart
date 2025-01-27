@@ -11,12 +11,11 @@ import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
@@ -111,7 +110,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
                   ),
                   if (state.isLoadingMore) const CircularProgressIndicator(),
                   if (state.loadingMoreError)
-                    Text("somethingWentWrng".translate(context))
+                    CustomText("somethingWentWrng".translate(context))
                 ],
               );
             }
@@ -124,82 +123,52 @@ class _BlogsScreenState extends State<BlogsScreen> {
 
   Widget buildBlogCard(BuildContext context, BlogModel blog) {
     return Padding(
-      padding: const EdgeInsets.all(7.0),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            Routes.blogDetailsScreenRoute,
-            arguments: {
-              "model": blog,
+        padding: const EdgeInsets.all(7.0),
+        child: GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                Routes.blogDetailsScreenRoute,
+                arguments: {
+                  "model": blog,
+                },
+              );
             },
-          );
-        },
-        child: Container(
-          width: double.infinity,
-          // height: 290,
-          decoration: BoxDecoration(
-            color: context.color.secondaryColor,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: context.color.borderColor.darken(40),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(12.0, 12, 12, 0),
-                child: ClipRRect(
+            child: Container(
+                width: double.infinity,
+                // height: 290,
+                decoration: BoxDecoration(
+                  color: context.color.secondaryColor,
                   borderRadius: BorderRadius.circular(10),
-                  child: UiUtils.getImage(
-                    blog.image!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: 151,
+                  border: Border.all(
+                    color: context.color.borderColor.darken(40),
                   ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(12.0, 12, 12, 6),
-                child: Text(
-                  (blog.title ?? "").firstUpperCase(),
-                )
-                    .color(
-                      context.color.textColorDark,
-                    )
-                    .size(context.font.normal)
-                    .setMaxLines(
-                      lines: 2,
-                    ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                ),
-                child: Text(stripHtmlTags(blog.description ?? "").trim())
-                    .setMaxLines(lines: 3)
-                    .size(context.font.small)
-                    .color(context.color.textColorDark.withOpacity(0.5)),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(12.0, 4, 12, 6),
-                child: Text(blog.createdAt == null
-                        ? ""
-                        : blog.createdAt.toString().formatDate())
-                    .size(context.font.smaller)
-                    .color(context.color.textColorDark.withOpacity(0.5)),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            12.0, 12, 12, 0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: UiUtils.getImage(
+                            blog.image!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 151,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            12.0, 12, 12, 6),
+                        child: CustomText(blog.title ?? "",
+                            color: context.color.textColorDark
+                                .withValues(alpha: 0.5),
+                            fontSize: context.font.normal),
+                      )
+                    ]))));
   }
 
   String stripHtmlTags(String htmlString) {
@@ -221,7 +190,7 @@ class _BlogsScreenState extends State<BlogsScreen> {
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 width: double.infinity,
-                height: 287.rh(context),
+                height: 287,
                 decoration: BoxDecoration(
                     color: context.color.secondaryColor,
                     border: Border.all(
@@ -231,27 +200,27 @@ class _BlogsScreenState extends State<BlogsScreen> {
                   children: [
                     CustomShimmer(
                       width: double.infinity,
-                      height: 160.rh(context),
+                      height: 160,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: CustomShimmer(
-                        width: 100.rw(context),
-                        height: 10.rh(context),
+                        width: 100,
+                        height: 10,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: CustomShimmer(
-                        width: 160.rw(context),
-                        height: 10.rh(context),
+                        width: 160,
+                        height: 10,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: CustomShimmer(
-                        width: 150.rw(context),
-                        height: 10.rh(context),
+                        width: 150,
+                        height: 10,
                       ),
                     ),
                   ],
@@ -261,5 +230,4 @@ class _BlogsScreenState extends State<BlogsScreen> {
           );
         });
   }
-
 }

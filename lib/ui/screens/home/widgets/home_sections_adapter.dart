@@ -1,25 +1,21 @@
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/repositories/favourites_repository.dart';
-import 'package:eClassify/data/cubits/favorite/manage_fav_cubit.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
-
-import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
+import 'package:eClassify/data/cubits/favorite/manage_fav_cubit.dart';
+import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/data/model/home/home_screen_section.dart';
-
-import 'package:eClassify/ui/screens/widgets/promoted_widget.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/repositories/favourites_repository.dart';
+import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
+import 'package:eClassify/ui/screens/widgets/promoted_widget.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeSectionsAdapter extends StatelessWidget {
@@ -49,9 +45,9 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                  height: MediaQuery.of(context).size.height / 3.5,
                   listAxis: Axis.horizontal,
-                  listSaperator: (BuildContext p0, int p1) => const SizedBox(
+                  listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
                   ),
                   builder: (context, int index, bool) {
@@ -83,9 +79,9 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                  height: MediaQuery.of(context).size.height / 3.5,
                   listAxis: Axis.horizontal,
-                  listSaperator: (BuildContext p0, int p1) => const SizedBox(
+                  listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
                   ),
                   builder: (context, int index, bool) {
@@ -118,7 +114,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 GridListAdapter(
                   type: ListUiType.Grid,
                   crossAxisCount: 2,
-                  height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                  height: MediaQuery.of(context).size.height / 3.5,
                   builder: (context, int index, bool) {
                     ItemModel? item = section.sectionData?[index];
 
@@ -148,9 +144,9 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                  height: MediaQuery.of(context).size.height / 3.5,
                   listAxis: Axis.horizontal,
-                  listSaperator: (BuildContext p0, int p1) => const SizedBox(
+                  listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
                   ),
                   builder: (context, int index, bool) {
@@ -192,22 +188,24 @@ class TitleHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 4,
-            child: Text(title)
-                .size(context.font.large)
-                .bold(weight: FontWeight.w600)
-                .setMaxLines(lines: 1),
-          ),
+              flex: 4,
+              child: CustomText(
+                title,
+                fontSize: context.font.large,
+                fontWeight: FontWeight.w600,
+                maxLines: 1,
+              )),
           const Spacer(),
           if (!(hideSeeAll ?? false))
             GestureDetector(
-              onTap: onTap,
-              child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 2.2),
-                  child: Text("seeAll".translate(context))
-                      .size(context.font.smaller + 1)),
-            )
+                onTap: onTap,
+                child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 2.2),
+                    child: CustomText(
+                      "seeAll".translate(context),
+                      fontSize: context.font.smaller + 1,
+                    )))
         ],
       ),
     );
@@ -233,13 +231,11 @@ class ItemCard extends StatefulWidget {
 class _ItemCardState extends State<ItemCard> {
   double likeButtonSize = 32;
   double imageHeight = 147;
-
   // Use nullable bool to represent initial state
 
   @override
   void initState() {
     super.initState();
-    // Initialize the isLiked status based on the existing favorite state
   }
 
   @override
@@ -263,6 +259,7 @@ class _ItemCardState extends State<ItemCard> {
         child: Stack(
           children: [
             Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Stack(
@@ -290,14 +287,18 @@ class _ItemCardState extends State<ItemCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("${Constant.currencySymbol} ${widget.item?.price?.toString()}")
-                            .bold()
-                            .color(context.color.territoryColor)
-                            .size(context.font.large),
-                        Text(widget.item!.name!)
-                            .firstUpperCaseWidget()
-                            .setMaxLines(lines: 1)
-                            .size(context.font.large),
+                        CustomText(
+                          (widget.item?.price ?? 0.0).currencyFormat,
+                          fontWeight: FontWeight.bold,
+                          color: context.color.territoryColor,
+                          fontSize: context.font.large,
+                        ),
+                        CustomText(
+                          widget.item!.name!,
+                          fontSize: context.font.large,
+                          maxLines: 1,
+                          firstUpperCaseWidget: true,
+                        ),
                         if (widget.item?.address != "")
                           Row(
                             children: [
@@ -310,13 +311,15 @@ class _ItemCardState extends State<ItemCard> {
                                 child: Padding(
                                   padding:
                                       EdgeInsetsDirectional.only(start: 3.0),
-                                  child: Text(widget.item?.address ?? "")
-                                      .size((widget.bigCard == true)
-                                          ? context.font.small
-                                          : context.font.smaller)
-                                      .setMaxLines(lines: 1)
-                                      .color(context.color.textDefaultColor
-                                          .withOpacity(0.5)),
+                                  child: CustomText(
+                                    widget.item?.address ?? "",
+                                    fontSize: (widget.bigCard == true)
+                                        ? context.font.small
+                                        : context.font.smaller,
+                                    color: context.color.textDefaultColor
+                                        .withValues(alpha: 0.5),
+                                    maxLines: 1,
+                                  ),
                                 ),
                               )
                             ],

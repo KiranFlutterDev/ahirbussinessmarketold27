@@ -1,18 +1,18 @@
-import 'package:eClassify/data/cubits/category/fetch_sub_categories_cubit.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
-
-import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/category/fetch_sub_categories_cubit.dart';
 import 'package:eClassify/data/model/category_model.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/ui_utils.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SubCategoryScreen extends StatefulWidget {
   final List<CategoryModel> categoryList;
@@ -99,15 +99,15 @@ class _CategoryListState extends State<SubCategoryScreen>
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 18, vertical: 18),
-                        child: Text(
+                        child: CustomText(
                           "${"lblall".translate(context)}\t${widget.catName}",
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                        )
-                            .color(context.color.textDefaultColor)
-                            .size(context.font.normal)
-                            .bold(weight: FontWeight.w600),
+                          color: context.color.textDefaultColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: context.font.normal,
+                        ),
                       ),
                       onTap: () {
                         Navigator.pushNamed(context, Routes.itemsList,
@@ -185,7 +185,7 @@ class _CategoryListState extends State<SubCategoryScreen>
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: context.color.territoryColor
-                                              .withOpacity(0.1)),
+                                              .withValues(alpha: 0.1)),
                                       child: ClipRRect(
                                         child: UiUtils.imageType(
                                           category.url!,
@@ -196,14 +196,14 @@ class _CategoryListState extends State<SubCategoryScreen>
                                         ),
                                       )),
                                 ),
-                                title: Text(
+                                title: CustomText(
                                   category.name!,
                                   textAlign: TextAlign.start,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                )
-                                    .color(context.color.textDefaultColor)
-                                    .size(context.font.normal),
+                                  color: context.color.textDefaultColor,
+                                  fontSize: context.font.normal,
+                                ),
                                 trailing: Container(
                                     width: 32,
                                     height: 32,
@@ -313,21 +313,21 @@ class _CategoryListState extends State<SubCategoryScreen>
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               color: context.color.territoryColor
-                                  .withOpacity(0.1)),
+                                  .withValues(alpha: 0.1)),
                           child: UiUtils.imageType(
                             category.url!,
                             color: context.color.territoryColor,
                             fit: BoxFit.cover,
                           )),
                     ),
-                    title: Text(
+                    title: CustomText(
                       category.name!,
                       textAlign: TextAlign.start,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                    )
-                        .color(context.color.textDefaultColor)
-                        .size(context.font.normal),
+                      color: context.color.textDefaultColor,
+                      fontSize: context.font.normal,
+                    ),
                     trailing: Container(
                         width: 32,
                         height: 32,

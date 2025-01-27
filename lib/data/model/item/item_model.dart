@@ -2,7 +2,6 @@ import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/custom_field/custom_field_model.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
 
-
 class ItemModel {
   int? id;
   String? name;
@@ -199,6 +198,15 @@ class ItemModel {
       areaId = json['area']['id'];
       area = json['area']['name'];
     }
+
+    // Ensure price is formatted to 2 decimal places
+    /* if (json['price'] is int) {
+      price = double.parse((json['price'] as int).toStringAsFixed(2));
+    } else if (json['price'] is double) {
+      price = double.parse((json['price'] as double).toStringAsFixed(2));
+    } else {
+      price = 0.00;
+    }*/
 
     if (json['price'] is int) {
       price = (json['price'] as int).toDouble();

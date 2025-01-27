@@ -21,7 +21,6 @@ class AppLocalization {
 
   //to load json(language) from assets
   Future loadJson() async {
-
     String jsonStringValues =
         await rootBundle.loadString('assets/languages/template.json');
     // value from root-bundle will be encoded string

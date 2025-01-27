@@ -3,11 +3,17 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/add_item_review_cubit.dart';
+import 'package:eClassify/data/cubits/chat/block_user_cubit.dart';
 import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
+import 'package:eClassify/data/cubits/chat/delete_message_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/load_chat_messages.dart';
 import 'package:eClassify/data/cubits/chat/send_message.dart';
+import 'package:eClassify/data/cubits/chat/unblock_user_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/repositories/item/item_repository.dart';
@@ -15,16 +21,13 @@ import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/record_button.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/transparant_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
-import 'package:eClassify/data/cubits/add_item_review_cubit.dart';
-import 'package:eClassify/data/cubits/chat/block_user_cubit.dart';
-import 'package:eClassify/data/cubits/chat/delete_message_cubit.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/customHeroAnimation.dart';
-import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
-import 'package:eClassify/data/cubits/chat/unblock_user_cubit.dart';
+import 'package:eClassify/utils/custom_hero_animation.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/notification/chat_message_handler.dart';
@@ -38,9 +41,9 @@ import 'package:permission_handler/permission_handler.dart';
 
 int totalMessageCount = 0;
 
-ValueNotifier<bool> showDeletebutton = ValueNotifier<bool>(false);
+ValueNotifier<bool> showDeleteButton = ValueNotifier<bool>(false);
 
-ValueNotifier<int> selectedMessageid = ValueNotifier<int>(-5);
+ValueNotifier<int> selectedMessageId = ValueNotifier<int>(-5);
 
 class ChatScreen extends StatefulWidget {
   final String? from;
@@ -51,13 +54,14 @@ class ChatScreen extends StatefulWidget {
   final String userName;
   final String itemImage;
   final String itemTitle;
-  final String userId; //for which we are messageing
+  final String userId; //for which we are messaging
   final String itemId;
   final String date;
   final String? status;
   final String? buyerId;
   final int isPurchased;
   final bool alreadyReview;
+  final bool? isFromBuyerList;
 
   const ChatScreen({
     super.key,
@@ -76,6 +80,7 @@ class ChatScreen extends StatefulWidget {
     this.buyerId,
     required this.isPurchased,
     required this.alreadyReview,
+    this.isFromBuyerList,
   });
 
   @override
@@ -95,7 +100,7 @@ class _ChatScreenState extends State<ChatScreen>
   bool isFetchedFirstTime = false;
   double scrollPositionWhenLoadMore = 0;
   late Stream<PermissionStatus> notificationStream = notificationPermission();
-  late StreamSubscription notificationStreamSubsctription;
+  late StreamSubscription notificationStreamSubscription;
   bool isNotificationPermissionGranted = true;
   bool showRecordButton = true;
   int _rating = 0;
@@ -112,16 +117,16 @@ class _ChatScreenState extends State<ChatScreen>
         }
       },
     );
-
   @override
   void initState() {
+    super.initState();
     context.read<LoadChatMessagesCubit>().load(
           itemOfferId: widget.itemOfferId,
         );
 
     currentlyChatItemId = widget.itemId;
     currentlyChatingWith = widget.userId;
-    notificationStreamSubsctription =
+    notificationStreamSubscription =
         notificationStream.listen((PermissionStatus permissionStatus) {
       isNotificationPermissionGranted = permissionStatus.isGranted;
       if (mounted) {
@@ -144,8 +149,6 @@ class _ChatScreenState extends State<ChatScreen>
         ratingsAlertDialog();
       }
     });
-
-    super.initState();
   }
 
   Stream<PermissionStatus> notificationPermission() async* {
@@ -157,7 +160,7 @@ class _ChatScreenState extends State<ChatScreen>
 
   @override
   void dispose() {
-    notificationStreamSubsctription.cancel();
+    notificationStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -181,7 +184,7 @@ class _ChatScreenState extends State<ChatScreen>
           backgroundColor: context.color.secondaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Center(child: Text("rateSeller".translate(context))),
+          title: Center(child: CustomText("rateSeller".translate(context))),
           content: BlocListener<AddItemReviewCubit, AddItemReviewState>(
             listener: (context, state) {
               if (state is AddItemReviewInSuccess) {
@@ -210,8 +213,10 @@ class _ChatScreenState extends State<ChatScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('rateYourExperience'.translate(context))
-                          .color(context.color.textLightColor),
+                      CustomText(
+                        'rateYourExperience'.translate(context),
+                        color: context.color.textLightColor,
+                      ),
                       SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -247,8 +252,8 @@ class _ChatScreenState extends State<ChatScreen>
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5),
                             borderSide: BorderSide(
-                              color:
-                                  context.color.textLightColor.withOpacity(0.7),
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -295,25 +300,6 @@ class _ChatScreenState extends State<ChatScreen>
               },
             ),
           ),
-          /*actions: [
-
-            */ /*ElevatedButton(
-              onPressed: _rating >= 1
-                  ? () {
-                      context.read<AddItemReviewCubit>().addItemReview(
-                          itemId: int.parse(widget.itemId),
-                          rating: _rating,
-                          review: _feedbackController.text.trim());
-                    }
-                  : null, // Disable button if rating is less than 1
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _rating >= 1
-                    ? context.color.territoryColor
-                    : context.color.deactivateColor,
-              ),
-              child: Text("submitBtnLbl".translate(context)),
-            ),*/ /*
-          ],*/
         );
       },
     );
@@ -330,25 +316,15 @@ class _ChatScreenState extends State<ChatScreen>
 
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         currentlyChatingWith = "";
-        showDeletebutton.value = false;
+        showDeleteButton.value = false;
 
         currentlyChatItemId = "";
-        notificationStreamSubsctription.cancel();
+        notificationStreamSubscription.cancel();
         ChatMessageHandler.flushMessages();
-        //context.read<ChatMessageHandlerCubit>().flushMessages();
         return;
       },
-      /*  onWillPop: () async {
-      currentlyChatingWith = "";
-      showDelet ebutton.value = false;
-
-      currentlyChatItemId = "";
-      notificationStreamSubsctription.cancel();
-      ChatMessageHandler.flushMessages();
-      return true;
-    },*/
       child: SafeArea(
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
@@ -394,8 +370,8 @@ class _ChatScreenState extends State<ChatScreen>
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(messageAttachment?.name ?? ""),
-                                Text(HelperUtils.getFileSizeString(
+                                CustomText(messageAttachment?.name ?? ""),
+                                CustomText(HelperUtils.getFileSizeString(
                                   bytes: messageAttachment!.size,
                                 ).toString()),
                               ],
@@ -432,9 +408,10 @@ class _ChatScreenState extends State<ChatScreen>
                               width: double.maxFinite,
                               color: context.color.secondaryColor,
                               alignment: Alignment.center,
-                              child: Text(
-                                      "${"thisItemIs".translate(context)} ${widget.status}")
-                                  .size(context.font.large))
+                              child: CustomText(
+                                "${"thisItemIs".translate(context)} ${widget.status}",
+                                fontSize: context.font.large,
+                              ))
                           : Column(
                               children: [
                                 BlocProvider(
@@ -483,13 +460,13 @@ class _ChatScreenState extends State<ChatScreen>
                                                   }
                                                 },
                                                 child: InkWell(
-                                                  child: Text(
-                                                          "youBlockedThisContact"
-                                                              .translate(
-                                                                  context))
-                                                      .color(context
-                                                          .color.textColorDark
-                                                          .withOpacity(0.7)),
+                                                  child: CustomText(
+                                                    "youBlockedThisContact"
+                                                        .translate(context),
+                                                    color: context
+                                                        .color.textColorDark
+                                                        .withValues(alpha: 0.7),
+                                                  ),
                                                   onTap: () async {
                                                     var unBlock = await UiUtils
                                                         .showBlurredDialoge(
@@ -499,7 +476,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                             "unBlockLbl"
                                                                 .translate(
                                                                     context),
-                                                        content: Text(
+                                                        content: CustomText(
                                                           "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
                                                               .translate(
                                                                   context),
@@ -535,7 +512,7 @@ class _ChatScreenState extends State<ChatScreen>
                                         cursorColor:
                                             context.color.territoryColor,
                                         onTap: () {
-                                          showDeletebutton.value = false;
+                                          showDeleteButton.value = false;
                                         },
                                         textInputAction:
                                             TextInputAction.newline,
@@ -607,14 +584,6 @@ class _ChatScreenState extends State<ChatScreen>
                                       RecordButton(
                                         controller: _recordButtonAnimation,
                                         callback: (path) {
-                                          /*if (Constant.isDemoModeOn) {
-                                  HelperUtils.showSnackBarMessage(
-                                      context,
-                                      "thisActionNotValidDemo"
-                                          .translate(context));
-                                  return;
-                                }*/
-
                                           //This is adding Chat widget in stream with BlocProvider , because we will need to do api process to store chat message to server, when it will be added to list it's initState method will be called
                                           ChatMessageHandler.add(
                                             BlocProvider(
@@ -647,15 +616,7 @@ class _ChatScreenState extends State<ChatScreen>
                                     if (!showRecordButton)
                                       GestureDetector(
                                         onTap: () {
-                                          /* if (Constant.isDemoModeOn) {
-                                  HelperUtils.showSnackBarMessage(
-                                      context,
-                                      "thisActionNotValidDemo"
-                                          .translate(context));
-                                  return;
-                                }*/
-                                          showDeletebutton.value = false;
-
+                                          showDeleteButton.value = false;
                                           //if file is selected then user can send message without text
                                           if (controller.text.trim().isEmpty &&
                                               messageAttachment == null) return;
@@ -663,15 +624,13 @@ class _ChatScreenState extends State<ChatScreen>
 
                                           ChatMessageHandler.add(
                                             BlocProvider(
-                                              key: ValueKey(DateTime.now()
-                                                  .toString()
-                                                  .toString()),
+                                              key: ValueKey(
+                                                  DateTime.now().toString()),
                                               create: (context) =>
                                                   SendMessageCubit(),
                                               child: ChatMessage(
-                                                key: ValueKey(DateTime.now()
-                                                    .toString()
-                                                    .toString()),
+                                                key: ValueKey(
+                                                    DateTime.now().toString()),
                                                 message: controller.text,
                                                 senderId: int.parse(
                                                     HiveUtils.getUserId()!),
@@ -688,10 +647,10 @@ class _ChatScreenState extends State<ChatScreen>
                                               ),
                                             ),
                                           );
+
                                           totalMessageCount++;
                                           controller.text = "";
                                           messageAttachment = null;
-                                          FocusScope.of(context).unfocus();
                                           setState(() {});
                                         },
                                         child: CircleAvatar(
@@ -813,21 +772,21 @@ class _ChatScreenState extends State<ChatScreen>
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
-                                  )
-                                      .color(context.color.textDefaultColor)
-                                      .size(context.font.large),
+                                    style: TextStyle(
+                                        color: context.color.textDefaultColor,
+                                        fontSize: context.font.large),
+                                  ),
                                 ),
                                 Padding(
                                   padding:
                                       EdgeInsetsDirectional.only(start: 15.0),
-                                  child: Text(
-                                    Constant.currencySymbol.toString() +
-                                        widget.itemPrice
-                                            .toString(), // Replace with your item price
-                                  )
-                                      .color(context.color.textDefaultColor)
-                                      .size(context.font.large)
-                                      .bold(),
+                                  child: CustomText(
+                                    widget.itemPrice.currencyFormat,
+                                    // Replace with your item price
+                                    color: context.color.textDefaultColor,
+                                    fontSize: context.font.large,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -836,20 +795,6 @@ class _ChatScreenState extends State<ChatScreen>
                       ],
                     ),
                   ),
-                  /*  isNotificationPermissionGranted
-                      ? SizedBox.shrink()
-                      : FittedBox(
-                          fit: BoxFit.cover,
-                          child: Container(
-                            width: context.screenWidth,
-                            color: const Color.fromARGB(255, 151, 151, 151),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child:
-                                  Text("turnOnNotification".translate(context)),
-                            ),
-                          ),
-                        ),*/
                 ],
               ),
             ),
@@ -938,34 +883,36 @@ class _ChatScreenState extends State<ChatScreen>
                                 itemBuilder: (context) => [
                                   if (!isBlocked)
                                     PopupMenuItem(
-                                      onTap: () async {
-                                        var block =
-                                            await UiUtils.showBlurredDialoge(
-                                          context,
-                                          dialoge: BlurredDialogBox(
-                                            acceptButtonName:
-                                                "blockLbl".translate(context),
-                                            title:
-                                                "${"blockLbl".translate(context)}\t${widget.userName}?",
-                                            content: Text(
-                                              "blockWarning".translate(context),
+                                        onTap: () async {
+                                          var block =
+                                              await UiUtils.showBlurredDialoge(
+                                            context,
+                                            dialoge: BlurredDialogBox(
+                                              acceptButtonName:
+                                                  "blockLbl".translate(context),
+                                              title:
+                                                  "${"blockLbl".translate(context)}\t${widget.userName}?",
+                                              content: CustomText(
+                                                "blockWarning"
+                                                    .translate(context),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                        if (block == true) {
-                                          Future.delayed(Duration.zero, () {
-                                            context
-                                                .read<BlockUserCubit>()
-                                                .blockUser(
-                                                  blockUserId:
-                                                      int.parse(widget.userId),
-                                                );
-                                          });
-                                        }
-                                      },
-                                      child: Text("blockLbl".translate(context))
-                                          .color(context.color.textColorDark),
-                                    )
+                                          );
+                                          if (block == true) {
+                                            Future.delayed(Duration.zero, () {
+                                              context
+                                                  .read<BlockUserCubit>()
+                                                  .blockUser(
+                                                    blockUserId: int.parse(
+                                                        widget.userId),
+                                                  );
+                                            });
+                                          }
+                                        },
+                                        child: CustomText(
+                                          "blockLbl".translate(context),
+                                          color: context.color.textColorDark,
+                                        ))
                                   else
                                     PopupMenuItem(
                                       onTap: () async {
@@ -975,7 +922,7 @@ class _ChatScreenState extends State<ChatScreen>
                                           dialoge: BlurredDialogBox(
                                             acceptButtonName:
                                                 "unBlockLbl".translate(context),
-                                            content: Text(
+                                            content: CustomText(
                                               "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
                                                   .translate(context),
                                             ),
@@ -992,9 +939,10 @@ class _ChatScreenState extends State<ChatScreen>
                                           });
                                         }
                                       },
-                                      child: Text(
-                                              "unBlockLbl".translate(context))
-                                          .color(context.color.textColorDark),
+                                      child: CustomText(
+                                        "unBlockLbl".translate(context),
+                                        color: context.color.textColorDark,
+                                      ),
                                     ),
                                 ],
                               ),
@@ -1053,11 +1001,12 @@ class _ChatScreenState extends State<ChatScreen>
                     width: 10,
                   ),
                   SizedBox(
-                    width: context.screenWidth * 0.35,
-                    child: Text(widget.userName)
-                        .color(context.color.textColorDark)
-                        .size(context.font.normal),
-                  ),
+                      width: context.screenWidth * 0.35,
+                      child: CustomText(
+                        widget.userName,
+                        color: context.color.textColorDark,
+                        fontSize: context.font.normal,
+                      )),
                 ],
               ),
             ),
@@ -1066,22 +1015,23 @@ class _ChatScreenState extends State<ChatScreen>
             create: (context) => AddItemReviewCubit(),
             child: Stack(
               children: [
-                SvgPicture.asset(
-                  chatBackground,
-                  height: MediaQuery.of(context).size.height,
-                  fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width,
-                ),
+                //Causing lag when transitioning
+                // SvgPicture.asset(
+                //   chatBackground,
+                //   height: MediaQuery.of(context).size.height,
+                //   fit: BoxFit.cover,
+                //   width: MediaQuery.of(context).size.width,
+                // ),
                 BlocListener<DeleteMessageCubit, DeleteMessageState>(
                   listener: (context, state) {
                     if (state is DeleteMessageSuccess) {
                       ChatMessageHandler.removeMessage(state.id);
-                      showDeletebutton.value = false;
+                      showDeleteButton.value = false;
                     }
                   },
                   child: GestureDetector(
                     onTap: () {
-                      showDeletebutton.value = false;
+                      showDeleteButton.value = false;
                     },
                     child: BlocConsumer<LoadChatMessagesCubit,
                         LoadChatMessagesState>(
@@ -1092,62 +1042,22 @@ class _ChatScreenState extends State<ChatScreen>
                           totalMessageCount = state.messages.length;
                           isFetchedFirstTime = true;
                           setState(() {});
+                          if (widget.isFromBuyerList != null) {
+                            if (widget.isFromBuyerList!) {
+                              context
+                                  .read<GetBuyerChatListCubit>()
+                                  .removeUnreadCount(widget.itemOfferId);
+                            } else {
+                              context
+                                  .read<GetSellerChatListCubit>()
+                                  .removeUnreadCount(widget.itemOfferId);
+                            }
+                          }
                         }
                       },
                       builder: (context, state) {
                         return Stack(
                           children: [
-/*                          BlocBuilder<ChatMessageHandlerCubit, List<Widget>>(
-                            builder: (context, messages) {
-                              Widget? loadingMoreWidget;
-
-                              if (state is LoadChatMessagesSuccess &&
-                                  state.isLoadingMore) {
-                                loadingMoreWidget =
-                                    Text("loading".translate(context));
-                              }
-                              if (messages.isEmpty) {
-                                return offerWidget();
-                              } else {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    loadingMoreWidget ??
-                                        const SizedBox.shrink(),
-                                    Expanded(
-                                      child: ListView.builder(
-                                        key: ValueKey(
-                                            'chat_list_${messages.length}'),
-                                        reverse: true,
-                                        shrinkWrap: true,
-                                        physics:
-                                            const AlwaysScrollableScrollPhysics(),
-                                        controller: _pageScrollController,
-                                        addAutomaticKeepAlives: true,
-                                        itemCount: messages.length,
-                                        padding:
-                                            const EdgeInsets.only(bottom: 10),
-                                        itemBuilder: (context, index) {
-                                          dynamic chat = messages[index];
-
-                                          return Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              if (index ==
-                                                  messages.length - 1)
-                                                offerWidget(),
-                                              chat
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-                            },
-                            bloc: context.read<ChatMessageHandlerCubit>(),
-                          ),*/
                             StreamBuilder<List<Widget>>(
                                 stream: ChatMessageHandler.getChatStream(),
                                 builder: (context,
@@ -1155,15 +1065,15 @@ class _ChatScreenState extends State<ChatScreen>
                                   Widget? loadingMoreWidget;
                                   if (state is LoadChatMessagesSuccess) {
                                     if (state.isLoadingMore) {
-                                      loadingMoreWidget =
-                                          Text("loading".translate(context));
+                                      loadingMoreWidget = CustomText(
+                                          "loading".translate(context));
                                     }
                                   }
 
                                   if (state is LoadChatMessagesSuccess &&
                                       state.isLoadingMore) {
-                                    loadingMoreWidget =
-                                        Text("loading".translate(context));
+                                    loadingMoreWidget = CustomText(
+                                        "loading".translate(context));
                                   }
 
                                   if (snapshot.connectionState ==
@@ -1194,11 +1104,6 @@ class _ChatScreenState extends State<ChatScreen>
                                               padding: const EdgeInsets.only(
                                                   bottom: 10),
                                               itemBuilder: (context, index) {
-                                                // final adjustedIndex =   index - 1;
-                                                /* dynamic chat =
-                                              (snapshot.data as List)
-                                                  .elementAt(index); */
-
                                                 dynamic chat =
                                                     snapshot.data![index];
 
@@ -1247,13 +1152,14 @@ class _ChatScreenState extends State<ChatScreen>
         return Align(
           alignment: AlignmentDirectional.topEnd,
           child: Container(
-              height: 71,
+              constraints: BoxConstraints(maxHeight: 70),
               margin: EdgeInsetsDirectional.only(top: 15, bottom: 15, end: 15),
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                   border: Border.all(
-                      color: context.color.territoryColor.withOpacity(0.3)),
-                  color: context.color.territoryColor.withOpacity(0.17),
+                      color:
+                          context.color.territoryColor.withValues(alpha: 0.3)),
+                  color: context.color.territoryColor.withValues(alpha: 0.17),
                   borderRadius: BorderRadius.only(
                       topRight: Radius.circular(0),
                       topLeft: Radius.circular(8),
@@ -1262,16 +1168,15 @@ class _ChatScreenState extends State<ChatScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("yourOffer".translate(context))
-                      .color(context.color.textDefaultColor.withOpacity(0.5)),
-
-                  /*  Text("yourOffer".translate(context))
-                  .color(context.color.textDefaultColor.withOpacity(0.5)),*/
-                  Text(Constant.currencySymbol +
-                          widget.itemOfferPrice.toString())
-                      .bold()
-                      .size(context.font.larger)
-                      .color(context.color.textDefaultColor)
+                  CustomText("yourOffer".translate(context),
+                      color: context.color.textDefaultColor
+                          .withValues(alpha: 0.5)),
+                  CustomText(
+                    (widget.itemOfferPrice ?? 0.0).currencyFormat,
+                    color: context.color.textDefaultColor,
+                    fontSize: context.font.larger,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ],
               )),
         );
@@ -1285,8 +1190,9 @@ class _ChatScreenState extends State<ChatScreen>
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                   border: Border.all(
-                      color: context.color.territoryColor.withOpacity(0.3)),
-                  color: context.color.territoryColor.withOpacity(0.17),
+                      color:
+                          context.color.territoryColor.withValues(alpha: 0.3)),
+                  color: context.color.territoryColor.withValues(alpha: 0.17),
                   borderRadius: BorderRadius.only(
                       topRight: Radius.circular(8),
                       topLeft: Radius.circular(0),
@@ -1295,13 +1201,15 @@ class _ChatScreenState extends State<ChatScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("offerLbl".translate(context))
-                      .color(context.color.textDefaultColor.withOpacity(0.5)),
-                  Text(Constant.currencySymbol +
-                          widget.itemOfferPrice.toString())
-                      .bold()
-                      .size(context.font.larger)
-                      .color(context.color.textDefaultColor)
+                  CustomText("offerLbl".translate(context),
+                      color: context.color.textDefaultColor
+                          .withValues(alpha: 0.5)),
+                  CustomText(
+                    Constant.currencySymbol + widget.itemOfferPrice.toString(),
+                    color: context.color.textDefaultColor,
+                    fontSize: context.font.larger,
+                    fontWeight: FontWeight.bold,
+                  )
                 ],
               )),
         );

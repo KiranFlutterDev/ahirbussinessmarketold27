@@ -28,13 +28,14 @@ class UnblockUserFail extends UnblockUserState {
 class UnblockUserCubit extends Cubit<UnblockUserState> {
   UnblockUserCubit() : super(UnblockUserInitial());
 
-  final ChatRepostiory _chatRepository = ChatRepostiory();
+  final ChatRepository _chatRepository = ChatRepository();
 
   void unBlockUser({required int blockUserId}) async {
     try {
       emit(UnblockUserInProgress());
 
-      var result = await _chatRepository.unBlockUserApi(blockUserId: blockUserId);
+      var result =
+          await _chatRepository.unBlockUserApi(blockUserId: blockUserId);
 
       emit(UnblockUserSuccess(message: result['message']));
     } catch (e) {

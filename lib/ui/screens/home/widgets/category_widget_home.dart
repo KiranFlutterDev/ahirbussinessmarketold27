@@ -1,16 +1,15 @@
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/home/widgets/category_home_card.dart';
+import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-
-
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/main_activity.dart';
-import 'package:eClassify/ui/screens/home/widgets/category_home_card.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CategoryWidgetHome extends StatelessWidget {
@@ -20,7 +19,6 @@ class CategoryWidgetHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<FetchCategoryCubit, FetchCategoryState>(
       builder: (context, state) {
-
         if (state is FetchCategorySuccess) {
           if (state.categories.isNotEmpty) {
             return Padding(
@@ -36,7 +34,8 @@ class CategoryWidgetHome extends StatelessWidget {
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    if (index == state.categories.length) {
+                    if (state.categories.length > 10 &&
+                        index == state.categories.length) {
                       return moreCategory(context);
                     } else {
                       return CategoryHomeCard(
@@ -70,7 +69,9 @@ class CategoryWidgetHome extends StatelessWidget {
                       );
                     }
                   },
-                  itemCount: state.categories.length + 1,
+                  itemCount: state.categories.length > 10
+                      ? state.categories.length + 1
+                      : state.categories.length,
                   separatorBuilder: (context, index) {
                     return const SizedBox(
                       width: 12,
@@ -140,15 +141,15 @@ class CategoryWidgetHome extends StatelessWidget {
               ),
               Expanded(
                   child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: Text("more".translate(context))
-                    .centerAlign()
-                    .setMaxLines(lines: 2)
-                    .size(context.font.smaller)
-                    .color(
-                      context.color.textDefaultColor,
-                    ),
-              ))
+                      padding: const EdgeInsets.all(0.0),
+                      child: CustomText(
+                        "more".translate(context),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
+                        color: context.color.textDefaultColor,
+                      )))
             ],
           ),
         ),

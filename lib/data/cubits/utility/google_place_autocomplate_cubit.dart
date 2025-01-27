@@ -31,7 +31,7 @@ class GooglePlaceAutocompleteCubit extends Cubit<GooglePlaceAutocompleteState> {
 
   ///This method will search location from text,
   ///We use it for search location
-  Future<void> getLocationFromText({required String text}) async {
+  Future<void> getLocationFromCustomText({required String text}) async {
     try {
       emit(GooglePlaceAutocompleteInProgress());
       List<GooglePlaceModel> googlePlaceAutocompleteResponse =

@@ -1,8 +1,7 @@
 import 'package:eClassify/data/model/data_output.dart';
-import 'package:eClassify/data/model/location/countriesModel.dart';
+import 'package:eClassify/data/model/location/countries_model.dart';
 import 'package:eClassify/data/repositories/location/countries_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class FetchCountriesState {}
 
@@ -58,7 +57,7 @@ class FetchCountriesCubit extends Cubit<FetchCountriesState> {
       emit(FetchCountriesInProgress());
 
       DataOutput<CountriesModel> result =
-          await _countriesRepository.fetchCountries(page: 1,search: search);
+          await _countriesRepository.fetchCountries(page: 1, search: search);
       emit(
         FetchCountriesSuccess(
           isLoadingMore: false,

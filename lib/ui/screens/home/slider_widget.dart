@@ -86,7 +86,7 @@ class _SliderWidgetState extends State<SliderWidget>
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: sidePadding),
               child: SizedBox(
-                height: 170.rh(context),
+                height: 170,
                 child: ListView.builder(
                     itemCount: state.sliderlist.length,
                     shrinkWrap: true,
@@ -129,7 +129,7 @@ class _SliderWidgetState extends State<SliderWidget>
                           }
                         },
                         child: Container(
-                          height: 170.rh(context),
+                          height: 170,
                           clipBehavior: Clip.antiAlias,
                           width: context.screenWidth - (sidePadding * 2),
                           decoration: BoxDecoration(
@@ -154,22 +154,21 @@ class _SliderWidgetState extends State<SliderWidget>
 */
 
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
-import 'package:url_launcher/url_launcher.dart' as urllauncher;
-
+import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart' as urllauncher;
+import 'package:url_launcher/url_launcher.dart';
 // Import your SliderCubit and other necessary dependencies
 
 class SliderWidget extends StatefulWidget {
@@ -230,8 +229,6 @@ class _SliderWidgetState extends State<SliderWidget>
       },
       builder: (context, SliderState state) {
         if (state is SliderFetchSuccess && state.sliderlist.isNotEmpty) {
-
-
           bannersLength = state.sliderlist.length; // Update bannersLength
           return SizedBox(
             height: 170,

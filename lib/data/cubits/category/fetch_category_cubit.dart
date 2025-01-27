@@ -8,7 +8,6 @@ import 'package:eClassify/data/repositories/category_repository.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class FetchCategoryState {}
 
 class FetchCategoryInitial extends FetchCategoryState {}
@@ -87,7 +86,7 @@ class FetchCategoryFailure extends FetchCategoryState {
   FetchCategoryFailure(this.errorMessage);
 }
 
-class FetchCategoryCubit extends Cubit<FetchCategoryState>{
+class FetchCategoryCubit extends Cubit<FetchCategoryState> {
   FetchCategoryCubit() : super(FetchCategoryInitial());
 
   final CategoryRepository _categoryRepository = CategoryRepository();
@@ -99,7 +98,6 @@ class FetchCategoryCubit extends Cubit<FetchCategoryState>{
 
       DataOutput<CategoryModel> categories =
           await _categoryRepository.fetchCategories(page: 1);
-
 
       emit(FetchCategorySuccess(
           total: categories.total,

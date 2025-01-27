@@ -57,7 +57,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="PLACE_YOUR_GOOGLE_MAP_ANDROID_API_KEY_HERE" />
+            android:value="AIzaSyApCJcVfUTKAdfiNB2vZ399YgJEFy_d-vk" />
 
 
         <activity
@@ -86,48 +86,17 @@
 
                 <data
                     android:host="eclassify-dev.vercel.app"
-                    android:pathPattern="/.."
+                    android:pathPattern="/product-details/.*"
                     android:scheme="eclassify" />
-                <data android:pathPattern="/product-details/.*" />
-
-                <!--<data
+                <data
+                    android:host="eclassifyweb.wrteam.me"
+                    android:pathPattern="/product-details/.*"
+                    android:scheme="eclassify" />
+                <data
                     android:host="eclassify.thewrteam.in"
+                    android:pathPattern="/product-details/.*"
                     android:scheme="eclassify" />
-                <data />-->
-
-
-
-                <!--<data
-                   android:host="eclassify.thewrteam.in"
-                   android:pathPattern="/.."
-                   android:scheme="eclassify" />
-               <data android:pathPattern="/product-details/.*" />-->
-
-                <!-- <data
-                     android:host="eclassify-dev.vercel.app"
-                     android:pathPattern="/.."
-                     android:scheme="eclassify" />
-                 <data android:pathPattern="/product-details/.*" />-->
-
-
-                <!-- <data
-                     android:host="e-classify-app-router.vercel.app"
-                     android:pathPattern="/.."
-                     android:scheme="http" />
-                 <data android:pathPattern="/product-details/.*" />
-                 <data android:scheme="https" />-->
-
-
             </intent-filter>
-
-
-            <!-- <intent-filter android:autoVerify="true">
-                 <action android:name="android.intent.action.VIEW" />
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.BROWSABLE" />
-                 <data android:host="eclassify.thewrteam.in" android:scheme="https"/>
-                 <data android:host="eclassify.thewrteam.in" android:scheme="http"/>
-             </intent-filter>-->
 
 
             <intent-filter>

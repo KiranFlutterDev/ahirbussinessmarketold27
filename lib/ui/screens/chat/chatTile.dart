@@ -5,18 +5,21 @@ import 'package:eClassify/ui/screens/chat/chat_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/notification/notification_service.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+
 class ChatTile extends StatelessWidget {
   final String profilePicture;
   final String userName;
   final String itemPicture;
   final String itemName;
   final String itemId;
+  final bool isBuyerList;
   final String pendingMessageCount;
   final String id;
   final String date;
@@ -27,6 +30,7 @@ class ChatTile extends StatelessWidget {
   final String? buyerId;
   final int isPurchased;
   final bool alreadyReview;
+  final int? unreadCount;
 
   const ChatTile({
     super.key,
@@ -35,6 +39,7 @@ class ChatTile extends StatelessWidget {
     required this.itemPicture,
     required this.itemName,
     required this.pendingMessageCount,
+    required this.isBuyerList,
     required this.id,
     required this.date,
     required this.itemId,
@@ -45,6 +50,7 @@ class ChatTile extends StatelessWidget {
     this.buyerId,
     required this.isPurchased,
     required this.alreadyReview,
+    this.unreadCount,
   });
 
   @override
@@ -64,24 +70,23 @@ class ChatTile extends StatelessWidget {
                   create: (context) => DeleteMessageCubit(),
                 ),
               ],
-              child: Builder(builder: (context) {
-                return ChatScreen(
-                  profilePicture: profilePicture,
-                  itemTitle: itemName,
-                  userId: id,
-                  itemImage: itemPicture,
-                  userName: userName,
-                  itemId: itemId,
-                  date: date,
-                  itemOfferId: itemOfferId,
-                  itemPrice: itemPrice,
-                  itemOfferPrice: itemAmount??null,
-                  status: status,
-                  buyerId: buyerId,
-                  alreadyReview: alreadyReview,
-                  isPurchased: isPurchased,
-                );
-              }),
+              child: ChatScreen(
+                profilePicture: profilePicture,
+                itemTitle: itemName,
+                userId: id,
+                itemImage: itemPicture,
+                userName: userName,
+                itemId: itemId,
+                date: date,
+                itemOfferId: itemOfferId,
+                itemPrice: itemPrice,
+                itemOfferPrice: itemAmount ?? null,
+                status: status,
+                buyerId: buyerId,
+                alreadyReview: alreadyReview,
+                isPurchased: isPurchased,
+                isFromBuyerList: isBuyerList,
+              ),
             );
           },
         ));
@@ -122,7 +127,7 @@ class ChatTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
                                 color: context.color.textDefaultColor
-                                    .withOpacity(0.05))),
+                                    .withValues(alpha: 0.05))),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(24),
                           child: UiUtils.getImage(
@@ -182,19 +187,30 @@ class ChatTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      CustomText(
                         userName,
                         softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                      ).bold().color(context.color.textColorDark),
-                      Text(
+                        maxLines: 1,
+                        color: context.color.textColorDark,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      CustomText(
                         itemName,
                         softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                      ).color(context.color.textColorDark),
+                        maxLines: 1,
+                        color: context.color.textColorDark,
+                      ),
                     ],
                   ),
-                )
+                ),
+                if (unreadCount != null && unreadCount != 0)
+                  Badge(
+                    backgroundColor: Colors.red,
+                    label: Text(
+                      '$unreadCount',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
               ],
             ),
           ),

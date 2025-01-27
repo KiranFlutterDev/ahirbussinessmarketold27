@@ -1,5 +1,3 @@
-import 'package:eClassify/utils/extensions/lib/adaptive_type.dart';
-
 class NotificationData {
   String? id;
   String? title;
@@ -30,7 +28,7 @@ class NotificationData {
     message = json['message'];
     image = json['image'];
     type = json['type'].toString();
-    sendType = Adapter.forceInt(json['send_type']);
+    sendType = json['send_type'] as int?;
     customersId = json['customers_id'];
     itemsId = json['items_id'].toString();
     createdAt = json['created_at'];

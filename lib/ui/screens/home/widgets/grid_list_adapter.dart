@@ -1,22 +1,15 @@
-import 'dart:math';
-
 import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
-
+import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-
-import 'package:eClassify/ui/screens/native_ads_screen.dart';
 
 enum ListUiType { Grid, List, Mixed }
 
 class GridListAdapter extends StatelessWidget {
   final ListUiType type;
   final Widget Function(BuildContext, int, bool) builder;
-  final Widget Function(BuildContext, int)? listSaperator;
+  final Widget Function(BuildContext, int)? listSeparator;
   final int total;
   final int? crossAxisCount;
   final double? height;
@@ -33,7 +26,7 @@ class GridListAdapter extends StatelessWidget {
     this.crossAxisCount,
     this.height,
     this.listAxis,
-    this.listSaperator,
+    this.listSeparator,
     this.controller,
     this.isNotSidePadding,
     this.mixMode = false,
@@ -45,13 +38,14 @@ class GridListAdapter extends StatelessWidget {
       return SizedBox(
         height: listAxis == Axis.horizontal ? height : null,
         child: ListView.separated(
+          shrinkWrap: true,
           padding: EdgeInsets.symmetric(
               horizontal: isNotSidePadding != null ? 0 : sidePadding),
           scrollDirection: listAxis ?? Axis.vertical,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) => builder(context, index, false),
           itemCount: total,
-          separatorBuilder: listSaperator ?? ((c, i) => Container()),
+          separatorBuilder: listSeparator ?? ((c, i) => Container()),
         ),
       );
     } else if (type == ListUiType.Grid) {
@@ -68,38 +62,18 @@ class GridListAdapter extends StatelessWidget {
         itemCount: total,
       );
     } else if (type == ListUiType.Mixed) {
-      List<Widget> children = [];
-      int gridCount = Constant.nativeAdsAfterItemNumber;
-      int listCount = 1;
-
-      for (int i = 0; i < total; i += gridCount + listCount) {
-        children.add(
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-                horizontal: sidePadding, vertical: 15 / 2),
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                    crossAxisCount: crossAxisCount ?? 2,
-                    height: height ?? 1,
-                    mainAxisSpacing: 15,
-                    crossAxisSpacing: 15),
-            itemBuilder: (context, index) => builder(context, i + index, true),
-            itemCount: min(gridCount, total - i),
-          ),
-        );
-
-        int listItemCount = min(listCount, total - i - gridCount);
-        if (listItemCount > 0) {
-          children.add(NativeAdWidget(
-            type: TemplateType.medium,
-          ));
-        }
-      }
-
-      return Column(
-        children: children,
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(
+            horizontal: sidePadding, vertical: 15 / 2),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+            crossAxisCount: crossAxisCount ?? 2,
+            height: height ?? 1,
+            mainAxisSpacing: 15,
+            crossAxisSpacing: 15),
+        itemBuilder: (context, index) => builder(context, index, true),
+        itemCount: total,
       );
     } else {
       return Container();

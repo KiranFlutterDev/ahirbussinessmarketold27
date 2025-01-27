@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/helper/custom_exception.dart';
 import 'package:eClassify/data/model/company.dart';
 import 'package:eClassify/utils/api.dart';
@@ -37,20 +36,12 @@ class CompanyCubit extends Cubit<CompanyState> {
     try {
       Company companyData = Company();
 
-      Map<String, String> body = {
-
-      };
-
-
+      Map<String, String> body = {};
 
       var response =
           await Api.get(url: Api.getSystemSettingsApi, queryParameters: body);
 
-
-
       if (!response[Api.error]) {
-
-
         var data = response['data'];
 
         companyData = Company(
@@ -58,15 +49,12 @@ class CompanyCubit extends Cubit<CompanyState> {
             companyName: data['company_name'],
             companyTel1: data['company_tel1'],
             companyTel2: data['company_tel2']);
-
-
       } else {
         throw CustomException(response[Api.message]);
       }
 
       return companyData;
     } catch (e) {
-
       rethrow;
     }
   }

@@ -1,8 +1,9 @@
-import 'package:eClassify/utils/ui_utils.dart';
+import 'package:eClassify/app/app_localization.dart';
 import 'package:flutter/cupertino.dart';
 
 extension TranslateString on String {
   String translate(BuildContext context) {
-    return UiUtils.getTranslatedLabel(context, this);
+    return (AppLocalization.of(context)!.getTranslatedValues(this) ?? this)
+        .trim();
   }
 }

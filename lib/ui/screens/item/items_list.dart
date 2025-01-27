@@ -3,30 +3,27 @@ import 'dart:math';
 
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/item/fetch_item_from_category_cubit.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/hive_utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/api.dart';
-
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/home/widgets/item_horizontal_card.dart';
 import 'package:eClassify/ui/screens/main_activity.dart';
 import 'package:eClassify/ui/screens/native_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class ItemsList extends StatefulWidget {
   final String categoryId, categoryName;
@@ -66,7 +63,7 @@ class ItemsListState extends State<ItemsList> {
   @override
   void initState() {
     super.initState();
-    searchbody = {};
+    searchBody = {};
     Constant.itemFilter = null;
     searchController = TextEditingController();
     searchController.addListener(searchItemListener);
@@ -90,9 +87,9 @@ class ItemsListState extends State<ItemsList> {
             longitude: HiveUtils.getLongitude() ?? null));
 
     Future.delayed(Duration.zero, () {
-      selectedcategoryId = widget.categoryId;
-      selectedcategoryName = widget.categoryName;
-      searchbody[Api.categoryId] = widget.categoryId;
+      selectedCategoryId = widget.categoryId;
+      selectedCategoryName = widget.categoryName;
+      searchBody[Api.categoryId] = widget.categoryId;
       setState(() {});
     });
   }
@@ -155,7 +152,7 @@ class ItemsListState extends State<ItemsList> {
 
   Widget searchBarWidget() {
     return Container(
-      height: 56.rh(context),
+      height: 56,
       color: context.color.secondaryColor,
       child: LayoutBuilder(builder: (context, c) {
         return SizedBox(
@@ -169,8 +166,8 @@ class ItemsListState extends State<ItemsList> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                        width: 243.rw(context),
-                        height: 40.rh(context),
+                        width: 243,
+                        height: 40,
                         alignment: AlignmentDirectional.center,
                         decoration: BoxDecoration(
                             border: Border.all(
@@ -219,8 +216,8 @@ class ItemsListState extends State<ItemsList> {
                         });
                       },
                       child: Container(
-                        width: 40.rw(context),
-                        height: 40.rh(context),
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           border: Border.all(
                               width: 1,
@@ -233,7 +230,7 @@ class ItemsListState extends State<ItemsList> {
                               color: !isList
                                   ? context.color.textDefaultColor
                                   : context.color.textDefaultColor
-                                      .withOpacity(0.2)),
+                                      .withValues(alpha: 0.2)),
                         ),
                       ),
                     ),
@@ -247,8 +244,8 @@ class ItemsListState extends State<ItemsList> {
                         });
                       },
                       child: Container(
-                        width: 40.rw(context),
-                        height: 40.rh(context),
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           border: Border.all(
                               width: 1,
@@ -261,7 +258,7 @@ class ItemsListState extends State<ItemsList> {
                               color: isList
                                   ? context.color.textDefaultColor
                                   : context.color.textDefaultColor
-                                      .withOpacity(0.2)),
+                                      .withValues(alpha: 0.2)),
                         ),
                       ),
                     ),
@@ -309,24 +306,22 @@ class ItemsListState extends State<ItemsList> {
       ),
       child: PopScope(
         canPop: true,
-        onPopInvoked: (isPop) {
+        onPopInvokedWithResult: (isPop, result) {
           Constant.itemFilter = null;
         },
         child: Scaffold(
           backgroundColor: Theme.of(context).colorScheme.primaryColor,
-          appBar: UiUtils.buildAppBar(
-            context,
-            showBackButton: true,
-            title: selectedcategoryName == ""
-                ? widget.categoryName
-                : selectedcategoryName
-          ),
+          appBar: UiUtils.buildAppBar(context,
+              showBackButton: true,
+              title: selectedCategoryName == ""
+                  ? widget.categoryName
+                  : selectedCategoryName),
           bottomNavigationBar: bottomWidget(),
           body: RefreshIndicator(
             onRefresh: () async {
               // Debug log to check if onRefresh is triggered
 
-              searchbody = {};
+              searchBody = {};
               Constant.itemFilter = null;
 
               context.read<FetchItemFromCategoryCubit>().fetchItemFromCategory(
@@ -375,7 +370,7 @@ class ItemsListState extends State<ItemsList> {
           SizedBox(
             width: 7,
           ),
-          Text("filterTitle".translate(context))
+          CustomText("filterTitle".translate(context))
         ],
       ),
       onTap: () {
@@ -400,7 +395,7 @@ class ItemsListState extends State<ItemsList> {
     );
   }
 
-  getFilterValue(ItemFilterModel model) {
+  void getFilterValue(ItemFilterModel model) {
     filter = model;
     setState(() {});
   }
@@ -414,7 +409,7 @@ class ItemsListState extends State<ItemsList> {
           SizedBox(
             width: 7,
           ),
-          Text("sortBy".translate(context))
+          CustomText("sortBy".translate(context))
         ],
       ),
       onTap: () {
@@ -423,7 +418,7 @@ class ItemsListState extends State<ItemsList> {
     );
   }
 
-  showSortByBottomSheet() {
+  void showSortByBottomSheet() {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -461,16 +456,18 @@ class ItemsListState extends State<ItemsList> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 17, horizontal: 20),
-                child: Text(
+                child: CustomText(
                   'sortBy'.translate(context),
                   textAlign: TextAlign.start,
-                ).bold(weight: FontWeight.bold).size(context.font.large),
+                  fontWeight: FontWeight.bold,
+                  fontSize: context.font.large,
+                ),
               ),
 
               Divider(height: 1), // Add some space between title and options
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                title: Text('default'.translate(context)),
+                title: CustomText('default'.translate(context)),
                 onTap: () {
                   Navigator.pop(context);
                   context
@@ -487,7 +484,6 @@ class ItemsListState extends State<ItemsList> {
                     print("isfocus$isFocused");
 
                     FocusManager.instance.primaryFocus?.unfocus();
-
                   });
 
                   // Handle option 1 selection
@@ -496,7 +492,7 @@ class ItemsListState extends State<ItemsList> {
               Divider(height: 1), // Divider between option 1 and option 2
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                title: Text('newToOld'.translate(context)),
+                title: CustomText('newToOld'.translate(context)),
                 onTap: () {
                   Navigator.pop(context);
                   context
@@ -516,7 +512,7 @@ class ItemsListState extends State<ItemsList> {
               Divider(height: 1), // Divider between option 2 and option 3
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                title: Text('oldToNew'.translate(context)),
+                title: CustomText('oldToNew'.translate(context)),
                 onTap: () {
                   Navigator.pop(context);
                   context
@@ -536,7 +532,7 @@ class ItemsListState extends State<ItemsList> {
               Divider(height: 1), // Divider between option 3 and option 4
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                title: Text('priceHighToLow'.translate(context)),
+                title: CustomText('priceHighToLow'.translate(context)),
                 onTap: () {
                   Navigator.pop(context);
                   context
@@ -556,7 +552,7 @@ class ItemsListState extends State<ItemsList> {
               Divider(height: 1), // Divider between option 4 and option 5
               ListTile(
                 contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                title: Text('priceLowToHigh'.translate(context)),
+                title: CustomText('priceLowToHigh'.translate(context)),
                 onTap: () {
                   Navigator.pop(context);
                   context
@@ -595,7 +591,7 @@ class ItemsListState extends State<ItemsList> {
 
       if (state is FetchItemFromCategoryFailure) {
         return Center(
-          child: Text(state.errorMessage),
+          child: CustomText(state.errorMessage),
         );
       }
       if (state is FetchItemFromCategorySuccess) {
@@ -657,7 +653,7 @@ class ItemsListState extends State<ItemsList> {
                           SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
                               crossAxisCount: 2,
                               height: MediaQuery.of(context).size.height /
-                                  3.5.rh(context),
+                                  3.5,
                               mainAxisSpacing: 7,
                               crossAxisSpacing: 10),
                       itemCount: calculateItemCount(state.itemModel.length),
@@ -753,7 +749,7 @@ class ItemsListState extends State<ItemsList> {
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
           crossAxisCount: 2,
-          height: MediaQuery.of(context).size.height / 3.5.rh(context),
+          height: MediaQuery.of(context).size.height / 3.5,
           mainAxisSpacing: 7,
           crossAxisSpacing: 10),
       itemCount: itemCount,
@@ -771,7 +767,7 @@ class ItemsListState extends State<ItemsList> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        height: 120.rh(context),
+        height: 120,
         decoration: BoxDecoration(
             border: Border.all(width: 1.5, color: context.color.borderColor),
             color: context.color.secondaryColor,
@@ -779,33 +775,33 @@ class ItemsListState extends State<ItemsList> {
         child: Row(
           children: [
             CustomShimmer(
-              height: 120.rh(context),
-              width: 100.rw(context),
+              height: 120,
+              width: 100,
             ),
             SizedBox(
-              width: 10.rw(context),
+              width: 10,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CustomShimmer(
-                  width: 100.rw(context),
+                  width: 100,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 150.rw(context),
+                  width: 150,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 120.rw(context),
+                  width: 120,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 80.rw(context),
+                  width: 80,
                   height: 10,
                   borderRadius: 7,
                 )

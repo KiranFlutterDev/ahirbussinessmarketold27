@@ -1,15 +1,13 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import 'package:eClassify/data/cubits/profile_setting_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileSettings extends StatefulWidget {
   final String? title;
@@ -73,35 +71,7 @@ Widget contentWidget(ProfileSettingFetchSuccess state, BuildContext context) {
   return SingleChildScrollView(
     physics: const BouncingScrollPhysics(),
     padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: /*Html(
-      data: state.data.toString(),
-      onAnchorTap: (
-        url,
-        context,
-        attributes,
-      ) {
-        launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-      },
-      style: {
-        "table": Style(
-          backgroundColor: Colors.grey[50],
-        ),
-        "p": Style(color: context.color.textColorDark),
-        "p strong": Style(
-            color: context.color.territoryColor, fontSize: FontSize.larger),
-        "tr": Style(
-            // border: Border(bottom: BorderSide(color: Colors.grey)),
-            ),
-        "th": Style(
-          backgroundColor: Colors.grey,
-          border: const Border(bottom: BorderSide(color: Colors.black)),
-        ),
-        "td": Style(border: Border.all(color: Colors.grey, width: 0.5)),
-        'h5': Style(maxLines: 2, textOverflow: TextOverflow.ellipsis),
-      },
-    )*/
-
-        HtmlWidget(
+    child: HtmlWidget(
       state.data.toString(),
       onTapUrl: (url) =>
           launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),

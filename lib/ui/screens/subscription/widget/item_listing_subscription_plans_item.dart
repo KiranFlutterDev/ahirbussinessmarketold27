@@ -1,26 +1,25 @@
 import 'dart:io';
 
+import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
+import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
+import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/data/model/subscription_pacakage_model.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/screens/subscription/payment_gatways.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
 import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
+import 'package:eClassify/utils/payment/gateaways/inapp_purchase_manager.dart';
+import 'package:eClassify/utils/payment/gateaways/payment_webview.dart';
+import 'package:eClassify/utils/payment/gateaways/stripe_service.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
-import 'package:eClassify/data/model/subscription_pacakage_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' as intl;
-
-import 'package:eClassify/utils/payment/gatways/inAppPurchaseManager.dart';
-import 'package:eClassify/utils/payment/gatways/payment_webview.dart';
-import 'package:eClassify/utils/payment/gatways/stripe_service.dart';
-import 'package:eClassify/data/helper/widgets.dart';
-
 
 class ItemListingSubscriptionPlansItem extends StatefulWidget {
   final int itemIndex, index;
@@ -110,7 +109,7 @@ class _ItemListingSubscriptionPlansItemState
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => PaymentWebView(
                       authorizationUrl:
-                      state.paymentIntent["payment_gateway_response"],
+                          state.paymentIntent["payment_gateway_response"],
                       onSuccess: (reference) {
                         HelperUtils.showSnackBarMessage(context,
                             "paymentSuccessfullyCompleted".translate(context));
@@ -180,11 +179,11 @@ class _ItemListingSubscriptionPlansItemState
                           width: MediaQuery.of(context).size.width / 1.6,
                           height: 33,
                           padding: EdgeInsets.only(top: 3),
-                          child: Text('activePlanLbl'.translate(context))
-                              .color(context.color.secondaryColor)
-                              .centerAlign()
-                              .bold(weight: FontWeight.w500)
-                              .size(15),
+                          child: CustomText('activePlanLbl'.translate(context),
+                              color: context.color.secondaryColor,
+                              textAlign: TextAlign.center,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15),
                         ),
                       ),
                     Card(
@@ -201,7 +200,7 @@ class _ItemListingSubscriptionPlansItemState
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start, //temp
                         children: [
-                          SizedBox(height: 50.rh(context)),
+                          SizedBox(height: 50),
                           ClipPath(
                             clipper: HexagonClipper(),
                             child: Container(
@@ -215,17 +214,19 @@ class _ItemListingSubscriptionPlansItemState
                                   fit: BoxFit.contain),
                             ),
                           ),
-                          SizedBox(height: 18.rh(context)),
+                          SizedBox(height: 18),
                           widget.model.isActive! && widget.model.finalPrice! > 0
                               ? activeAdsData()
                               : adsData(),
-
                           const Spacer(),
-                          Text(widget.model.finalPrice! > 0
-                                  ? "${Constant.currencySymbol}${widget.model.finalPrice.toString()}"
-                                  : "free".translate(context))
-                              .size(context.font.xxLarge)
-                              .bold(),
+                          CustomText(
+                            widget.model.finalPrice! > 0
+                                ? widget.model.finalPrice!.currencyFormat
+                                : "free".translate(context),
+                            fontSize: context.font.xxLarge,
+                            fontWeight: FontWeight.bold,
+                            color: context.color.textDefaultColor,
+                          ),
                           if (widget.model.discount! > 0)
                             Padding(
                               padding:
@@ -233,10 +234,12 @@ class _ItemListingSubscriptionPlansItemState
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text("${widget.model.discount}%\t${"OFF".translate(context)}")
-                                      .color(context.color.forthColor)
-                                      .bold(),
-                                  SizedBox(width: 5.rh(context)),
+                                  CustomText(
+                                    "${widget.model.discount}%\t${"OFF".translate(context)}",
+                                    color: context.color.forthColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  SizedBox(width: 5),
                                   Text(
                                     " ${Constant.currencySymbol}${widget.model.price.toString()}",
                                     style: const TextStyle(
@@ -245,15 +248,12 @@ class _ItemListingSubscriptionPlansItemState
                                 ],
                               ),
                             ),
-                          //if ((widget.index == widget.itemIndex))
-                          // padding: const EdgeInsets.fromLTRB(15.0, 0, 15.0, 15.0),
                           UiUtils.buildButton(context, onPressed: () {
                             UiUtils.checkUser(
                                 onNotGuest: () {
                                   if (!widget.model.isActive!) {
                                     if (widget.model.finalPrice! > 0) {
                                       if (Platform.isIOS) {
-                                        //_purchaseSubscription();
                                         widget.inAppPurchaseManager.buy(
                                             widget.model.iosProductId!,
                                             widget.model.id!.toString());
@@ -295,10 +295,11 @@ class _ItemListingSubscriptionPlansItemState
                                   : context.color.territoryColor,
                               textColor: widget.model.isActive!
                                   ? context.color.textDefaultColor
-                                      .withOpacity(0.5)
+                                      .withValues(alpha: 0.5)
                                   : context.color.secondaryColor,
-                              buttonTitle:
-                                  "purchaseThisPackage".translate(context),
+                              buttonTitle: widget.model.isActive ?? false
+                                  ? "purchased".translate(context)
+                                  : "purchaseThisPackage".translate(context),
 
                               //TODO: change title to Your Current Plan according to condition
                               outerPadding: const EdgeInsets.all(20))
@@ -315,38 +316,6 @@ class _ItemListingSubscriptionPlansItemState
     );
   }
 
-/*  Future<void> _purchaseSubscription() async {
-    bool success = await widget.inAppPurchaseManager
-        .purchaseSubscription(widget.model.iosProductId!);
-    if (success) {
-    */ /*  Constant.navigatorKey.currentContext!
-          .read<InAppPurchaseProductCubit>()
-          .inAppPurchase(
-              packageId: int.parse(widget.model.id.toString()),
-              method: "apple",
-              purchaseToken: purchase.purchaseID!);
-
-      UiUtils.showBlurredDialoge(
-        Constant.navigatorKey.currentContext!,
-        dialoge: BlurredDialogBox(
-          title: "Purchase completed",
-          showCancleButton: false,
-          acceptTextColor:
-              Constant.navigatorKey.currentContext!.color.buttonColor,
-          content: const Text("Your purchase has completed successfully"),
-          isAcceptContainesPush: true,
-          onAccept: () => Future.value().then((_) {
-            Navigator.pop(Constant.navigatorKey.currentContext!);
-            return;
-          }),
-        ),
-      );*/ /*
-      // Handle successful purchase
-    } else {
-      // Handle failed purchase
-    }
-  }*/
-
   Widget adsData() {
     return Expanded(
       flex: 10,
@@ -354,15 +323,13 @@ class _ItemListingSubscriptionPlansItemState
         physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: [
-          Text(widget.model.name!)
-              .firstUpperCaseWidget()
-              .centerAlign()
-              .copyWith(
-                  style: TextStyle(
-                color: context.color.textDefaultColor,
-                fontWeight: FontWeight.w600,
-              ))
-              .size(context.font.larger),
+          CustomText(
+            widget.model.name!,
+            firstUpperCaseWidget: true,
+            fontWeight: FontWeight.w600,
+            fontSize: context.font.larger,
+            textAlign: TextAlign.center,
+          ),
           SizedBox(height: 15),
           if (widget.model.type == "item_listing")
             checkmarkPoint(context,
@@ -379,10 +346,11 @@ class _ItemListingSubscriptionPlansItemState
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
+                child: CustomText(
                   widget.model.description!,
                   textAlign: TextAlign.start,
-                ).color(context.color.textDefaultColor.withOpacity(0.7)),
+                  color: context.color.textDefaultColor.withValues(alpha: 0.7),
+                ),
               ),
             ),
           ]
@@ -398,14 +366,13 @@ class _ItemListingSubscriptionPlansItemState
         physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: [
-          Text(widget.model.name!)
-              .firstUpperCaseWidget()
-              .copyWith(
-                  style: TextStyle(
-                      color: context.color.textDefaultColor,
-                      fontWeight: FontWeight.w600))
-              .size(context.font.larger)
-              .centerAlign(),
+          CustomText(
+            widget.model.name!,
+            firstUpperCaseWidget: true,
+            fontWeight: FontWeight.w600,
+            fontSize: context.font.larger,
+            textAlign: TextAlign.center,
+          ),
           SizedBox(height: 15),
           if (widget.model.type == "item_listing")
             checkmarkPoint(context,
@@ -420,12 +387,13 @@ class _ItemListingSubscriptionPlansItemState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.model.description!,
-                  textAlign: TextAlign.start,
-                ).color(context.color.textDefaultColor.withOpacity(0.7)),
-              ),
+                  alignment: Alignment.centerLeft,
+                  child: CustomText(
+                    widget.model.description!,
+                    color:
+                        context.color.textDefaultColor.withValues(alpha: 0.7),
+                    textAlign: TextAlign.start,
+                  )),
             ),
         ],
       ),
@@ -445,7 +413,7 @@ class _ItemListingSubscriptionPlansItemState
             bottom: 15.0,
             start: 15,
             end: 15), // EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Text(
+        child: CustomText(
             "${"yourSubscriptionWillExpireOn".translate(context)} $formattedDate"),
       );
     } else {
@@ -472,10 +440,11 @@ class _ItemListingSubscriptionPlansItemState
           //  const Icon(Icons.check_box_rounded, size: 25.0, color: Colors.cyan), //TODO: change it to given icon and fill according to status passed
           SizedBox(width: 15),
           Expanded(
-              child: Text(
+              child: CustomText(
             text,
             textAlign: TextAlign.start,
-          ).color(context.color.textDefaultColor))
+            color: context.color.textDefaultColor,
+          )),
         ],
       ),
     );
@@ -486,7 +455,7 @@ class _ItemListingSubscriptionPlansItemState
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-
+        mainAxisSize: MainAxisSize.min,
         // width: context.screenWidth * 0.55,
         children: [
           UiUtils.getSvg(
@@ -494,14 +463,12 @@ class _ItemListingSubscriptionPlansItemState
             //(boolVariable) ? AppIcons.active_mark : AppIcons.deactive_mark,
           ),
           //  const Icon(Icons.check_box_rounded, size: 25.0, color: Colors.cyan), //TODO: change it to given icon and fill according to status passed
-          SizedBox(width: 8.rw(context)),
+          SizedBox(width: 8),
           Expanded(
-              child: Text(
+              child: CustomText(
             text,
             textAlign: TextAlign.start,
-          ).color(
-            context.color.textDefaultColor,
-          ))
+          )),
         ],
       ),
     );
@@ -548,8 +515,8 @@ class _ItemListingSubscriptionPlansItemState
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(3),
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.1),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1),
                         ),
                         height: 6,
                         width: 60,
@@ -558,10 +525,13 @@ class _ItemListingSubscriptionPlansItemState
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 5),
-                    child: Text('selectPaymentMethod'.translate(context))
-                        .bold(weight: FontWeight.w600)
-                        .size(context.font.larger)
-                        .centerAlign(),
+                    child: CustomText(
+                      'selectPaymentMethod'.translate(context),
+                      color: context.color.textDefaultColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: context.font.larger,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   ListView.builder(
                     shrinkWrap: true,
@@ -615,11 +585,11 @@ class PaymentMethodTile extends StatelessWidget {
     return ListTile(
       leading: UiUtils.getSvg(gatewayIcon(gateway.type),
           width: 23, height: 23, fit: BoxFit.contain),
-      title: Text(gateway.name),
+      title: CustomText(gateway.name),
       trailing: isSelected
           ? Icon(Icons.check_circle, color: context.color.territoryColor)
           : Icon(Icons.radio_button_unchecked,
-              color: context.color.textDefaultColor.withOpacity(0.5)),
+              color: context.color.textDefaultColor.withValues(alpha: 0.5)),
       onTap: () => onSelect(gateway.type),
     );
   }

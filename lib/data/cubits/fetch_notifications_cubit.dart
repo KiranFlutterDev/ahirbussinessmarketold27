@@ -1,8 +1,7 @@
 import 'package:eClassify/data/model/data_output.dart';
+import 'package:eClassify/data/model/notification_data.dart';
 import 'package:eClassify/data/repositories/notifications_repository_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/data/model/notification_data.dart';
 
 abstract class FetchNotificationsState {}
 
@@ -60,7 +59,6 @@ class FetchNotificationsCubit extends Cubit<FetchNotificationsState> {
 
       DataOutput<NotificationData> result =
           await _notificationsRepository.fetchNotifications(page: 1);
-
       emit(FetchNotificationsSuccess(
           isLoadingMore: false,
           loadingMoreError: false,

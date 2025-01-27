@@ -1,10 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/repositories/chat_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class BlockedUsersListState {}
 
@@ -34,18 +33,16 @@ class BlockedUsersListFail extends BlockedUsersListState {
   });
 }
 
-class BlockedUsersListCubit extends Cubit<BlockedUsersListState>
-    {
+class BlockedUsersListCubit extends Cubit<BlockedUsersListState> {
   BlockedUsersListCubit() : super(BlockedUsersListInitial());
 
-  final ChatRepostiory _chatRepository = ChatRepostiory();
+  final ChatRepository _chatRepository = ChatRepository();
 
   void blockedUsersList() async {
     try {
       emit(BlockedUsersListInProgress());
       DataOutput<BlockedUserModel> result =
           await _chatRepository.blockedUsersListApi();
-
 
       emit(BlockedUsersListSuccess(data: result.modelList));
     } catch (e) {
@@ -54,7 +51,6 @@ class BlockedUsersListCubit extends Cubit<BlockedUsersListState>
   }
 
   bool isUserBlocked(int userId) {
-
     if (state is BlockedUsersListSuccess) {
       List<BlockedUserModel> list = (state as BlockedUsersListSuccess).data;
 
@@ -89,13 +85,11 @@ class BlockedUsersListCubit extends Cubit<BlockedUsersListState>
     emit(BlockedUsersListInProgress());
   }
 
-  @override
   BlockedUsersListState? fromJson(Map<String, dynamic> json) {
     // TODO: implement fromJson
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(BlockedUsersListState state) {
     // TODO: implement toJson
     return null;

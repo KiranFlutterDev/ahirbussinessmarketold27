@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/model/personalized/personalized_settings.dart';
 import 'package:eClassify/firebase_options.dart';
 import 'package:eClassify/main.dart';
@@ -16,7 +15,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 PersonalizedInterestSettings personalizedInterestSettings =
     PersonalizedInterestSettings.empty();
 
-
 void initApp() async {
   ///Note: this file's code is very necessary and sensitive if you change it, this might affect whole app , So change it carefully.
   ///This must be used do not remove this line
@@ -29,10 +27,13 @@ void initApp() async {
 
   ///This is the widget to show uncaught runtime error in this custom widget so that user can know in that screen something is wrong instead of grey screen
   if (kReleaseMode) {
-    ErrorWidget.builder =
-        (FlutterErrorDetails flutterErrorDetails) => SomethingWentWrong(
-              error: flutterErrorDetails,
-            );
+    ErrorWidget.builder = (FlutterErrorDetails flutterErrorDetails) {
+      print(flutterErrorDetails.exceptionAsString());
+      print(flutterErrorDetails.stack);
+      return SomethingWentWrong(
+        error: flutterErrorDetails,
+      );
+    };
   }
 
   if (Firebase.apps.isNotEmpty) {
@@ -44,12 +45,6 @@ void initApp() async {
 
   MobileAds.instance.initialize();
 
-/*  final NativeAdFactoryExample factoryExample = NativeAdFactoryExample();
-  GoogleMobileAds.instance.nativeAdFactoryRegistry
-      .registerFactory('listTile', factoryExample);*/
-
-
-
   await Hive.initFlutter();
   await Hive.openBox(HiveKeys.userDetailsBox);
   await Hive.openBox(HiveKeys.authBox);
@@ -57,7 +52,6 @@ void initApp() async {
   await Hive.openBox(HiveKeys.themeBox);
   await Hive.openBox(HiveKeys.svgBox);
   await Hive.openBox(HiveKeys.jwtToken);
-  //Hive.registerAdapter(ItemModelAdapter()); // Register your adapter
   await Hive.openBox(HiveKeys.historyBox);
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
@@ -69,7 +63,3 @@ void initApp() async {
     },
   );
 }
-
-
-
-

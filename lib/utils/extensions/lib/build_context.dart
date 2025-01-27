@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/ui/theme/theme.dart';
-
+import 'package:flutter/material.dart';
 
 extension CustomContext on BuildContext {
   double get screenWidth => MediaQuery.of(this).size.width;

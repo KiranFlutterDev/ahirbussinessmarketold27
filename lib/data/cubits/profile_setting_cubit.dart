@@ -1,11 +1,9 @@
-
 import 'package:eClassify/data/helper/custom_exception.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class ProfileSettingState {}
 
@@ -37,8 +35,7 @@ class ProfileSettingFetchFailure extends ProfileSettingState {
   ProfileSettingFetchFailure(this.errmsg);
 }
 
-class ProfileSettingCubit extends Cubit<ProfileSettingState>
-   {
+class ProfileSettingCubit extends Cubit<ProfileSettingState> {
   ProfileSettingCubit() : super(ProfileSettingInitial());
 
   void fetchProfileSetting(BuildContext context, String title,
@@ -80,7 +77,6 @@ class ProfileSettingCubit extends Cubit<ProfileSettingState>
   Future<String?> fetchProfileSettingFromDb(
       BuildContext context, String title) async {
     try {
-
       String? profileSettingData;
       Map<String, String> body = {
         Api.type: title,
@@ -89,16 +85,13 @@ class ProfileSettingCubit extends Cubit<ProfileSettingState>
       var response = await Api.get(
         url: Api.getSystemSettingsApi,
         queryParameters: body,
-
       );
-
-
-
 
       if (!response[Api.error]) {
         /*if (title == Api.currencySymbol) {
           // Constant.currencySymbol = getdata['data'].toString();
-        } else*/ if (title == Api.maintenanceMode) {
+        } else*/
+        if (title == Api.maintenanceMode) {
           Constant.maintenanceMode = response['data'].toString();
         } else {
           Map data = (response['data']);

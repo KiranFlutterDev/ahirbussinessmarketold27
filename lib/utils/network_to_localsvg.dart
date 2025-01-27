@@ -65,22 +65,3 @@ class NetworkToLocalSvg {
     );
   }
 }
-
-/*class _SVGBUILDER extends StatefulWidget {
-  const _SVGBUILDER();
-
-  @override
-  State<_SVGBUILDER> createState() => _SVGBUILDERState();
-}
-
-class _SVGBUILDERState extends State<_SVGBUILDER> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}*/

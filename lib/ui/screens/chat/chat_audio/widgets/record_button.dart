@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:eClassify/ui/screens/chat/chat_audio/audio_state.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/globals.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:vibration/vibration.dart';
-
-import 'package:flutter/material.dart';
-import 'package:record/record.dart';
-
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/flow_shader.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/lottie_animation.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import 'package:vibration/vibration.dart';
 
 class RecordButton extends StatefulWidget {
   const RecordButton(
@@ -157,7 +157,7 @@ class _RecordButtonState extends State<RecordButton> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              showLottie ? const LottieAnimation() : Text(recordDuration),
+              showLottie ? const LottieAnimation() : CustomText(recordDuration),
               FlowShader(
                 duration: const Duration(seconds: 3),
                 flowColors: [
@@ -167,7 +167,7 @@ class _RecordButtonState extends State<RecordButton> {
                 child: Row(
                   children: [
                     const Icon(Icons.keyboard_arrow_left),
-                    Text("slidetocancel".translate(context)),
+                    CustomText("slidetocancel".translate(context)),
                     const SizedBox(
                       width: 10,
                     ),
@@ -209,14 +209,14 @@ class _RecordButtonState extends State<RecordButton> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(recordDuration),
+                CustomText(recordDuration),
                 const SizedBox(
                   width: 5,
                 ),
                 FlowShader(
                   duration: const Duration(seconds: 3),
                   flowColors: [context.color.territoryColor, Colors.grey],
-                  child: Text("taploacktostop".translate(context)),
+                  child: CustomText("taploacktostop".translate(context)),
                   //flowColors: const [Colors.white, Colors.grey],
                 ),
                 const Center(
@@ -338,7 +338,8 @@ class _RecordButtonState extends State<RecordButton> {
     if (await record.hasPermission()) {
       // Start recording to file
 
-      String documentPath = "${(await getApplicationDocumentsDirectory()).path}/";
+      String documentPath =
+          "${(await getApplicationDocumentsDirectory()).path}/";
       await record.start(
         const RecordConfig(
           encoder: AudioEncoder.aacLc,
@@ -346,7 +347,7 @@ class _RecordButtonState extends State<RecordButton> {
           sampleRate: 44100,
         ),
         path:
-            "${documentPath}audio_${DateTime.now().millisecondsSinceEpoch}.mp4",
+            "${documentPath}audio_${DateTime.now().millisecondsSinceEpoch}.mp3",
       );
       startTime = DateTime.now();
 
@@ -364,7 +365,6 @@ class _RecordButtonState extends State<RecordButton> {
   }
 
   Future<void> saveFile() async {
-    //if (await Vibrate.canVibrate) Vibrate.feedback(FeedbackType.success);
     if (await Vibration.hasVibrator() != null) {
       Vibration.vibrate();
     }
@@ -383,37 +383,9 @@ class _RecordButtonState extends State<RecordButton> {
 
     // if (widget.callback != Null) {
     final fileAudio = File(filePath);
-    //final mp3FilePath = await convertToMp3(fileAudio);
-
-    // Call the callback function with the MP3 file path
-    //widget.callback?.call(mp3FilePath);
-
-    // widget.callback!(mp3FilePath);
     widget.callback!(fileAudio.path);
     //}
   }
-
-/*  Future<File?> convertToMp3(File recordedFile) async {
-    final outputFilePath = '/path/to/output.mp3';
-
-    try {
-      final session = await FFmpegKit.execute(
-          '-i ${recordedFile.path} -c:a libmp3lame -q:a 2 $outputFilePath');
-      final returnCode = await session.getReturnCode();
-
-      if (ReturnCode.isSuccess(returnCode)) {
-        return File(outputFilePath);
-      } else if (ReturnCode.isCancel(returnCode)) {
-        throw Exception("Cancelled to convert audio to MP3");
-      } else {
-        throw Exception("Failed to convert audio to MP3");
-      }
-    } catch (e) {
-      // Handle any exceptions that occurred during the conversion process
-      print('Error converting audio to MP3: $e');
-      return null;
-    }
-  }*/
 
   bool checkIsLocked(Offset offset) {
     return (offset.dy < -35);

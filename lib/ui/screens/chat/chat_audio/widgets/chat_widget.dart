@@ -10,6 +10,7 @@ import 'package:eClassify/data/cubits/chat/send_message.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/ui/screens/chat/chat_screen.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
@@ -23,9 +24,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part "parts/attachment.part.dart";
-
 part "parts/linkpreview.part.dart";
-
 part "parts/recordmsg.part.dart";
 
 ////Please don't make changes without sufficent knowledege in this file. otherwise you will be responsable for it
@@ -124,7 +123,7 @@ class ChatMessageState extends State<ChatMessage>
     super.initState();
   }
 
-  String _emptyTextIfAttachmentHasNoText() {
+  String _emptyTextIfAttachmentHasNoCustomText() {
     if (widget.file != "") {
       if (widget.message == "[File]") {
         return "";
@@ -154,7 +153,7 @@ class ChatMessageState extends State<ChatMessage>
     const String substringIdentifier = "‎";
 
     ///This will find and add invisible charector in prefix and suffix
-    String splitMapJoin = _emptyTextIfAttachmentHasNoText().splitMapJoin(
+    String splitMapJoin = _emptyTextIfAttachmentHasNoCustomText().splitMapJoin(
       linkPattern,
       onMatch: (match) {
         return substringIdentifier + match.group(0)! + substringIdentifier;
@@ -192,8 +191,8 @@ class ChatMessageState extends State<ChatMessage>
 
     return GestureDetector(
       onLongPress: () {
-        selectedMessageid.value = (widget.key as ValueKey).value;
-        showDeletebutton.value = true;
+        selectedMessageId.value = (widget.key as ValueKey).value;
+        showDeleteButton.value = true;
       },
       onTap: () {
         selectedMessage = false;
@@ -225,21 +224,10 @@ class ChatMessageState extends State<ChatMessage>
                             ? context.color.territoryColor.darken(45)
                             : context.color.secondaryColor.darken(45))
                         : (widget.senderId.toString() == HiveUtils.getUserId()
-                            ? context.color.territoryColor.withOpacity(0.3)
+                            ? context.color.territoryColor
+                                .withValues(alpha: 0.3)
                             : context.color.secondaryColor),
-                    borderRadius: BorderRadius.circular(8)
-
-                    // BorderRadius.only(
-                    //   topRight: widget.isSentByMe
-                    //       ? Radius.zero
-                    //       : const Radius.circular(10),
-                    //   topLeft: widget.isSentByMe
-                    //       ? const Radius.circular(10)
-                    //       : Radius.zero,
-                    //   bottomLeft: const Radius.circular(10),
-                    //   bottomRight: const Radius.circular(10),
-                    // ),
-                    ),
+                    borderRadius: BorderRadius.circular(8)),
                 child: Wrap(
                   runAlignment: WrapAlignment.end,
                   alignment: WrapAlignment.end,
@@ -382,18 +370,8 @@ class ChatMessageState extends State<ChatMessage>
                                 DateTime.now().toString())) ...[
                       BlocConsumer<SendMessageCubit, SendMessageState>(
                         listener: (context, state) {
-
-
                           if (state is SendMessageSuccess) {
                             isChatSent = true;
-
-                            ///Value which we added locally
-                            ValueKey? uniqueIdentifier = widget.key as ValueKey;
-
-                            ////We were added local id so whenit completed we will replace it with server message id
-
-                            /*ChatMessageHandler.updateMessageId(
-                                uniqueIdentifier.value, state.messageId);*/
 
                             WidgetsBinding.instance
                                 .addPostFrameCallback((timeStamp) {
@@ -441,17 +419,19 @@ class ChatMessageState extends State<ChatMessage>
               ),
               Padding(
                 padding: EdgeInsetsDirectional.only(end: 3.0),
-                child: Text(
+                child: CustomText(
                   (DateTime.parse(widget.createdAt))
                       .toLocal()
                       .toIso8601String()
                       .toString()
-                      .formatDate(format: "hh:mm aa"), //
-                  style: TextStyle(
-                      color: widget.senderId.toString() != HiveUtils.getUserId()
-                          ? context.color.textLightColor
-                          : context.color.textLightColor),
-                ).size(context.font.smaller),
+                      .formatDate(
+                        format: "hh:mm aa",
+                      ),
+                  color: widget.senderId.toString() != HiveUtils.getUserId()
+                      ? context.color.textLightColor
+                      : context.color.textLightColor,
+                  fontSize: context.font.smaller,
+                ),
               ),
             ],
           ),

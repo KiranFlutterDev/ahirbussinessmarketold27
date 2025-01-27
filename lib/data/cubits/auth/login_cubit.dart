@@ -2,14 +2,13 @@
 
 import 'dart:io';
 
+import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
+import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 
 abstract class LoginState {}
 
@@ -60,11 +59,10 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       emit(LoginInProgress());
 
-      /*String? token = await getDeviceToken();*/
       String? token = await () async {
-        try{
+        try {
           return await FirebaseMessaging.instance.getToken();
-        } catch(_){
+        } catch (_) {
           return '';
         }
       }();

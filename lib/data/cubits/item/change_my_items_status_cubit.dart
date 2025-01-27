@@ -24,12 +24,13 @@ class ChangeMyItemStatusCubit extends Cubit<ChangeMyItemStatusState> {
 
   ChangeMyItemStatusCubit() : super(ChangeMyItemStatusInitial());
 
-  Future<void> changeMyItemStatus({required int id, required String status,int? userId}) async {
+  Future<void> changeMyItemStatus(
+      {required int id, required String status, int? userId}) async {
     try {
       emit(ChangeMyItemStatusInProgress());
 
       await _itemRepository
-          .changeMyItemStatus(itemId: id, status: status,userId: userId)
+          .changeMyItemStatus(itemId: id, status: status, userId: userId)
           .then((value) {
         emit(ChangeMyItemStatusSuccess(value["message"]));
       });

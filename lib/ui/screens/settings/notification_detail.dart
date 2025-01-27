@@ -1,12 +1,10 @@
 import 'package:eClassify/data/helper/designs.dart';
 import 'package:eClassify/ui/screens/settings/notifications.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:flutter/material.dart';
 
 class NotificationDetail extends StatefulWidget {
   const NotificationDetail({super.key});
@@ -27,25 +25,23 @@ class _NotificationDetailState extends State<NotificationDetail> {
     return Scaffold(
       backgroundColor: context.color.primaryColor,
       appBar: UiUtils.buildAppBar(context,
-          title: "notifications".translate(context),
-          showBackButton: true),
-      body: ListView(children: <Widget>[
-        if (selectedNotification.image!.isNotEmpty)
-          setNetworkImg(selectedNotification.image!,
-              width: double.maxFinite,
-              height: 200.rh(context),
-              boxFit: BoxFit.cover),
-        const SizedBox(height: 10),
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: detailWidget())
-      ]),
+          title: "notifications".translate(context), showBackButton: true),
+      body: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 13.0, vertical: 13.0),
+          children: <Widget>[
+            if (selectedNotification.image!.isNotEmpty)
+              setNetworkImg(selectedNotification.image!, boxFit: BoxFit.cover),
+            const SizedBox(height: 10),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: detailWidget())
+          ]),
     );
   }
 
   @override
   void dispose() {
-    //Routes.currentRoute = Routes.previousCustomerRoute;
     super.dispose();
   }
 

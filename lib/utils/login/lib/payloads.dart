@@ -25,7 +25,6 @@ class AppleLoginPayload extends LoginPayload {
   AppleLoginPayload();
 }
 
-
 class PhoneLoginPayload extends LoginPayload {
   final String phoneNumber;
   final String countryCode;

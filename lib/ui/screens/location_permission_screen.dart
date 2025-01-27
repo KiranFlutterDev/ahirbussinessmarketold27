@@ -1,20 +1,19 @@
 import 'dart:io';
 
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 
 class LocationPermissionScreen extends StatefulWidget {
   const LocationPermissionScreen({super.key});
@@ -121,8 +120,8 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
   void _showLocationServiceInstructions() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text('pleaseEnableLocationServicesManually'.translate(context)),
+        content: CustomText(
+            'pleaseEnableLocationServicesManually'.translate(context)),
         action: SnackBarAction(
           label: 'ok'.translate(context),
           textColor: context.color.secondaryColor,
@@ -142,7 +141,7 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
   Future<void> _getCurrentLocationAndNavigate() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
 
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -187,19 +186,21 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
             children: [
               UiUtils.getSvg(AppIcons.locationAccessIcon),
               const SizedBox(height: 19),
-              Text(
+              CustomText(
                 "whatsYourLocation".translate(context),
-              ).size(context.font.extraLarge).bold(weight: FontWeight.w600),
+                fontSize: context.font.extraLarge,
+                fontWeight: FontWeight.w600,
+              ),
               const SizedBox(height: 14),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
+                child: CustomText(
                   'enjoyPersonalizedSellingAndBuyingLocationLbl'
                       .translate(context),
-                )
-                    .size(context.font.larger)
-                    .color(context.color.textDefaultColor.withOpacity(0.65))
-                    .centerAlign(),
+                  fontSize: context.font.larger,
+                  color: context.color.textDefaultColor.withValues(alpha: 0.65),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 58),
               Padding(

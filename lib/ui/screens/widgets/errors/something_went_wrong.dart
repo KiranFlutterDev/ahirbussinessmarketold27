@@ -1,10 +1,9 @@
-
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 
 class SomethingWentWrong extends StatelessWidget {
   final FlutterErrorDetails? error;
@@ -37,10 +36,13 @@ class NoChatFound extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Text("nodatafound".translate(context))
-              .size(context.font.larger)
-              .color(context.color.territoryColor)
-              .bold(weight: FontWeight.w600),
+          CustomText(
+            "No chat found. Start a new conversation",
+            //"noChatFound".translate(context),
+            fontSize: context.font.larger,
+            color: context.color.territoryColor,
+            fontWeight: FontWeight.w600,
+          ),
         ],
       ),
     );
@@ -74,7 +76,7 @@ class ErrorScreen extends StatelessWidget {
       onPressed: () {
         _generateError(context);
       },
-      child: const Text('Generate Error'),
+      child: const CustomText('Generate Error'),
     );
   }
 }
@@ -88,13 +90,13 @@ class ErrorDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Filtered and Prettified Error Stack Trace'),
+        title: const CustomText('Filtered and Prettified Error Stack Trace'),
       ),
       body: ListView.builder(
         itemCount: stackLines.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(_formatStackTraceLine(stackLines[index])),
+            title: CustomText(_formatStackTraceLine(stackLines[index])),
           );
         },
       ),

@@ -1,7 +1,6 @@
 import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class MakeAnOfferItemState {}
 
 class MakeAnOfferItemInitial extends MakeAnOfferItemState {}

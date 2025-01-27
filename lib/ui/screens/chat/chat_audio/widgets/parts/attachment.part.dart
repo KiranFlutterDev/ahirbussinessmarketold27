@@ -21,7 +21,6 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
   }
 
   Future<void> downloadFile() async {
-
     try {
       if (widget.url.startsWith('http')) {
         // Download file from URL using Dio
@@ -34,10 +33,8 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
 
             if (persontage == 1) {
               HelperUtils.showSnackBarMessage(
-                  context,
-                  "fileSavedIn".translate(context),
-                  type: MessageType.success
-              );
+                  context, "fileSavedIn".translate(context),
+                  type: MessageType.success);
 
               await OpenFilex.open("$downloadPath/${getFileName()}");
             }
@@ -52,22 +49,17 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
         File(widget.url).copy("$downloadPath/$fileName");
 
         HelperUtils.showSnackBarMessage(
-            context,
-            "fileSavedIn".translate(context),
-            type: MessageType.success
-        );
+            context, "fileSavedIn".translate(context),
+            type: MessageType.success);
 
         await OpenFilex.open("$downloadPath/$fileName");
       }
     } catch (e) {
       HelperUtils.showSnackBarMessage(
-          context,
-          "errorFileSave".translate(context),
-          type: MessageType.success
-      );
+          context, "errorFileSave".translate(context),
+          type: MessageType.success);
     }
   }
-
 
 /*  Future<void> downloadFile() async {
     print("widget url***${widget.url}");
@@ -133,7 +125,7 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
             width: 50,
             alignment: AlignmentDirectional.center,
             decoration: BoxDecoration(
-                color: context.color.secondaryColor.withOpacity(0.064),
+                color: context.color.secondaryColor.withValues(alpha: 0.064),
                 borderRadius: BorderRadius.circular(10),
                 border:
                     Border.all(color: context.color.borderColor, width: 1.5)),
@@ -153,7 +145,7 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
                     ],
                   ),
                 ] else ...[
-                  Text(getExtentionOfFile().toString().toUpperCase()),
+                  CustomText(getExtentionOfFile().toString().toUpperCase()),
                   Icon(
                     Icons.download,
                     size: 14,
@@ -172,11 +164,11 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
             height: 50,
             alignment: AlignmentDirectional.centerStart,
             child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(getFileName().toString()).setMaxLines(
-                lines: 1,
-              ),
-            ),
+                padding: const EdgeInsets.all(4.0),
+                child: CustomText(
+                  getFileName().toString(),
+                  maxLines: 1,
+                )),
           ),
         ),
       ],

@@ -1,76 +1,61 @@
-import 'package:eClassify/ui/screens/auth/sign_up/mobile_signup_screen.dart';
-import 'package:eClassify/ui/screens/home/widgets/categoryFilterScreen.dart';
-import 'package:eClassify/ui/screens/home/widgets/postedSinceFilter.dart';
-import 'package:eClassify/ui/screens/home/widgets/subCategoryFilterScreen.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/widgets/pdf_viewer.dart';
-import 'package:eClassify/ui/screens/item/viewAll.dart';
-import 'package:eClassify/ui/screens/sub_category/sub_category_screen.dart';
+import 'package:eClassify/ui/screens/ad_details_screen.dart';
+import 'package:eClassify/ui/screens/advertisement/my_advertisment_screen.dart';
 import 'package:eClassify/ui/screens/auth/login/forgot_password.dart';
+import 'package:eClassify/ui/screens/auth/login/login_screen.dart';
+import 'package:eClassify/ui/screens/auth/sign_up/mobile_signup_screen.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/signup_main_screen.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/signup_screen.dart';
-import 'package:eClassify/ui/screens/chat/blocked_user_list_screen.dart';
-
-import 'package:eClassify/ui/screens/favorite_screen.dart';
-
-import 'package:eClassify/ui/screens/item/add_item_screen/add_item_details.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/confirm_location_screen.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/more_details.dart';
-import 'package:eClassify/ui/screens/item/items_list.dart';
-import 'package:eClassify/ui/screens/location/cities_screen.dart';
-import 'package:eClassify/ui/screens/location/countries_screen.dart';
-import 'package:eClassify/ui/screens/location/states_screen.dart';
-import 'package:eClassify/ui/screens/seller/seller_verification_complete.dart';
-
-import 'package:eClassify/ui/screens/ad_details_screen.dart';
-import 'package:eClassify/ui/screens/faqs_screen.dart';
-import 'package:eClassify/ui/screens/location_permission_screen.dart';
-import 'package:eClassify/ui/screens/my_review_screen.dart';
-import 'package:eClassify/ui/screens/sold_out_bought_screen.dart';
-import 'package:eClassify/ui/screens/user_profile/edit_profile.dart';
-import 'package:eClassify/utils/hive_utils.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:eClassify/ui/screens/advertisement/my_advertisment_screen.dart';
-import 'package:eClassify/ui/screens/auth/login/login_screen.dart';
-
 import 'package:eClassify/ui/screens/blogs/blog_details.dart';
 import 'package:eClassify/ui/screens/blogs/blogs_screen.dart';
-
+import 'package:eClassify/ui/screens/chat/blocked_user_list_screen.dart';
+import 'package:eClassify/ui/screens/faqs_screen.dart';
+import 'package:eClassify/ui/screens/favorite_screen.dart';
+import 'package:eClassify/ui/screens/filter_screen.dart';
 import 'package:eClassify/ui/screens/home/category_list.dart';
 import 'package:eClassify/ui/screens/home/change_language_screen.dart';
 import 'package:eClassify/ui/screens/home/search_screen.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/widgets/success_item_screen.dart';
+import 'package:eClassify/ui/screens/home/widgets/categoryFilterScreen.dart';
+import 'package:eClassify/ui/screens/home/widgets/posted_since_filter.dart';
+import 'package:eClassify/ui/screens/home/widgets/sub_category_filter.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/add_item_details.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/confirm_location_screen.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/more_details.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/widgets/pdf_viewer.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/widgets/success_item_screen.dart';
+import 'package:eClassify/ui/screens/item/items_list.dart';
 import 'package:eClassify/ui/screens/item/my_items_screen.dart';
-
+import 'package:eClassify/ui/screens/item/view_all_screen.dart';
 import 'package:eClassify/ui/screens/location/areas_screen.dart';
+import 'package:eClassify/ui/screens/location/cities_screen.dart';
+import 'package:eClassify/ui/screens/location/countries_screen.dart';
 import 'package:eClassify/ui/screens/location/nearby_location.dart';
+import 'package:eClassify/ui/screens/location/states_screen.dart';
+import 'package:eClassify/ui/screens/location_permission_screen.dart';
+import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/my_review_screen.dart';
 import 'package:eClassify/ui/screens/onboarding/onboarding_screen.dart';
-
 import 'package:eClassify/ui/screens/seller/seller_intro_verification.dart';
 import 'package:eClassify/ui/screens/seller/seller_profile.dart';
 import 'package:eClassify/ui/screens/seller/seller_verification.dart';
+import 'package:eClassify/ui/screens/seller/seller_verification_complete.dart';
 import 'package:eClassify/ui/screens/settings/contact_us.dart';
 import 'package:eClassify/ui/screens/settings/notification_detail.dart';
 import 'package:eClassify/ui/screens/settings/notifications.dart';
 import 'package:eClassify/ui/screens/settings/profile_setting.dart';
-import 'package:eClassify/ui/screens/subscription/packages_list.dart';
-
-import 'package:eClassify/ui/screens/subscription/transaction_history_screen.dart';
-
-import 'package:eClassify/ui/screens/filter_screen.dart';
-import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/sold_out_bought_screen.dart';
 import 'package:eClassify/ui/screens/splash_screen.dart';
+import 'package:eClassify/ui/screens/sub_category/sub_category_screen.dart';
+import 'package:eClassify/ui/screens/subscription/packages_list.dart';
+import 'package:eClassify/ui/screens/subscription/transaction_history_screen.dart';
+import 'package:eClassify/ui/screens/user_profile/edit_profile.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
-import 'package:eClassify/data/repositories/item/item_repository.dart';
-import 'package:eClassify/data/model/data_output.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class Routes {
-  //private constructor
-  //Routes._();
-
   static const splash = 'splash';
   static const onboarding = 'onboarding';
   static const login = 'login';
@@ -85,7 +70,7 @@ class Routes {
   static const waitingScreen = 'waitingScreen';
   static const categories = 'Categories';
   static const addresses = 'address';
-  static const chooseAdrs = 'chooseAddress';
+  static const chooseAddress = 'chooseAddress';
   static const itemsList = 'itemsList';
   static const contactUs = 'ContactUs';
   static const profileSettings = 'profileSettings';
@@ -150,46 +135,35 @@ class Routes {
   static const blockedUserListScreen = '/blockedUserListScreen';
   static const payStackWebViewScreen = '/payStackWebViewScreen';
 
-  // static const myItemsScreen = '/myItemsScreen';
-
   //Sandbox[test]
   static const playground = 'playground';
 
-  static String currentRoute = splash;
-
-  //static String previousCustomerRoute = splash;
+  static String currentRoute = '';
+  static String previousRoute = '';
 
   static Route onGenerateRouted(RouteSettings routeSettings) {
-    currentRoute = routeSettings.name ?? "";
+    previousRoute = currentRoute;
+
+    print('$previousRoute -> $currentRoute');
 
     if (routeSettings.name!.contains('/product-details/')) {
-      String itemSlug = routeSettings.name!.split('/').last;
-      // Fetch item details based on the itemId
-      return MaterialPageRoute(builder: (context) {
-        return FutureBuilder<DataOutput<ItemModel>>(
-          future: ItemRepository().fetchItemFromItemSlug(itemSlug),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // Return a loading indicator while fetching data
-              return Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              // Handle error case
-              return Scaffold(
-                body: Center(
-                  child: Text('Error: ${snapshot.error}'),
-                ),
-              );
-            } else {
-              return AdDetailsScreen(model: snapshot.data!.modelList.first);
-            }
-          },
-        );
-      });
+      final itemSlug = routeSettings.name!.split('/').last;
+      if (previousRoute.isEmpty) {
+        return BlurredRouter(
+            builder: ((context) => SplashScreen(
+                  itemSlug: itemSlug,
+                )));
+      } else {
+        //Pop the current route if it is adDetailsScreen otherwise multiple adDetailsScreen will be added
+        //when navigating through deep links
+        if (currentRoute == adDetailsScreen) {
+          Constant.navigatorKey.currentState?.pop();
+        }
+        return AdDetailsScreen.route(
+            RouteSettings(arguments: {"slug": itemSlug}));
+      }
     }
+    currentRoute = routeSettings.name ?? "";
 
     switch (routeSettings.name) {
       case splash:
@@ -312,27 +286,8 @@ class Routes {
       case myReviewsScreen:
         return MyReviewScreen.route(routeSettings);
 
-      /*case payStackWebViewScreen:
-        return PaystackWebView.route(routeSettings);*/
-
-      /*  case myItemsScreen:
-        return ItemsScreen.route(routeSettings);*/
-
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());
-      /*
-        if (routeSettings.name!.contains(AppSettings.shareNavigationWebUrl)) {
-
-          return NativeLinkWidget.render(routeSettings);
-        }
-
-        return BlurredRouter(
-          builder: ((context) => Scaffold(
-                body: Text(
-                  "pageNotFoundErrorMsg".translate(context),
-                ),
-              )),
-        );*/
     }
   }
 }

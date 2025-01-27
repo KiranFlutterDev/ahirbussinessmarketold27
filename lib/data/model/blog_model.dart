@@ -1,5 +1,3 @@
-
-
 class BlogModel {
   int? id;
   String? title;

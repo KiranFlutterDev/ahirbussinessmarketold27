@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/unblock_user_cubit.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
@@ -7,8 +9,7 @@ import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
@@ -127,7 +128,7 @@ class _BlockedUserListScreenState extends State<BlockedUserListScreen> {
                   context,
                   dialoge: BlurredDialogBox(
                     acceptButtonName: "unBlockLbl".translate(context),
-                    content: Text(
+                    content: CustomText(
                       "${"unBlockLbl".translate(context)}\t${user.name!}\t${"toSendMessage".translate(context)}"
                           .translate(context),
                     ),
@@ -185,11 +186,12 @@ class _BlockedUserListScreenState extends State<BlockedUserListScreen> {
                       width: 10,
                     ),
                     Expanded(
-                      child: Text(
+                      child: CustomText(
                         user.name!,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                      ).bold().color(context.color.textColorDark),
+                        color: context.color.textColorDark,
+                        fontSize: context.font.large,
+                        fontWeight: FontWeight.bold,
+                      ),
                     )
                   ],
                 ),

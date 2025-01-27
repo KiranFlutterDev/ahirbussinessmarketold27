@@ -1,7 +1,6 @@
 import 'package:eClassify/data/repositories/renew_item_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class RenewItemState {}
 
 class RenewItemInitial extends RenewItemState {}

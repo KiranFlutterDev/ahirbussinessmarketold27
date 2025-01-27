@@ -1,37 +1,33 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/location/fetch_countries_cubit.dart';
-import 'package:eClassify/data/model/location/countriesModel.dart';
+import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/data/model/location/countries_model.dart';
+import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shimmer/shimmer.dart';
-
-import 'package:eClassify/utils/api.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
-
-import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/ui_utils.dart';
 
 class CountriesScreen extends StatefulWidget {
   final String from;
@@ -57,16 +53,18 @@ class CountriesScreen extends StatefulWidget {
   CountriesScreenState createState() => CountriesScreenState();
 }
 
-class CountriesScreenState extends State<CountriesScreen> {
+class CountriesScreenState extends State<CountriesScreen>
+    with WidgetsBindingObserver {
   bool isFocused = false;
   String previousSearchQuery = "";
   TextEditingController searchController = TextEditingController(text: null);
   final ScrollController controller = ScrollController();
   Timer? _searchDelay;
-  String _locationStatus = 'enableLocation'; // Initial status
+  ValueNotifier<String> _locationStatus = ValueNotifier('enableLocation');
   String _currentLocation = '';
   bool _isFetchingLocation = false;
 
+  bool shouldListenToAppLifeCycle = false;
   @override
   void initState() {
     super.initState();
@@ -79,6 +77,34 @@ class CountriesScreenState extends State<CountriesScreen> {
     searchController.addListener(searchItemListener);
     controller.addListener(pageScrollListen);
     defaultLocation();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      shouldListenToAppLifeCycle = true;
+    }
+    if (state == AppLifecycleState.resumed && shouldListenToAppLifeCycle) {
+      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+      final permission = await Geolocator.checkPermission();
+      final isPermissionGiven = permission != LocationPermission.denied &&
+          permission != LocationPermission.deniedForever;
+      log('$permission', name: 'APP LIFECYCLE');
+      _locationStatus.value =
+          _getLocationStatus(isLocationEnabled, isPermissionGiven);
+      shouldListenToAppLifeCycle = false;
+    }
+  }
+
+  String _getLocationStatus(bool locationEnabled, bool permissionGiven) {
+    return switch ((locationEnabled, permissionGiven)) {
+      (true, true) => 'fetchLocation',
+      (true, false) => 'locationPermissionDenied',
+      (false, true) => 'locationServiceDisabled',
+      (false, false) => 'enableLocation',
+    };
   }
 
   void pageScrollListen() {
@@ -111,9 +137,6 @@ class CountriesScreenState extends State<CountriesScreen> {
       previousSearchQuery = searchController.text;
       setState(() {});
     }
-    // } else {
-    // context.read<SearchItemCubit>().clearSearch();
-    // }
   }
 
   PreferredSizeWidget appBarWidget(List<CountriesModel> countriesModel) {
@@ -121,14 +144,14 @@ class CountriesScreenState extends State<CountriesScreen> {
       systemOverlayStyle:
           SystemUiOverlayStyle(statusBarColor: context.color.backgroundColor),
       bottom: PreferredSize(
-          preferredSize: Size.fromHeight(58.rh(context)),
+          preferredSize: Size.fromHeight(58),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
                 child: Container(
                     width: double.maxFinite,
-                    height: 48.rh(context),
+                    height: 48,
                     margin: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     alignment: AlignmentDirectional.center,
                     decoration: BoxDecoration(
@@ -178,8 +201,8 @@ class CountriesScreenState extends State<CountriesScreen> {
                         arguments: {"from": widget.from});
                   },
                   child: Container(
-                    width: 50.rw(context),
-                    height: 50.rh(context),
+                    width: 50,
+                    height: 50,
                     margin: EdgeInsetsDirectional.only(end: sidePadding),
                     decoration: BoxDecoration(
                       border: Border.all(
@@ -200,12 +223,12 @@ class CountriesScreenState extends State<CountriesScreen> {
             ],
           )),
       automaticallyImplyLeading: false,
-      title: Text(
+      title: CustomText(
         "locationLbl".translate(context),
-      )
-          .color(context.color.textDefaultColor)
-          .bold(weight: FontWeight.w600)
-          .size(18),
+        color: context.color.textDefaultColor,
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+      ),
       leading: Material(
         clipBehavior: Clip.antiAlias,
         color: Colors.transparent,
@@ -240,7 +263,7 @@ class CountriesScreenState extends State<CountriesScreen> {
       shadowColor:
           context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
               ? null
-              : context.color.textDefaultColor.withOpacity(0.2),
+              : context.color.textDefaultColor.withValues(alpha: 0.2),
       backgroundColor: context.color.backgroundColor,
     );
   }
@@ -249,10 +272,6 @@ class CountriesScreenState extends State<CountriesScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      /*   padding: const EdgeInsets.symmetric(
-        vertical: 10 + defaultPadding,
-        //horizontal: defaultPadding,
-      ),*/
       itemCount: 15,
       separatorBuilder: (context, index) {
         return Container();
@@ -295,62 +314,59 @@ class CountriesScreenState extends State<CountriesScreen> {
     return searchItemsWidget();
   }
 
-  defaultLocation() {
+  void defaultLocation() async {
     _currentLocation = [
       HiveUtils.getCurrentAreaName(),
       HiveUtils.getCurrentCityName(),
       HiveUtils.getCurrentStateName(),
       HiveUtils.getCurrentCountryName()
     ].where((part) => part != null && part.isNotEmpty).join(', ');
-    _locationStatus =
-        _currentLocation.isNotEmpty ? 'locationFetched' : 'enableLocation';
-    setState(() {});
+    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+    final permission = await Geolocator.checkPermission();
+    final isPermissionGiven = permission != LocationPermission.denied &&
+        permission != LocationPermission.deniedForever;
+    log('$permission - $isPermissionGiven - $isLocationEnabled');
+    _locationStatus.value =
+        _currentLocation.isNotEmpty && isLocationEnabled && isPermissionGiven
+            ? 'locationFetched'
+            : _getLocationStatus(isLocationEnabled, isPermissionGiven);
   }
 
   Future<void> _getCurrentLocation() async {
     if (_isFetchingLocation) return;
-
-    setState(() {
-      _isFetchingLocation = true;
-      _locationStatus = 'fetchingLocation';
-    });
-
+    _isFetchingLocation = true;
     try {
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _locationStatus = 'locationServicesDisabled';
-          _isFetchingLocation = false;
-        });
+      //Check if location is enabled
+      final locationEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!locationEnabled) {
+        //if location is not enabled, ask the user to turn on location
+        await Geolocator.openLocationSettings();
         return;
       }
 
-      // Check location permissions
-      LocationPermission permission = await Geolocator.checkPermission();
+      //Check if location permission given
+      final permission = await Geolocator.checkPermission();
+      log('$permission', name: 'current status');
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _locationStatus = 'locationPermissionsDenied';
-            _isFetchingLocation = false;
-          });
-          return;
+        final newPermission = await Geolocator.requestPermission();
+        log('$newPermission');
+        if (newPermission == LocationPermission.deniedForever &&
+            permission == LocationPermission.denied) {
+          _locationStatus.value = 'pleaseEnableLocationServicesManually';
         }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _locationStatus = 'locationPermissionsPermanentlyDenied';
-          _isFetchingLocation = false;
-        });
         return;
+      } else if (permission == LocationPermission.deniedForever) {
+        //Ask the user to give permission
+        //When the permission is LocationPermission.deniedForever, the request dialog won't appear hence we take user to app settings
+        await Geolocator.openAppSettings();
+        return;
+      } else {
+        _locationStatus.value = 'fetchingLocation';
       }
 
       // Get the current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
 
       // Get placemarks from coordinates
       List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -361,17 +377,15 @@ class CountriesScreenState extends State<CountriesScreen> {
       if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks[0];
         if (mounted) {
-          setState(() {
-            _currentLocation = [
-              placemark.subLocality,
-              placemark.locality,
-              placemark.administrativeArea,
-              placemark.country,
-            ].where((part) => part != null && part.isNotEmpty).join(', ');
-            _locationStatus = _currentLocation.isNotEmpty
-                ? 'locationFetched'
-                : 'enableLocation';
-          });
+          _currentLocation = [
+            placemark.subLocality,
+            placemark.locality,
+            placemark.administrativeArea,
+            placemark.country,
+          ].where((part) => part != null && part.isNotEmpty).join(', ');
+          _locationStatus.value = _currentLocation.isNotEmpty
+              ? 'locationFetched'
+              : 'enableLocation';
 
           // Store current location in Hive
           HiveUtils.setCurrentLocation(
@@ -415,8 +429,6 @@ class CountriesScreenState extends State<CountriesScreen> {
                   isCurrent: false, isHomeUpdate: false, context: context);
               HelperUtils.killPreviousPages(
                   context, Routes.main, {"from": "login"});
-              /*Navigator.of(context).pushReplacementNamed(Routes.main,
-                  arguments: {'from': "main"});*/
             } else {
               HiveUtils.setLocation(
                 area: placemark.subLocality,
@@ -428,8 +440,6 @@ class CountriesScreenState extends State<CountriesScreen> {
               );
               HelperUtils.killPreviousPages(
                   context, Routes.main, {"from": "login"});
-              /*Navigator.of(context).pushReplacementNamed(Routes.main,
-                  arguments: {'from': "main"});*/
             }
           } else {
             Map<String, dynamic> result = {
@@ -446,18 +456,13 @@ class CountriesScreenState extends State<CountriesScreen> {
           }
         }
       } else {
-        setState(() {
-          _locationStatus = 'noPlacemarksFound';
-        });
+        _locationStatus.value = 'unableToDetermineLocation';
       }
-    } catch (e) {
-      setState(() {
-        _locationStatus = 'locationFetchError';
-      });
+    } on Exception catch (e) {
+      log('$e');
+      _locationStatus.value = 'locationFetchError';
     } finally {
-      setState(() {
-        _isFetchingLocation = false;
-      });
+      _isFetchingLocation = false;
     }
   }
 
@@ -472,7 +477,7 @@ class CountriesScreenState extends State<CountriesScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: InkWell(
-                onTap: _isFetchingLocation ? null : _getCurrentLocation,
+                onTap: _getCurrentLocation,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -487,21 +492,25 @@ class CountriesScreenState extends State<CountriesScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("useCurrentLocation".translate(context))
-                                .color(context.color.territoryColor)
-                                .bold(weight: FontWeight.bold),
+                            CustomText(
+                              "useCurrentLocation".translate(context),
+                              color: context.color.territoryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                             Padding(
                               padding: const EdgeInsets.only(top: 3.0),
-                              child: Text(
-                                _locationStatus == 'locationFetched'
-                                    ? _currentLocation
-                                    : _isFetchingLocation
-                                        ? "fetchingLocation".translate(context)
-                                        : "enableLocation".translate(context),
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
+                              child: ValueListenableBuilder(
+                                  valueListenable: _locationStatus,
+                                  builder: (context, value, child) {
+                                    return CustomText(
+                                      value == 'locationFetched'
+                                          ? _currentLocation
+                                          : value.translate(context),
+                                      softWrap: true,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    );
+                                  }),
                             ),
                           ],
                         ),
@@ -552,7 +561,8 @@ class CountriesScreenState extends State<CountriesScreen> {
 
               if (state is FetchCountriesSuccess) {
                 if (state.countriesModel.isEmpty) {
-                  return Center(child: SingleChildScrollView(child: NoDataFound()));
+                  return Center(
+                      child: SingleChildScrollView(child: NoDataFound()));
                 }
 
                 return Container(
@@ -566,15 +576,15 @@ class CountriesScreenState extends State<CountriesScreen> {
                           ? Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 18, vertical: 18),
-                              child: Text(
+                              child: CustomText(
                                 "${"chooseLbl".translate(context)}\t${"country".translate(context)}",
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                              )
-                                  .color(context.color.textDefaultColor)
-                                  .size(context.font.normal)
-                                  .bold(weight: FontWeight.w600),
+                                color: context.color.textDefaultColor,
+                                fontSize: context.font.normal,
+                                fontWeight: FontWeight.w600,
+                              ),
                             )
                           : InkWell(
                               child: Padding(
@@ -582,15 +592,15 @@ class CountriesScreenState extends State<CountriesScreen> {
                                     horizontal: 15, vertical: 12),
                                 child: Row(
                                   children: [
-                                    Text(
+                                    CustomText(
                                       "${"lblall".translate(context)}\t${"countriesLbl".translate(context)}",
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                    )
-                                        .color(context.color.textDefaultColor)
-                                        .size(context.font.normal)
-                                        .bold(weight: FontWeight.w600),
+                                      color: context.color.textDefaultColor,
+                                      fontSize: context.font.normal,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     Spacer(),
                                     Container(
                                         width: 32,
@@ -674,14 +684,15 @@ class CountriesScreenState extends State<CountriesScreen> {
                                   "from": widget.from
                                 });
                               },
-                              title: Text(
+                              title: CustomText(
                                 country.name!,
                                 textAlign: TextAlign.start,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                              )
-                                  .color(context.color.textDefaultColor)
-                                  .size(context.font.normal),
+                                color: context.color.textDefaultColor,
+                                fontSize: context.font.normal,
+                                fontWeight: FontWeight.w600,
+                              ),
                               trailing: Container(
                                   width: 32,
                                   height: 32,
@@ -741,7 +752,7 @@ class CountriesScreenState extends State<CountriesScreen> {
   @override
   void dispose() {
     searchController.dispose();
-    searchController.clear();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

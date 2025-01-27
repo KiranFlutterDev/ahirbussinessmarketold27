@@ -2,10 +2,9 @@ import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -15,7 +14,6 @@ class SellerVerificationCompleteScreen extends StatefulWidget {
   });
 
   static Route route(RouteSettings settings) {
-    Map? arguments = settings.arguments as Map?;
     return BlurredRouter(
       builder: (context) {
         return SellerVerificationCompleteScreen();
@@ -88,7 +86,7 @@ class _SellerVerificationCompleteScreenState
         if (mounted) {
           Navigator.pop(context);
           Navigator.pop(context);
-          Navigator.pop(context,'refresh');
+          Navigator.pop(context, 'refresh');
         }
       });
   }
@@ -97,7 +95,7 @@ class _SellerVerificationCompleteScreenState
   Widget build(BuildContext context) {
     return PopScope(
       canPop: isBack,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         // Handle back button press
         _handleBackButtonPressed();
       },
@@ -115,24 +113,25 @@ class _SellerVerificationCompleteScreenState
                 position: _slideAnimation,
                 child: Column(
                   children: [
-                    SizedBox(height: 50.rh(context)),
+                    SizedBox(height: 50),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Text(
-                        'userVerificationCompleted'.translate(context),
-                      )
-                          .centerAlign()
-                          .size(context.font.extraLarge)
-                          .color(context.color.territoryColor)
-                          .bold(weight: FontWeight.w600),
-                    ),
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: CustomText(
+                          'userVerificationCompleted'.translate(context),
+                          fontSize: context.font.extraLarge,
+                          fontWeight: FontWeight.w600,
+                          color: context.color.territoryColor,
+                          textAlign: TextAlign.center,
+                        )),
                     SizedBox(height: 18),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Text('sellerDocApproveLbl'.translate(context))
-                          .centerAlign()
-                          .size(context.font.larger)
-                          .color(context.color.textDefaultColor),
+                      child: CustomText(
+                        'sellerDocApproveLbl'.translate(context),
+                        textAlign: TextAlign.center,
+                        fontSize: context.font.larger,
+                        color: context.color.textDefaultColor,
+                      ),
                     ),
                     SizedBox(height: 60),
                     InkWell(
@@ -147,10 +146,10 @@ class _SellerVerificationCompleteScreenState
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             color: context.color.territoryColor),
-                        child: Text("backToProfile".translate(context))
-                            .centerAlign()
-                            .size(context.font.larger)
-                            .color(context.color.secondaryColor),
+                        child: CustomText("backToProfile".translate(context),
+                            color: context.color.secondaryColor,
+                            textAlign: TextAlign.center,
+                            fontSize: context.font.larger),
                       ),
                     ),
                   ],

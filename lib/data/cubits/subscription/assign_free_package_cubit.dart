@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/repositories/advertisement_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,10 +29,8 @@ class AssignFreePackageCubit extends Cubit<AssignFreePackageState> {
     emit(AssignFreePackageInProgress());
 
     repository.assignFreePackages(packageId: packageId).then((value) {
-
       emit(AssignFreePackageInSuccess(value['message']));
     }).catchError((e) {
-
       emit(AssignFreePackageFailure(e.toString()));
     });
   }

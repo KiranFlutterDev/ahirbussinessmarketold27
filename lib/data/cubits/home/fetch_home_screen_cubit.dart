@@ -1,8 +1,6 @@
-
 import 'package:eClassify/data/model/home/home_screen_section.dart';
 import 'package:eClassify/data/repositories/home/home_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class FetchHomeScreenState {}
 
@@ -22,13 +20,13 @@ class FetchHomeScreenFail extends FetchHomeScreenState {
   FetchHomeScreenFail(this.error);
 }
 
-class FetchHomeScreenCubit extends Cubit<FetchHomeScreenState>
-   {
+class FetchHomeScreenCubit extends Cubit<FetchHomeScreenState> {
   FetchHomeScreenCubit() : super(FetchHomeScreenInitial());
 
   final HomeRepository _homeRepository = HomeRepository();
 
-  fetch({String? country, String? state, String? city, int? areaId}) async {
+  void fetch(
+      {String? country, String? state, String? city, int? areaId}) async {
     try {
       emit(FetchHomeScreenInProgress());
       List<HomeScreenSection> homeScreenDataList =
@@ -42,13 +40,11 @@ class FetchHomeScreenCubit extends Cubit<FetchHomeScreenState>
     }
   }
 
-  @override
   FetchHomeScreenState? fromJson(Map<String, dynamic> json) {
     // TODO: implement fromJson
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(FetchHomeScreenState state) {
     // TODO: implement toJson
     return null;

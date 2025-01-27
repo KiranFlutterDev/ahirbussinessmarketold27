@@ -3,18 +3,17 @@ import 'dart:ui' as ui;
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/data/cubits/company_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
+import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -56,18 +55,22 @@ class ContactUsState extends State<ContactUs> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("howCanWeHelp".translate(context))
-                    .color(context.color.textColorDark)
-                    .size(context.font.larger)
-                    .bold(weight: FontWeight.w700),
-                SizedBox(
-                  height: 10.rh(context),
+                CustomText(
+                  "howCanWeHelp".translate(context),
+                  color: context.color.textColorDark,
+                  fontSize: context.font.larger,
+                  fontWeight: FontWeight.w700,
                 ),
-                Text("itLooksLikeYouHasError".translate(context))
-                    .size(context.font.small)
-                    .color(context.color.textLightColor),
                 SizedBox(
-                  height: 15.rh(context),
+                  height: 10,
+                ),
+                CustomText(
+                  "itLooksLikeYouHasError".translate(context),
+                  fontSize: context.font.small,
+                  color: context.color.textLightColor,
+                ),
+                SizedBox(
+                  height: 15,
                 ),
                 customTile(context, title: "callBtnLbl".translate(context),
                     onTap: () async {
@@ -77,22 +80,28 @@ class ContactUsState extends State<ContactUs> {
                   UiUtils.showBlurredDialoge(context,
                       dialoge: BlurredDialogBox(
                         title: "chooseNumber".translate(context),
-                        showCancleButton: false,
-                        barrierDismissable: true,
+                        showCancelButton: false,
+                        barrierDismissible: true,
                         acceptTextColor: context.color.buttonColor,
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             ListTile(
-                              title: Text(number1.toString()).centerAlign(),
+                              title: CustomText(
+                                number1.toString(),
+                                textAlign: TextAlign.center,
+                              ),
                               onTap: () async {
                                 await launchUrl(Uri.parse("tel:$number1"));
                               },
                             ),
                             if (number2 != null)
                               ListTile(
-                                title: Text(number2.toString()).centerAlign(),
+                                title: CustomText(
+                                  number2.toString(),
+                                  textAlign: TextAlign.center,
+                                ),
                                 onTap: () async {
                                   await launchUrl(Uri.parse("tel:$number2"));
                                 },
@@ -102,19 +111,19 @@ class ContactUsState extends State<ContactUs> {
                       ));
                 }, svgImagePath: AppIcons.call),
                 SizedBox(
-                  height: 15.rh(context),
+                  height: 15,
                 ),
                 customTile(context, title: "companyEmailLbl".translate(context),
                     onTap: () {
                   var email = state.companyData.companyEmail;
-                  showEmailDialoge(email);
+                  showEmailDialog(email);
                 }, svgImagePath: AppIcons.message)
               ],
             ),
           );
         } else if (state is CompanyFetchFailure) {
           return Center(
-            child: Text(state.errmsg),
+            child: CustomText(state.errmsg),
           );
         } else {
           return const SizedBox.shrink();
@@ -123,7 +132,7 @@ class ContactUsState extends State<ContactUs> {
     );
   }
 
-  showEmailDialoge(email) {
+  void showEmailDialog(email) {
     Navigator.push(
         context,
         BlurredRouter(
@@ -146,8 +155,8 @@ class ContactUsState extends State<ContactUs> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: context.color.territoryColor.withOpacity(
-                0.10000000149011612,
+              color: context.color.territoryColor.withValues(
+                alpha: .10000000149011612,
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -157,11 +166,13 @@ class ContactUsState extends State<ContactUs> {
                     color: context.color.territoryColor)),
           ),
           SizedBox(
-            width: 25.rw(context),
+            width: 25,
           ),
-          Text(title)
-              .bold(weight: FontWeight.w700)
-              .color(context.color.textColorDark),
+          CustomText(
+            title,
+            fontWeight: FontWeight.w700,
+            color: context.color.textColorDark,
+          ),
           const Spacer(),
           if (isSwitchBox != true)
             Container(
@@ -171,7 +182,7 @@ class ContactUsState extends State<ContactUs> {
                 border:
                     Border.all(color: context.color.borderColor, width: 1.5),
                 color: context.color.secondaryColor
-                    .withOpacity(0.10000000149011612),
+                    .withValues(alpha: 0.10000000149011612),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: FittedBox(
@@ -220,7 +231,7 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white.withOpacity(0.0),
+      backgroundColor: Colors.white.withValues(alpha: 0.0),
       body: Center(
         child: Container(
           clipBehavior: Clip.antiAlias,
@@ -259,8 +270,8 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
                         },
                         child: Container(
                             decoration: BoxDecoration(
-                              color:
-                                  context.color.territoryColor.withOpacity(0.0),
+                              color: context.color.territoryColor
+                                  .withValues(alpha: 0.0),
                               shape: BoxShape.circle,
                             ),
                             width: 40,
@@ -281,18 +292,18 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
                     ],
                   ),
                   SizedBox(
-                    height: 20.rh(context),
+                    height: 20,
                   ),
-                  Text("sendEmail".translate(context)),
+                  CustomText("sendEmail".translate(context)),
                   SizedBox(
-                    height: 15.rh(context),
+                    height: 15,
                   ),
                   CustomTextFormField(
                     controller: _subject,
                     hintText: "subject".translate(context),
                   ),
                   SizedBox(
-                    height: 15.rh(context),
+                    height: 15,
                   ),
                   CustomTextFormField(
                     controller: _email,
@@ -300,7 +311,7 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
                     hintText: "companyEmailLbl".translate(context),
                   ),
                   SizedBox(
-                    height: 15.rh(context),
+                    height: 15,
                   ),
                   CustomTextFormField(
                     controller: _text,
@@ -309,7 +320,7 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
                     minLine: 5,
                   ),
                   SizedBox(
-                    height: 15.rh(context),
+                    height: 15,
                   ),
                   UiUtils.buildButton(context, onPressed: () async {
                     Uri redirecturi = Uri(
@@ -317,9 +328,7 @@ class _EmailSendWidgetState extends State<EmailSendWidget> {
                         path: _email.text,
                         query: 'subject=${_subject.text}&body=${_text.text}');
                     await launchUrl(redirecturi);
-                  },
-                      height: 50.rh(context),
-                      buttonTitle: "sendEmail".translate(context))
+                  }, height: 50, buttonTitle: "sendEmail".translate(context))
                 ],
               ),
             ),

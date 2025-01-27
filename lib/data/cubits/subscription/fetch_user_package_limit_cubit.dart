@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/repositories/advertisement_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,10 +27,8 @@ class FetchUserPackageLimitCubit extends Cubit<FetchUserPackageLimitState> {
     emit(FetchUserPackageLimitInProgress());
 
     repository.fetchUserPackageLimit(packageType: packageType).then((value) {
-
       emit(FetchUserPackageLimitInSuccess(value['message']));
     }).catchError((e) {
-
       emit(FetchUserPackageLimitFailure(e.toString()));
     });
   }

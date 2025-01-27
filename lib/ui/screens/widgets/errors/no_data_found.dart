@@ -1,9 +1,9 @@
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
 
 class NoDataFound extends StatelessWidget {
   final double? height;
@@ -29,27 +29,31 @@ class NoDataFound extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Text(mainMessage == null
-                  ? "nodatafound".translate(context)
-                  : mainMessage!)
-              .size(context.font.extraLarge)
-              .color(context.color.territoryColor)
-              .bold(weight: FontWeight.w600),
+          CustomText(
+            mainMessage == null
+                ? "nodatafound".translate(context)
+                : mainMessage!,
+            fontSize: context.font.extraLarge,
+            color: context.color.territoryColor,
+            fontWeight: FontWeight.w600,
+          ),
           const SizedBox(
             height: 14,
           ),
-          Text(subMessage == null
-                  ? "sorryLookingFor".translate(context)
-                  : subMessage!)
-              .size(context.font.larger)
-              .centerAlign(),
-          // Text(UiUtils.getTranslatedLabel(context, "nodatafound")),
+          CustomText(
+            subMessage == null
+                ? "sorryLookingFor".translate(context)
+                : subMessage!,
+            fontSize: context.font.larger,
+            textAlign: TextAlign.center,
+          ),
+          // CustomText(UiUtils.getTranslatedLabel(context, "nodatafound")),
           // TextButton(
           //     onPressed: onTap,
           //     style: ButtonStyle(
           //         overlayColor: MaterialStateItem.all(
-          //             context.color.teritoryColor.withOpacity(0.2))),
-          //     child: const Text("Retry").color(context.color.teritoryColor))
+          //             context.color.teritoryColor.withValues(alpha: 0.2))),
+          //     child: const CustomText("Retry").color(context.color.teritoryColor))
         ],
       ),
     );

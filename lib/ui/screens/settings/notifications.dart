@@ -1,24 +1,22 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/fetch_notifications_cubit.dart';
 import 'package:eClassify/data/helper/custom_exception.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/notification_data.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/intertitial_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 late NotificationData selectedNotification;
 
@@ -38,13 +36,6 @@ class Notifications extends StatefulWidget {
 class NotificationsState extends State<Notifications> {
   late final ScrollController _pageScrollController = ScrollController();
 
-  /* ..addListener(() {
-      if (_pageScrollController.isEndReached()) {
-        if (context.read<FetchNotificationsCubit>().hasMoreData()) {
-          context.read<FetchNotificationsCubit>().fetchNotificationsMore();
-        }
-      }
-    });*/
   List<ItemModel> itemData = [];
 
   @override
@@ -65,7 +56,6 @@ class NotificationsState extends State<Notifications> {
 
   @override
   void dispose() {
-    //Routes.currentRoute = Routes.previousCustomerRoute;
     super.dispose();
   }
 
@@ -142,17 +132,17 @@ class NotificationsState extends State<Notifications> {
                   children: <Widget>[
                     CustomShimmer(
                       height: 7,
-                      width: 200.rw(context),
+                      width: 200,
                     ),
                     const SizedBox(height: 5),
                     CustomShimmer(
                       height: 7,
-                      width: 100.rw(context),
+                      width: 100,
                     ),
                     const SizedBox(height: 5),
                     CustomShimmer(
                       height: 7,
-                      width: 150.rw(context),
+                      width: 150,
                     )
                   ],
                 )
@@ -204,9 +194,7 @@ class NotificationsState extends State<Notifications> {
                               Radius.circular(15),
                             ),
                             child: UiUtils.getImage(notificationData.image!,
-                                height: 53.rh(context),
-                                width: 53.rw(context),
-                                fit: BoxFit.fill),
+                                height: 53, width: 53, fit: BoxFit.fill),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -224,22 +212,28 @@ class NotificationsState extends State<Notifications> {
                                           fontWeight: FontWeight.w500)),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 3.0),
-                                  child: Text(
-                                    notificationData.message!.firstUpperCase(),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall!,
-                                  ).color(context.color.textLightColor),
-                                ),
+                                    padding: const EdgeInsets.only(top: 3.0),
+                                    child: Text(
+                                      notificationData.message!
+                                          .firstUpperCase(),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                              color:
+                                                  context.color.textLightColor),
+                                    )),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 4.0),
-                                  child: Text(notificationData.createdAt!
-                                          .formatDate()
-                                          .toString())
-                                      .size(context.font.smaller)
-                                      .color(context.color.textLightColor),
+                                  child: CustomText(
+                                    notificationData.createdAt!
+                                        .formatDate()
+                                        .toString(),
+                                    fontSize: context.font.smaller,
+                                    color: context.color.textLightColor,
+                                  ),
                                 )
                               ])),
                         ]),

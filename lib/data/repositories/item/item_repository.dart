@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:eClassify/data/model/item_filter_model.dart';
-import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/model/item_filter_model.dart';
+import 'package:eClassify/utils/api.dart';
 import 'package:path/path.dart' as path;
-
 
 class ItemRepository {
   Future<ItemModel> createItem(
@@ -122,8 +121,9 @@ class ItemRepository {
       queryParameters: parameters,
     );
 
-    List<ItemModel> modelList =
-        (response['data']['data'] as List).map((e) => ItemModel.fromJson(e)).toList();
+    List<ItemModel> modelList = (response['data']['data'] as List)
+        .map((e) => ItemModel.fromJson(e))
+        .toList();
 
     return DataOutput(total: modelList.length, modelList: modelList);
   }
@@ -373,13 +373,5 @@ class ItemRepository {
         .toList();
 
     return DataOutput(total: response['data']['total'] ?? 0, modelList: items);
-  }
-
-  Future<List<MultipartFile>> _fileToMultipartFileList(List<File> files) async {
-    List<MultipartFile> multipartFileList = [];
-    for (File file in files) {
-      multipartFileList.add(await MultipartFile.fromFile(file.path));
-    }
-    return multipartFileList;
   }
 }

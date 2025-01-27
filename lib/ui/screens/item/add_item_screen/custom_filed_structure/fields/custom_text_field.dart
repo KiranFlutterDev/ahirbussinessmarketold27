@@ -1,12 +1,11 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
-import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 
 class CustomFieldText extends CustomField {
   @override
@@ -35,10 +34,10 @@ class CustomFieldText extends CustomField {
           children: [
             if (parameters['image'] != null) ...[
               Container(
-                width: 48.rw(context),
-                height: 48.rh(context),
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: context.color.territoryColor.withOpacity(0.1),
+                  color: context.color.territoryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: SizedBox(
@@ -55,17 +54,19 @@ class CustomFieldText extends CustomField {
                 ),
               ),
               SizedBox(
-                width: 10.rw(context),
+                width: 10,
               ),
             ],
-            Text(parameters['name'])
-                .size(context.font.large)
-                .bold(weight: FontWeight.w500)
-                .color(context.color.textColorDark)
+            CustomText(
+              parameters['name'],
+              fontSize: context.font.large,
+              fontWeight: FontWeight.w500,
+              color: context.color.textColorDark,
+            )
           ],
         ),
         SizedBox(
-          height: 14.rh(context),
+          height: 14,
         ),
         CustomTextFieldDynamic(
           action: TextInputAction.newline,

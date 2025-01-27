@@ -1,6 +1,6 @@
-﻿import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/data/model/data_output.dart';
+﻿import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
+import 'package:eClassify/utils/api.dart';
 
 class SellerRatingsRepository {
   Future<DataOutput<UserRatings>> fetchSellerRatingsAllRatings(
@@ -9,15 +9,16 @@ class SellerRatingsRepository {
       Map<String, dynamic> parameters = {"id": sellerId, "page": page};
 
       Map<String, dynamic> response =
-      await Api.get(url: Api.getSellerApi, queryParameters: parameters);
+          await Api.get(url: Api.getSellerApi, queryParameters: parameters);
 
       // Deserialize response into SellerRatingsModel
       SellerRatingsModel sellerRatingsModel =
-      SellerRatingsModel.fromJson(response["data"]);
+          SellerRatingsModel.fromJson(response["data"]);
 
       // Ensure ratings and userRatings are not null
       int totalRatings = sellerRatingsModel.ratings?.total ?? 0;
-      List<UserRatings> userRatings = sellerRatingsModel.ratings?.userRatings ?? [];
+      List<UserRatings> userRatings =
+          sellerRatingsModel.ratings?.userRatings ?? [];
 
       // Handle the possibility of seller being null
       var seller = sellerRatingsModel.seller;
@@ -34,5 +35,4 @@ class SellerRatingsRepository {
       rethrow;
     }
   }
-
 }

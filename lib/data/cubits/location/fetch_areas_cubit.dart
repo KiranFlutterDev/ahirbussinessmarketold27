@@ -1,9 +1,7 @@
-
 import 'package:eClassify/data/model/data_output.dart';
-import 'package:eClassify/data/model/location/areaModel.dart';
+import 'package:eClassify/data/model/location/area_model.dart';
 import 'package:eClassify/data/repositories/location/areas_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class FetchAreasState {}
 
@@ -21,19 +19,19 @@ class FetchAreasSuccess extends FetchAreasState {
 
   FetchAreasSuccess(
       {required this.isLoadingMore,
-        required this.loadingMoreError,
-        required this.areasModel,
-        required this.page,
-        required this.total,
-        this.cityId});
+      required this.loadingMoreError,
+      required this.areasModel,
+      required this.page,
+      required this.total,
+      this.cityId});
 
   FetchAreasSuccess copyWith(
       {bool? isLoadingMore,
-        bool? loadingMoreError,
-        List<AreaModel>? areasModel,
-        int? page,
-        int? total,
-        int? cityId}) {
+      bool? loadingMoreError,
+      List<AreaModel>? areasModel,
+      int? page,
+      int? total,
+      int? cityId}) {
     return FetchAreasSuccess(
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
         loadingMoreError: loadingMoreError ?? this.loadingMoreError,
@@ -55,8 +53,7 @@ class FetchAreasCubit extends Cubit<FetchAreasState> {
 
   final AreasRepository _areasRepository = AreasRepository();
 
-  Future<void> fetchAreas(
-      {required int cityId, String? search}) async {
+  Future<void> fetchAreas({required int cityId, String? search}) async {
     try {
       emit(FetchAreasInProgress());
 

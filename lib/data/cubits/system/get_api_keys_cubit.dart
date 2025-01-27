@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'dart:developer';
+
 import 'package:eClassify/utils/api.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,19 +40,19 @@ class GetApiKeysCubit extends Cubit<GetApiKeysState> {
         razorPayApiKey: _getDataFromMap(data, 'Razorpay', 'api_key'),
         razorPayCurrency: _getDataFromMap(data, 'Razorpay', 'currency_code'),
         razorPayStatus:
-        int.tryParse(_getDataFromMap(data, 'Razorpay', 'status') ?? '0'),
+            int.tryParse(_getDataFromMap(data, 'Razorpay', 'status') ?? '0'),
         payStackApiKey: _getDataFromMap(data, 'Paystack', 'api_key'),
         payStackStatus:
-        int.tryParse(_getDataFromMap(data, 'Paystack', 'status') ?? '0'),
+            int.tryParse(_getDataFromMap(data, 'Paystack', 'status') ?? '0'),
         payStackCurrency: _getDataFromMap(data, 'Paystack', 'currency_code'),
         stripeCurrency: _getDataFromMap(data, 'Stripe', 'currency_code'),
         stripePublishableKey: _getDataFromMap(data, 'Stripe', 'api_key'),
         stripeStatus:
-        int.tryParse(_getDataFromMap(data, 'Stripe', 'status') ?? '0'),
+            int.tryParse(_getDataFromMap(data, 'Stripe', 'status') ?? '0'),
         phonePeKey: _getDataFromMap(data, 'PhonePe', 'api_key'),
         phonePeCurrency: _getDataFromMap(data, 'PhonePe', 'currency_code'),
         phonePeStatus:
-        int.tryParse(_getDataFromMap(data, 'PhonePe', 'status') ?? '0'),
+            int.tryParse(_getDataFromMap(data, 'PhonePe', 'status') ?? '0'),
       ));
     } catch (e) {
       emit(GetApiKeysFail(e.toString()));

@@ -3,32 +3,27 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/custom_field/fetch_custom_fields_cubit.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
+import 'package:eClassify/data/model/category_model.dart';
+import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/widgets/image_adapter.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/widgets/image_adapter.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
 import 'package:eClassify/utils/constant.dart';
-
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-
-import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/imagePicker.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
+import 'package:eClassify/utils/image_picker.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'package:eClassify/utils/ui_utils.dart';
-
-import 'package:eClassify/data/model/category_model.dart';
-
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 
 class AddItemDetails extends StatefulWidget {
   final List<CategoryModel>? breadCrumbItems;
@@ -66,7 +61,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
   String titleImageURL = "";
   List<dynamic> mixedItemImageList = [];
   List<int> deleteItemImageList = [];
-  final GlobalKey<FormState> _formKey = GlobalKey();
+  late final GlobalKey<FormState> _formKey;
 
   //Text Controllers
   final TextEditingController adTitleController = TextEditingController();
@@ -97,6 +92,8 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
 
   @override
   void initState() {
+    super.initState();
+    _formKey = GlobalKey<FormState>();
     AbstractField.fieldsData.clear();
     AbstractField.files.clear();
     if (widget.isEdit == true) {
@@ -150,8 +147,6 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
 
       setState(() {});
     });
-
-    super.initState();
   }
 
   void updateSlug() {
@@ -181,14 +176,9 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
           context: context, statusBarColor: context.color.secondaryColor),
       child: PopScope(
         canPop: true,
-        onPopInvoked: (didPop) {
-          //Navigator.pop(context, true);
+        onPopInvokedWithResult: (didPop, result) {
           return;
         },
-        /*onWillPop: () async {
-          Navigator.pop(context, true);
-          return false;
-        },*/
         child: SafeArea(
           child: Scaffold(
             appBar: UiUtils.buildAppBar(context,
@@ -212,7 +202,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         context,
                         dialoge: BlurredDialogBox(
                           title: "imageRequired".translate(context),
-                          content: Text(
+                          content: CustomText(
                             "selectImageYourItem".translate(context),
                           ),
                         ),
@@ -234,8 +224,6 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       "all_category_ids": widget.isEdit == true
                           ? item!.allCategoryIds
                           : selectedCategoryList.join(',')
-                      /*"image": _pickTitleImage.pickedFile,
-                      "gallery_images": galleryImages,*/
                     });
                     screenStack++;
                     if (context.read<FetchCustomFieldsCubit>().isEmpty()!) {
@@ -275,7 +263,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                     }
                   }
                 },
-                    height: 48.rh(context),
+                    height: 48,
                     fontSize: context.font.large,
                     buttonTitle: "next".translate(context)),
               ),
@@ -284,19 +272,19 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
               key: _formKey,
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("youAreAlmostThere".translate(context))
-                          .size(context.font.large)
-                          .bold(weight: FontWeight.w600)
-                          .color(context.color.textColorDark),
+                      CustomText(
+                        "youAreAlmostThere".translate(context),
+                        fontSize: context.font.large,
+                        fontWeight: FontWeight.w600,
+                        color: context.color.textColorDark,
+                      ),
                       SizedBox(
-                        height: 16.rh(context),
+                        height: 16,
                       ),
                       if (widget.breadCrumbItems != null)
                         SizedBox(
@@ -316,42 +304,22 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                                   return Row(
                                     children: [
                                       InkWell(
-                                        onTap: () {
-                                          _onBreadCrumbItemTap(index);
-                                        },
-                                        child: Text(widget
-                                                .breadCrumbItems![index].name!)
-                                            .firstUpperCaseWidget()
-                                            .color(
-                                              isNotLast
-                                                  ? context.color.textColorDark
-                                                  : context
-                                                      .color.territoryColor,
-                                            ),
-                                      ),
+                                          onTap: () {
+                                            _onBreadCrumbItemTap(index);
+                                          },
+                                          child: CustomText(
+                                            widget
+                                                .breadCrumbItems![index].name!,
+                                            color: isNotLast
+                                                ? context.color.textColorDark
+                                                : context.color.territoryColor,
+                                            firstUpperCaseWidget: true,
+                                          )),
                                       if (index <
                                           widget.breadCrumbItems!.length - 1)
-                                        const Text(" > ").color(
-                                            context.color.territoryColor),
-
-                                      /*InkWell(
-                                    onTap: () {
-                                      _onBreadCrumbItemTap(index);
-                                    },
-                                    child: Text(widget
-                                            .breadCrumbItems[index].name)
-                                        .firstUpperCaseWidget()
-                                        .color(
-                                          isNotLast
-                                              ? context.color.teritoryColor
-                                              : context.color.textColorDark,
-                                        ),
-                                  ),
-
-                                  ///if it is not last
-                                  if (isNotLast)
-                                    const Text(" > ")
-                                        .color(context.color.teritoryColor)*/
+                                        CustomText(" > ",
+                                            color:
+                                                context.color.territoryColor),
                                     ],
                                   );
                                 },
@@ -359,11 +327,11 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                           ),
                         ),
                       SizedBox(
-                        height: 18.rh(context),
+                        height: 18,
                       ),
-                      Text("adTitle".translate(context)),
+                      CustomText("adTitle".translate(context)),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       CustomTextFormField(
                         controller: adTitleController,
@@ -373,17 +341,17 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         capitalization: TextCapitalization.sentences,
                         hintText: "adTitleHere".translate(context),
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 15.rh(context),
+                        height: 15,
                       ),
-                      Text(
+                      CustomText(
                           "${"adSlug".translate(context)}\t(${"englishOnlyLbl".translate(context)})"),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       CustomTextFormField(
                         controller: adSlugController,
@@ -401,16 +369,16 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         action: TextInputAction.next,
                         hintText: "adSlugHere".translate(context),
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 15.rh(context),
+                        height: 15,
                       ),
-                      Text("descriptionLbl".translate(context)),
+                      CustomText("descriptionLbl".translate(context)),
                       SizedBox(
-                        height: 15.rh(context),
+                        height: 15,
                       ),
                       CustomTextFormField(
                         controller: adDescriptionController,
@@ -424,26 +392,28 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         minLine: 6,
 
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 15.rh(context),
+                        height: 15,
                       ),
                       Row(
                         children: [
-                          Text("mainPicture".translate(context)),
+                          CustomText("mainPicture".translate(context)),
                           const SizedBox(
                             width: 3,
                           ),
-                          Text("maxSize".translate(context))
-                              .italic()
-                              .size(context.font.small),
+                          CustomText(
+                            "maxSize".translate(context),
+                            fontStyle: FontStyle.italic,
+                            fontSize: context.font.small,
+                          )
                         ],
                       ),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       Wrap(
                         children: [
@@ -455,54 +425,55 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         ],
                       ),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       Row(
                         children: [
-                          Text("otherPictures".translate(context)),
+                          CustomText("otherPictures".translate(context)),
                           const SizedBox(
                             width: 3,
                           ),
-                          Text("max5Images".translate(context))
-                              .italic()
-                              .size(context.font.small),
+                          CustomText(
+                            "max5Images".translate(context),
+                            fontStyle: FontStyle.italic,
+                            fontSize: context.font.small,
+                          )
                         ],
                       ),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       itemImagesListener(),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
-                      Text("price".translate(context)),
+                      CustomText("price".translate(context)),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       CustomTextFormField(
                         controller: adPriceController,
                         action: TextInputAction.next,
-                        prefix: Text("${Constant.currencySymbol} "),
+                        prefix: CustomText("${Constant.currencySymbol} "),
                         // controller: _priceController,
                         formaters: [
                           FilteringTextInputFormatter.allow(
                               RegExp(r'^\d+\.?\d*')),
                         ],
-                        isReadOnly: false,
                         keyboard: TextInputType.number,
                         validator: CustomTextFieldValidator.nullCheck,
                         hintText: "00",
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
-                      Text("phoneNumber".translate(context)),
+                      CustomText("phoneNumber".translate(context)),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       CustomTextFormField(
                         controller: adPhoneNumberController,
@@ -511,36 +482,35 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                           FilteringTextInputFormatter.allow(
                               RegExp(r'^\d+\.?\d*')),
                         ],
-                        isReadOnly: false,
                         keyboard: TextInputType.phone,
                         validator: CustomTextFieldValidator.phoneNumber,
                         hintText: "9876543210",
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
-                      Text("videoLink".translate(context)),
+                      CustomText("videoLink".translate(context)),
                       SizedBox(
-                        height: 10.rh(context),
+                        height: 10,
                       ),
                       CustomTextFormField(
                         controller: adAdditionalDetailsController,
                         validator: CustomTextFieldValidator.url,
-                        // prefix: Text("${Constant.currencySymbol} "),
+                        // prefix: CustomText("${Constant.currencySymbol} "),
                         // controller: _videoLinkController,
                         // isReadOnly: widget.properyDetails != null,
                         hintText: "http://example.com/video.mp4",
                         hintTextStyle: TextStyle(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.5),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5),
                             fontSize: context.font.large),
                       ),
                       SizedBox(
-                        height: 15.rh(context),
+                        height: 15,
                       ),
                     ],
                   ),
@@ -559,12 +529,12 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('selectImageSource'.translate(context)),
+          title: CustomText('selectImageSource'.translate(context)),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 GestureDetector(
-                  child: Text('camera'.translate(context)),
+                  child: CustomText('camera'.translate(context)),
                   onTap: () {
                     Navigator.of(context).pop();
                     onSelected(ImageSource.camera);
@@ -572,7 +542,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                 ),
                 Padding(padding: EdgeInsets.all(8.0)),
                 GestureDetector(
-                  child: Text('gallery'.translate(context)),
+                  child: CustomText('gallery'.translate(context)),
                   onTap: () {
                     Navigator.of(context).pop();
                     onSelected(ImageSource.gallery);
@@ -661,13 +631,11 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   alignment: AlignmentDirectional.center,
-                  height: 48.rh(context),
-                  child: Text(
+                  height: 48,
+                  child: CustomText(
                     "addMainPicture".translate(context),
-                    style: TextStyle(
-                      color: context.color.textDefaultColor,
-                      fontSize: context.font.large,
-                    ),
+                    color: context.color.textDefaultColor,
+                    fontSize: context.font.large,
                   ),
                 ),
               ),
@@ -733,13 +701,6 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                 ),
               ),
               closeButton(context, () {
-                /*if (image is String) {
-                  print(
-                      "item!.galleryImages![index].id!***${item!.galleryImages![index].id!}");
-                  deleteItemImageList.add(item!.galleryImages![index].id!);
-                  setState(() {});
-                }*/
-
                 if (image is String) {
                   final matchingIndex = item!.galleryImages!.indexWhere(
                     (galleryImage) => galleryImage.image == image,
@@ -791,11 +752,10 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   alignment: AlignmentDirectional.center,
-                  height: 48.rh(context),
-                  child: Text("addOtherPicture".translate(context),
-                      style: TextStyle(
-                          color: context.color.textDefaultColor,
-                          fontSize: context.font.large)),
+                  height: 48,
+                  child: CustomText("addOtherPicture".translate(context),
+                      color: context.color.textDefaultColor,
+                      fontSize: context.font.large),
                 ),
               ),
             ),
@@ -828,7 +788,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
         },
         child: Container(
           decoration: BoxDecoration(
-              color: context.color.primaryColor.withOpacity(0.7),
+              color: context.color.primaryColor.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: EdgeInsets.all(4.0),
@@ -855,12 +815,12 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
         child: DottedBorder(
-            color: context.color.textColorDark.withOpacity(0.5),
+            color: context.color.textColorDark.withValues(alpha: 0.5),
             borderType: BorderType.RRect,
             radius: const Radius.circular(10),
             child: Container(
               alignment: AlignmentDirectional.center,
-              child: Text("uploadPhoto".translate(context)),
+              child: CustomText("uploadPhoto".translate(context)),
             )),
       ),
     );

@@ -1,31 +1,31 @@
 import 'dart:async';
+
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/location/fetch_areas_cubit.dart';
 import 'package:eClassify/data/cubits/location/fetch_cities_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/data/model/location/cityModel.dart';
+import 'package:eClassify/data/model/location/city_model.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
-
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:flutter/material.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 
 class CitiesScreen extends StatefulWidget {
   final int stateId;
@@ -133,10 +133,10 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
       systemOverlayStyle:
           SystemUiOverlayStyle(statusBarColor: context.color.backgroundColor),
       bottom: PreferredSize(
-          preferredSize: Size.fromHeight(58.rh(context)),
+          preferredSize: Size.fromHeight(58),
           child: Container(
               width: double.maxFinite,
-              height: 48.rh(context),
+              height: 48,
               margin: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               alignment: AlignmentDirectional.center,
               decoration: BoxDecoration(
@@ -176,12 +176,12 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                     });
                   }))),
       automaticallyImplyLeading: false,
-      title: Text(
+      title: CustomText(
         widget.stateName,
-      )
-          .color(context.color.textDefaultColor)
-          .bold(weight: FontWeight.w600)
-          .size(18),
+        color: context.color.textDefaultColor,
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+      ),
       leading: Material(
         clipBehavior: Clip.antiAlias,
         color: Colors.transparent,
@@ -216,7 +216,7 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
       shadowColor:
           context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
               ? null
-              : context.color.textDefaultColor.withOpacity(0.2),
+              : context.color.textDefaultColor.withValues(alpha: 0.2),
       backgroundColor: context.color.backgroundColor,
     );
   }
@@ -311,15 +311,15 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                       ? Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 18),
-                          child: Text(
+                          child: CustomText(
                             "${"chooseLbl".translate(context)}\t${"city".translate(context)}",
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                          )
-                              .color(context.color.textDefaultColor)
-                              .size(context.font.normal)
-                              .bold(weight: FontWeight.w600),
+                            color: context.color.textDefaultColor,
+                            fontSize: context.font.normal,
+                            fontWeight: FontWeight.w600,
+                          ),
                         )
                       : InkWell(
                           child: Padding(
@@ -327,15 +327,15 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                                 horizontal: 15, vertical: 12),
                             child: Row(
                               children: [
-                                Text(
+                                CustomText(
                                   "${"allIn".translate(context)}\t${widget.stateName}",
                                   textAlign: TextAlign.center,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                )
-                                    .color(context.color.textDefaultColor)
-                                    .size(context.font.normal)
-                                    .bold(weight: FontWeight.w600),
+                                  color: context.color.textDefaultColor,
+                                  fontSize: context.font.normal,
+                                  fontWeight: FontWeight.w600,
+                                ),
                                 Spacer(),
                                 Container(
                                     width: 32,
@@ -527,14 +527,14 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                                       .read<FetchAreasCubit>()
                                       .fetchAreas(cityId: city.id!);
                                 },
-                                title: Text(
+                                title: CustomText(
                                   city.name!,
                                   textAlign: TextAlign.start,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                )
-                                    .color(context.color.textDefaultColor)
-                                    .size(context.font.normal),
+                                  color: context.color.textDefaultColor,
+                                  fontSize: context.font.normal,
+                                ),
                                 trailing: Container(
                                     width: 32,
                                     height: 32,
@@ -595,7 +595,6 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
   @override
   void dispose() {
     searchController.dispose();
-    searchController.clear();
     super.dispose();
   }
 }

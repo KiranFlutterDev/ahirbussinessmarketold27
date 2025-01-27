@@ -25,7 +25,7 @@ class GoogleLogin extends LoginSystem {
       }
 
       GoogleSignInAuthentication? googleAuth =
-      await googleSignIn.authentication;
+          await googleSignIn.authentication;
 
       AuthCredential authCredential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -33,7 +33,7 @@ class GoogleLogin extends LoginSystem {
       );
 
       UserCredential userCredential =
-      await firebaseAuth.signInWithCredential(authCredential);
+          await firebaseAuth.signInWithCredential(authCredential);
       emit(MSuccess());
 
       return userCredential;
@@ -45,6 +45,12 @@ class GoogleLogin extends LoginSystem {
       }
 
       rethrow;
+    }
+  }
+
+  void signOut() async {
+    if (await _googleSignIn?.isSignedIn() ?? false) {
+      _googleSignIn?.signOut();
     }
   }
 

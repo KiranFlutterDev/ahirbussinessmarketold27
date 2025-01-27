@@ -2,52 +2,45 @@
 import 'dart:async';
 import 'dart:developer';
 
-//import 'package:app_links/app_links.dart';
-import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
+import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/get_api_keys_cubit.dart';
-import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
-import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
-
-import 'package:eClassify/data/model/home/home_screen_section.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/notification/awsomeNotification.dart';
-import 'package:eClassify/utils/notification/notification_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
-//import 'package:uni_links/uni_links.dart';
-
-import 'package:eClassify/utils/api.dart';
-
-import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
-import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/helper/designs.dart';
+import 'package:eClassify/data/model/home/home_screen_section.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/system_settings_model.dart';
-
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/ui/screens/ad_banner_screen.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
-import 'package:eClassify/ui/screens/home/widgets/item_horizontal_card.dart';
+import 'package:eClassify/ui/screens/home/slider_widget.dart';
 import 'package:eClassify/ui/screens/home/widgets/category_widget_home.dart';
+import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_search.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_shimmers.dart';
 import 'package:eClassify/ui/screens/home/widgets/location_widget.dart';
-import 'package:eClassify/ui/screens/home/slider_widget.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+//import 'package:uni_links/uni_links.dart';
 
-const double sidePadding = 18;
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/notification/awsome_notification.dart';
+import 'package:eClassify/utils/notification/notification_service.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+const double sidePadding = 10;
 
 class HomeScreen extends StatefulWidget {
   final String? from;
@@ -77,10 +70,11 @@ class HomeScreenState extends State<HomeScreen>
 
   @override
   void initState() {
+    super.initState();
     initializeSettings();
     addPageScrollListener();
     notificationPermissionChecker();
-  LocalAwsomeNotification().init(context);
+    LocalAwesomeNotification().init(context);
     ///////////////////////////////////////
     NotificationService.init(context);
     context.read<SliderCubit>().fetchSlider(
@@ -123,7 +117,6 @@ class HomeScreenState extends State<HomeScreen>
         }
       }
     });
-    super.initState();
   }
 
   @override
@@ -148,24 +141,9 @@ class HomeScreenState extends State<HomeScreen>
     context.read<GetApiKeysCubit>().fetch();
   }
 
-/*  void pageScrollListener() {
-    ///This will load data on page end
-    if (homeScreenController.isEndReached()) {
-      if (mounted) {
-        if (context.read<FetchHomeItemsCubit>().hasMoreData()) {
-          if (context.read<FetchHomeItemsCubit>().hasMoreData()) {
-            context.read<FetchHomeItemsCubit>().fetchMoreItem();
-          }
-        }
-      }
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    print(context.watch<SliderCubit>().state);
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -173,19 +151,14 @@ class HomeScreenState extends State<HomeScreen>
           leadingWidth: double.maxFinite,
           leading: Padding(
               padding: EdgeInsetsDirectional.only(
-                  start: sidePadding.rw(context), end: sidePadding.rw(context)),
+                  start: sidePadding, end: sidePadding),
               child: const LocationWidget()),
-          /* HiveUtils.getCityName() != null
-                    ? const LocationWidget()
-                    : const SizedBox.shrink()),*/
           backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         ),
         backgroundColor: context.color.primaryColor,
         body: RefreshIndicator(
           key: _refreshIndicatorKey,
-
           color: context.color.territoryColor,
-          //triggerMode: RefreshIndicatorTriggerMode.onEdge,
           onRefresh: () async {
             context.read<SliderCubit>().fetchSlider(
                   context,
@@ -206,13 +179,12 @@ class HomeScreenState extends State<HomeScreen>
                 state: HiveUtils.getStateName());
           },
           child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             controller: _scrollController,
             child: Column(
               children: [
                 BlocBuilder<FetchHomeScreenCubit, FetchHomeScreenState>(
                   builder: (context, state) {
-
                     if (state is FetchHomeScreenInProgress) {
                       return shimmerEffect();
                     }
@@ -250,11 +222,9 @@ class HomeScreenState extends State<HomeScreen>
                       );
                     }
 
-                    if(state is FetchHomeScreenFail)
-{
-
-  print('hey bro ${state.error}');
-}
+                    if (state is FetchHomeScreenFail) {
+                      print('hey bro ${state.error}');
+                    }
                     return SizedBox.shrink();
                   },
                 ),
@@ -460,7 +430,6 @@ class HomeScreenState extends State<HomeScreen>
   Widget sliderWidget() {
     return BlocConsumer<SliderCubit, SliderState>(
       listener: (context, state) {
-
         if (state is SliderFetchSuccess) {
           setState(() {});
         }
@@ -474,7 +443,6 @@ class HomeScreenState extends State<HomeScreen>
           return Container();
         }
         if (state is SliderFetchSuccess) {
-        
           if (state.sliderlist.isNotEmpty) {
             return const SliderWidget();
           }
@@ -496,45 +464,60 @@ class AllItemsWidget extends StatelessWidget {
       builder: (context, state) {
         if (state is FetchHomeAllItemsSuccess) {
           if (state.items.isNotEmpty) {
+            final int crossAxisCount = 2;
+            final int items = state.items.length;
+            final int total = (items ~/ crossAxisCount) +
+                (items % crossAxisCount != 0 ? 1 : 0);
+
             return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 GridListAdapter(
-                  type: ListUiType.Mixed,
-                  mixMode: true,
-                  crossAxisCount: 2,
-                  height: MediaQuery.of(context).size.height / 3.5.rh(context),
-                  builder: (context, int index, bool isGrid) {
-                    ItemModel? item = state.items[index];
-
-                    if (isGrid) {
-                      // Show ItemCard for grid items
-                      return ItemCard(
-                        item: item,
-                        width: 192,
-                      );
-                    } else {
-                      // Show ItemHorizontalCard for list items
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            Routes.adDetailsScreen,
-                            arguments: {
-                              'model': item,
-                            },
-                          );
-                        },
-                        child: ItemHorizontalCard(
-                          item: item,
-                          showLikeButton: true,
-                          additionalImageWidth: 8,
+                    type: ListUiType.List,
+                    crossAxisCount: 2,
+                    builder: (context, int index, bool isGrid) {
+                      int itemIndex = index * crossAxisCount;
+                      return SizedBox(
+                        height: MediaQuery.sizeOf(context).height / 3.5,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (int i = 0; i < crossAxisCount; ++i) ...[
+                              Expanded(
+                                  child: itemIndex + 1 <= items
+                                      ? ItemCard(item: state.items[itemIndex++])
+                                      : SizedBox.shrink()),
+                              if (i != crossAxisCount - 1)
+                                SizedBox(
+                                  width: 15,
+                                )
+                            ]
+                          ],
                         ),
                       );
-                    }
-                    // }
-                  },
-                  total: state.items.length,
-                ),
+                    },
+                    listSeparator: (context, index) {
+                      if (index == 0 ||
+                          index % Constant.nativeAdsAfterItemNumber != 0) {
+                        return SizedBox(
+                          height: 15,
+                        );
+                      } else {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 5,
+                            ),
+                            AdBannerWidget(),
+                            SizedBox(
+                              height: 5,
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                    total: total),
                 if (state.isLoadingMore) UiUtils.progress(),
               ],
             );
@@ -553,37 +536,6 @@ class AllItemsWidget extends StatelessWidget {
         }
         return SizedBox.shrink();
       },
-    );
-  }
-}
-
-Widget _builderWrapper(FetchHomeAllItemsSuccess state, BuildContext context,
-    int index, bool isGrid) {
-  ItemModel? item = state.items[index];
-
-  if (isGrid) {
-    // Show ItemCard for grid items
-    return ItemCard(
-      item: item,
-      width: 192,
-    );
-  } else {
-    // Show ItemHorizontalCard for list items
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          Routes.adDetailsScreen,
-          arguments: {
-            'model': item,
-          },
-        );
-      },
-      child: ItemHorizontalCard(
-        item: item,
-        showLikeButton: true,
-        additionalImageWidth: 8,
-      ),
     );
   }
 }

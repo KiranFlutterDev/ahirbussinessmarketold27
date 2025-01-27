@@ -3,7 +3,6 @@ import 'package:eClassify/data/model/transaction_model.dart';
 import 'package:eClassify/data/repositories/transaction.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class FetchTransactionsState {}
 
 class FetchTransactionsInitial extends FetchTransactionsState {}

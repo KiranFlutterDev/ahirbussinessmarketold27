@@ -1,4 +1,5 @@
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eClassify/utils/extensions/extensions.dart';
@@ -22,13 +23,12 @@ class PromotedCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(3.0),
           child: Center(
-            child: Text("featured".translate(context))
-                .color(
-                  context.color.primaryColor,
-                )
-                .bold()
-                .size(context.font.smaller),
-          ),
+              child: CustomText(
+            "featured".translate(context),
+            color: context.color.primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: context.font.smaller,
+          )),
         ),
       );
     }
@@ -40,13 +40,12 @@ class PromotedCard extends StatelessWidget {
           color: context.color.territoryColor,
           borderRadius: BorderRadius.circular(4)),
       child: Center(
-        child: Text("featured".translate(context))
-            .color(
-              context.color.primaryColor,
-            )
-            .bold()
-            .size(context.font.smaller),
-      ),
+          child: CustomText(
+        "featured".translate(context),
+        color: context.color.primaryColor,
+        fontWeight: FontWeight.bold,
+        fontSize: context.font.smaller,
+      )),
     );
   }
 }

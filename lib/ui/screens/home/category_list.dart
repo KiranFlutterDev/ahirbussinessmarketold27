@@ -1,17 +1,16 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:eClassify/utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 import 'package:eClassify/data/model/category_model.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/widgets/category.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CategoryList extends StatefulWidget {
   final String? from;
@@ -139,24 +138,5 @@ class _CategoryListState extends State<CategoryList>
         ),
       ),
     );
-    //   body:
-    //       BlocBuilder<CategoryCubit, CategoryState>(builder: (context, state) {
-    //     if (state is CategoryFetchProgress) {
-    //       return const Center(
-    //         child: CircularProgressIndicator(),
-    //       );
-    //     } else if (state is CategoryFetchSuccess) {
-    //       initCategoryAnimations(state.categorylist);
-    //       categorieslist.clear();
-    //       categorieslist.addAll(state.categorylist);
-
-    //       return gridWidget();
-    //     } else if (state is ChangeSelectedCategory) {
-    //       return gridWidget();
-    //     } else {
-    //       return const SizedBox.shrink();
-    //     }
-    //   }),
-    // );
   }
 }

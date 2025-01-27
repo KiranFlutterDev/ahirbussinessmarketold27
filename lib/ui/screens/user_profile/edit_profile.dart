@@ -3,27 +3,26 @@ import 'dart:io';
 import 'package:country_picker/country_picker.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/auth/auth_cubit.dart';
+import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/data/model/user_model.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/screens/widgets/image_cropper.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
-import 'package:eClassify/data/model/user_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String from;
@@ -60,9 +59,12 @@ class UserProfileScreen extends StatefulWidget {
 
 class UserProfileScreenState extends State<UserProfileScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  late final TextEditingController phoneController =
+      TextEditingController(text: widget.extraData?['email']);
+  late final TextEditingController nameController =
+      TextEditingController(text: widget.extraData?['username']);
+  late final TextEditingController emailController =
+      TextEditingController(text: widget.extraData?['email']);
   final TextEditingController addressController = TextEditingController();
   dynamic size;
   dynamic city, _state, country;
@@ -84,9 +86,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     latitude = HiveUtils.getLatitude();
     longitude = HiveUtils.getLongitude();
 
-    nameController.text = (HiveUtils.getUserDetails().name) ?? "";
-    emailController.text = HiveUtils.getUserDetails().email ?? "";
-    addressController.text = HiveUtils.getUserDetails().address ?? "";
     if (widget.from == "login") {
       isNotificationsEnabled = true;
     } else {
@@ -124,43 +123,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     addressController.dispose();
   }
 
-  /* void _onTapChooseLocation() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    if (!const bool.fromEnvironment("force-disable-demo-mode",
-        defaultValue: false)) {
-      */ /*    if (Constant.isDemoModeOn) {
-        HelperUtils.showSnackBarMessage(context, "Not valid in demo mode");
-
-        return;
-      }*/ /*
-    }
-
-    var result = await showModalBottomSheet(
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-      context: context,
-      builder: (context) {
-        return const ChooseLocatonBottomSheet();
-      },
-    );
-    if (result != null) {
-      GooglePlaceModel place = (result as GooglePlaceModel);
-
-      city = place.city;
-      country = place.country;
-      _state = place.state;
-      latitude = double.parse(place.latitude);
-      longitude = double.parse(place.longitude);
-    }
-  }*/
-
-  void _onTapVerifyPhoneNumber() {
-    //verify phone number before update
-  }
-
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -179,8 +141,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                 behavior: RemoveGlow(),
                 child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Form(
@@ -219,27 +179,27 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                   controller: addressController,
                                 ),
                                 SizedBox(
-                                  height: 10.rh(context),
+                                  height: 10,
                                 ),
-                                Text(
+                                CustomText(
                                   "notification".translate(context),
                                 ),
                                 SizedBox(
-                                  height: 10.rh(context),
+                                  height: 10,
                                 ),
                                 buildNotificationEnableDisableSwitch(context),
                                 SizedBox(
-                                  height: 10.rh(context),
+                                  height: 10,
                                 ),
-                                Text(
+                                CustomText(
                                   "showContactInfo".translate(context),
                                 ),
                                 SizedBox(
-                                  height: 10.rh(context),
+                                  height: 10,
                                 ),
                                 buildPersonalDetailEnableDisableSwitch(context),
                                 SizedBox(
-                                  height: 25.rh(context),
+                                  height: 25,
                                 ),
                                 UiUtils.buildButton(
                                   context,
@@ -268,7 +228,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                       validateData();
                                     }
                                   },
-                                  height: 48.rh(context),
+                                  height: 48,
                                   buttonTitle:
                                       "updateProfile".translate(context),
                                 )
@@ -281,6 +241,12 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                     normalProgressColor: context.color.territoryColor,
                   ),
                 ),
+              if (widget.from == 'login')
+                Positioned(
+                  left: 10,
+                  top: 10,
+                  child: BackButton(),
+                )
             ],
           ),
         ),
@@ -291,12 +257,14 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   Widget phoneWidget() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       SizedBox(
-        height: 10.rh(context),
+        height: 10,
       ),
-      Text("phoneNumber".translate(context))
-          .color(context.color.textDefaultColor),
+      CustomText(
+        "phoneNumber".translate(context),
+        color: context.color.textDefaultColor,
+      ),
       SizedBox(
-        height: 10.rh(context),
+        height: 10,
       ),
       CustomTextFormField(
         controller: phoneController,
@@ -324,14 +292,16 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                   }
                 },
                 child: Container(
-                  // color: Colors.red,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-                  child: Center(
-                      child: Text(formatCountryCode(countryCode!))
-                          .size(context.font.large)
-                          .centerAlign()),
-                ),
+                    // color: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 8),
+                    child: Center(
+                      child: CustomText(
+                        formatCountryCode(countryCode!),
+                        fontSize: context.font.large,
+                        textAlign: TextAlign.center,
+                      ),
+                    )),
               )),
         ),
         hintText: "phoneNumber".translate(context),
@@ -345,83 +315,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     }
     return countryCode;
   }
-
-  /* Widget locationWidget(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 10.0,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                  color: context.color.secondaryColor,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: context.color.borderColor.darken(40),
-                    width: 1.5,
-                  )),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 10.0),
-                    child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: (city != "" && city != null)
-                            ? Text("$city,$_state,$country")
-                            : Text(
-                                "selectLocationOptional".translate(context))),
-                  ),
-                  const Spacer(),
-                  if (city != "" && city != null)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 10.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          city = "";
-                          _state = "";
-                          country = "";
-                          latitude = null;
-                          longitude = null;
-                          setState(() {});
-                        },
-                        child: Icon(
-                          Icons.close,
-                          color: context.color.textColorDark,
-                        ),
-                      ),
-                    )
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          GestureDetector(
-            onTap: _onTapChooseLocation,
-            child: Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                  color: context.color.secondaryColor,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: context.color.borderColor.darken(40),
-                    width: 1.5,
-                  )),
-              child: Icon(
-                Icons.location_searching_sharp,
-                color: context.color.territoryColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }*/
 
   Widget safeAreaCondition({required Widget child}) {
     if (widget.from == "login") {
@@ -446,14 +339,17 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text((isNotificationsEnabled
-                        ? "enabled".translate(context)
-                        : "disabled".translate(context))
-                    .translate(context))
-                .size(context.font.large),
+            child: CustomText(
+              (isNotificationsEnabled
+                      ? "enabled".translate(context)
+                      : "disabled".translate(context))
+                  .translate(context),
+              fontSize: context.font.large,
+              color: context.color.textDefaultColor,
+            ),
           ),
           CupertinoSwitch(
-            activeColor: context.color.territoryColor,
+            activeTrackColor: context.color.territoryColor,
             value: isNotificationsEnabled,
             onChanged: (value) {
               isNotificationsEnabled = value;
@@ -480,15 +376,16 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text((isPersonalDetailShow
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: CustomText(
+                (isPersonalDetailShow
                         ? "enabled".translate(context)
                         : "disabled".translate(context))
-                    .translate(context))
-                .size(context.font.large),
-          ),
+                    .translate(context),
+                fontSize: context.font.large,
+              )),
           CupertinoSwitch(
-            activeColor: context.color.territoryColor,
+            activeTrackColor: context.color.territoryColor,
             value: isPersonalDetailShow,
             onChanged: (value) {
               isPersonalDetailShow = value;
@@ -509,11 +406,14 @@ class UserProfileScreenState extends State<UserProfileScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
-        Text(title.translate(context)).color(context.color.textDefaultColor),
+        CustomText(
+          title.translate(context),
+          color: context.color.textDefaultColor,
+        ),
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
         CustomTextFormField(
           controller: controller,
@@ -535,11 +435,11 @@ class UserProfileScreenState extends State<UserProfileScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
-        Text(title.translate(context)),
+        CustomText(title.translate(context)),
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
         CustomTextFormField(
           controller: controller,
@@ -548,20 +448,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           isReadOnly: readOnly,
           fillColor: context.color.secondaryColor,
         ),
-        /*const SizedBox(
-          width: 10,
-        ),
-        locationWidget(context),
-        const SizedBox(
-          height: 10,
-        ),
-        Text("enablesNewSection".translate(context))
-            .size(context.font.small)
-            .bold(weight: FontWeight.w300)
-            .color(
-          context.color.textColorDark
-              .withOpacity(0.8),
-        ),*/
       ],
     );
   }
@@ -608,8 +494,8 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     return Stack(
       children: [
         Container(
-          height: 124.rh(context),
-          width: 124.rw(context),
+          height: 124,
+          width: 124,
           alignment: AlignmentDirectional.center,
           decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -618,11 +504,11 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           child: Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: context.color.territoryColor.withOpacity(0.2),
+              color: context.color.territoryColor.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            width: 106.rw(context),
-            height: 106.rh(context),
+            width: 106,
+            height: 106,
             child: getProfileImage(),
           ),
         ),
@@ -632,8 +518,8 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           child: InkWell(
             onTap: showPicker,
             child: Container(
-                height: 37.rh(context),
-                width: 37.rw(context),
+                height: 37,
+                width: 37,
                 alignment: AlignmentDirectional.center,
                 decoration: BoxDecoration(
                     border: Border.all(
@@ -641,8 +527,8 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                     shape: BoxShape.circle,
                     color: context.color.territoryColor),
                 child: SizedBox(
-                    width: 15.rw(context),
-                    height: 15.rh(context),
+                    width: 15,
+                    height: 15,
                     child: UiUtils.getSvg(AppIcons.edit))),
           ),
         )
@@ -652,11 +538,14 @@ class UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> validateData() async {
     if (_formKey.currentState!.validate()) {
-      profileupdateprocess();
+      if (widget.from == 'login') {
+        HiveUtils.setUserIsAuthenticated(true);
+      }
+      profileUpdateProcess();
     }
   }
 
-  profileupdateprocess() async {
+  void profileUpdateProcess() async {
     setState(() {
       isLoading = true;
     });
@@ -670,8 +559,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           notification: isNotificationsEnabled == true ? "1" : "0",
           countryCode: countryCode,
           personalDetail: isPersonalDetailShow == true ? 1 : 0);
-
-      //HiveUtils.getUserDetails();
 
       Future.delayed(
         Duration.zero,
@@ -741,14 +628,14 @@ class UserProfileScreenState extends State<UserProfileScreen> {
               children: <Widget>[
                 ListTile(
                     leading: const Icon(Icons.photo_library),
-                    title: Text("gallery".translate(context)),
+                    title: CustomText("gallery".translate(context)),
                     onTap: () {
                       _imgFromGallery(ImageSource.gallery);
                       Navigator.of(context).pop();
                     }),
                 ListTile(
                   leading: const Icon(Icons.photo_camera),
-                  title: Text("camera".translate(context)),
+                  title: CustomText("camera".translate(context)),
                   onTap: () {
                     _imgFromGallery(ImageSource.camera);
                     Navigator.of(context).pop();
@@ -757,7 +644,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                 if (fileUserimg != null && widget.from == 'login')
                   ListTile(
                     leading: const Icon(Icons.clear_rounded),
-                    title: Text("lblremove".translate(context)),
+                    title: CustomText("lblremove".translate(context)),
                     onTap: () {
                       fileUserimg = null;
 
@@ -771,7 +658,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         });
   }
 
-  _imgFromGallery(ImageSource imageSource) async {
+  void _imgFromGallery(ImageSource imageSource) async {
     CropImage.init(context);
 
     final pickedFile = await ImagePicker().pickImage(source: imageSource);

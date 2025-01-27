@@ -1,26 +1,25 @@
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/model/category_model.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
-
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
-import 'package:eClassify/utils/touch_manager.dart';
 import 'package:eClassify/data/cubits/category/fetch_sub_categories_cubit.dart';
+import 'package:eClassify/data/model/category_model.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/widgets/category.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/widgets/category.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
+import 'package:eClassify/utils/touch_manager.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 int screenStack = 0;
 
@@ -28,8 +27,6 @@ class SelectCategoryScreen extends StatefulWidget {
   const SelectCategoryScreen({super.key});
 
   static Route route(RouteSettings settings) {
-    Map<String, dynamic> apiParameters =
-        settings.arguments as Map<String, dynamic>;
     return BlurredRouter(
       builder: (context) {
         return const SelectCategoryScreen();
@@ -86,7 +83,7 @@ class _SelectCategoryScreenState extends CloudState<SelectCategoryScreen> {
               child: BlocBuilder<FetchCategoryCubit, FetchCategoryState>(
                   builder: (context, state) {
                 if (state is FetchCategoryFailure) {
-                  return Text(state.errorMessage);
+                  return CustomText(state.errorMessage);
                 }
                 if (state is FetchCategoryInProgress) {
                   return Center(child: UiUtils.progress());
@@ -96,10 +93,12 @@ class _SelectCategoryScreenState extends CloudState<SelectCategoryScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("selectTheCategory".translate(context))
-                          .size(context.font.large)
-                          .bold(weight: FontWeight.w600)
-                          .color(context.color.textColorDark),
+                      CustomText(
+                        "selectTheCategory".translate(context),
+                        fontSize: context.font.large,
+                        fontWeight: FontWeight.w600,
+                        color: context.color.textColorDark,
+                      ),
                       const SizedBox(
                         height: 18,
                       ),
@@ -107,9 +106,10 @@ class _SelectCategoryScreenState extends CloudState<SelectCategoryScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
-                             SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+                            SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
                           crossAxisCount: 3,
-                          height: MediaQuery.of(context).size.height*0.18,//149,
+                          height:
+                              MediaQuery.of(context).size.height * 0.18, //149,
                           crossAxisSpacing: 14,
                           mainAxisSpacing: 14,
                         ),
@@ -272,7 +272,7 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
           context: context, statusBarColor: context.color.secondaryColor),
       child: PopScope(
         canPop: true,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, result) async {
           return;
         },
         child: SafeArea(
@@ -284,10 +284,12 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("selectTheCategory".translate(context))
-                      .size(context.font.large)
-                      .bold(weight: FontWeight.w600)
-                      .color(context.color.textColorDark),
+                  CustomText(
+                    "selectTheCategory".translate(context),
+                    fontSize: context.font.large,
+                    fontWeight: FontWeight.w600,
+                    color: context.color.textColorDark,
+                  ),
                   const SizedBox(
                     height: 16,
                   ),
@@ -316,7 +318,10 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
                               color: context.color.textDefaultColor,
                             ),
                           ),
-                          const Text(" > ").color(context.color.territoryColor),
+                          CustomText(
+                            " > ",
+                            color: context.color.territoryColor,
+                          ),
                           ListView.builder(
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
@@ -328,23 +333,22 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
                                 return Row(
                                   children: [
                                     GestureDetector(
-                                      onTap: () {
-                                        _onBreadCrumbItemTap(
-                                            breadCrumbData, index);
-                                      },
-                                      child: Text(breadCrumbData[index].name!)
-                                          .firstUpperCaseWidget()
-                                          .color(
-                                            isNotLast
-                                                ? context.color.territoryColor
-                                                : context.color.textColorDark,
-                                          ),
-                                    ),
+                                        onTap: () {
+                                          _onBreadCrumbItemTap(
+                                              breadCrumbData, index);
+                                        },
+                                        child: CustomText(
+                                          breadCrumbData[index].name!,
+                                          color: isNotLast
+                                              ? context.color.territoryColor
+                                              : context.color.textColorDark,
+                                          firstUpperCaseWidget: true,
+                                        )),
 
                                     ///if it is not last
                                     if (isNotLast)
-                                      const Text(" > ")
-                                          .color(context.color.territoryColor)
+                                      CustomText(" > ",
+                                          color: context.color.territoryColor)
                                   ],
                                 );
                               },
@@ -453,11 +457,11 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: Text(category.name!)
-                                              .color(
-                                                  context.color.textColorDark)
-                                              .firstUpperCaseWidget()
-                                              .bold(weight: FontWeight.w600),
+                                          child: CustomText(category.name!,
+                                              color:
+                                                  context.color.textColorDark,
+                                              firstUpperCaseWidget: true,
+                                              fontWeight: FontWeight.w600),
                                         ),
                                         Container(
                                           width: 32,
@@ -604,11 +608,12 @@ class _SelectNestedCategoryState extends CloudState<SelectNestedCategory> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(category.name!)
-                                  .color(context.color.textColorDark)
-                                  .firstUpperCaseWidget()
-                                  .bold(weight: FontWeight.w600),
-                            ),
+                                child: CustomText(
+                              category.name!,
+                              color: context.color.textColorDark,
+                              firstUpperCaseWidget: true,
+                              fontWeight: FontWeight.w600,
+                            )),
                             Container(
                               width: 32,
                               height: 32,

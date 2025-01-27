@@ -1,28 +1,25 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'dart:developer';
+
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/data/cubits/custom_field/fetch_custom_fields_cubit.dart';
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-
-import 'package:eClassify/data/cubits/custom_field/fetch_custom_fields_cubit.dart';
-
-
-import 'package:eClassify/utils/api.dart';
-
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
-import 'package:eClassify/ui/screens/main_activity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FilterScreen extends StatefulWidget {
@@ -79,16 +76,6 @@ class FilterScreenState extends State<FilterScreen> {
   dynamic longitude = Constant.itemFilter?.longitude ?? null;
   List<CustomFieldBuilder> moreDetailDynamicFields = [];
 
-  // String _selectedOption = "All Time";
-  /*List<String> postedSince = [
-    "All Time",
-    "Today",
-    "Within 1 week",
-    "Within 2 weeks",
-    "Within 1 month",
-    "Within 3 months"
-  ];*/
-
   String postedOn =
       Constant.itemFilter?.postedSince ?? Constant.postedSince[0].value;
 
@@ -110,7 +97,8 @@ class FilterScreenState extends State<FilterScreen> {
     getCustomFieldsData();
   }
 
-  setCategories() {
+  void setCategories() {
+    log('${widget.categoryList} - ${widget.categoryIds}');
     if (widget.categoryIds != null && widget.categoryIds!.isNotEmpty) {
       selectedCategories.addAll(widget.categoryIds!);
     }
@@ -120,7 +108,7 @@ class FilterScreenState extends State<FilterScreen> {
     }
   }
 
-  getCustomFieldsData() {
+  void getCustomFieldsData() {
     if (Constant.itemFilter == null) {
       AbstractField.fieldsData.clear();
     }
@@ -135,9 +123,9 @@ class FilterScreenState extends State<FilterScreen> {
     if (isRefresh) {
       postedOn = Constant.postedSince[0].value;
       Constant.itemFilter = null;
-      searchbody[Api.postedSince] = Constant.postedSince[0].value;
+      searchBody[Api.postedSince] = Constant.postedSince[0].value;
 
-      selectedcategoryId = "0";
+      selectedCategoryId = "0";
       city = "";
       areaId = null;
       radius = null;
@@ -146,7 +134,7 @@ class FilterScreenState extends State<FilterScreen> {
       country = "";
       latitude = null;
       longitude = null;
-      selectedcategoryName = "";
+      selectedCategoryName = "";
       selectedCategory = defaultCategory;
 
       minController.clear();
@@ -202,26 +190,6 @@ class FilterScreenState extends State<FilterScreen> {
         });
       }
     });
-/*    FocusManager.instance.primaryFocus?.unfocus();
-    var result = await showModalBottomSheet(
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-      context: context,
-      builder: (context) {
-        return const ChooseLocatonBottomSheet();
-      },
-    );
-    if (result != null) {
-      GooglePlaceModel place = (result as GooglePlaceModel);
-
-      city = place.city;
-      country = place.country;
-      _state = place.state;
-      latitude = place.latitude;
-      longitude = place.longitude;
-    }*/
   }
 
   Map<String, dynamic> convertToCustomFields(Map<dynamic, dynamic> fieldsData) {
@@ -234,14 +202,10 @@ class FilterScreenState extends State<FilterScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         checkFilterValSet();
         return;
       },
-      /*  onWillPop: () async {
-        checkFilterValSet();
-        return true;
-      },*/
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primaryColor,
         appBar: UiUtils.buildAppBar(
@@ -277,10 +241,9 @@ class FilterScreenState extends State<FilterScreen> {
         bottomNavigationBar: BottomAppBar(
           color: context.color.secondaryColor,
           elevation: 3,
-          //padding: EdgeInsets.all(12),
           child: UiUtils.buildButton(context,
               outerPadding: const EdgeInsets.all(12),
-              height: 50.rh(context), onPressed: () {
+              height: 50, onPressed: () {
             Map<String, dynamic> customFields =
                 convertToCustomFields(AbstractField.fieldsData);
 
@@ -319,15 +282,6 @@ class FilterScreenState extends State<FilterScreen> {
                 customFields: customFields));
 
             Navigator.pop(context, true);
-
-            //this will set name of previous screen app bar
-
-            /*if (selectedCategory == null) {
-              selectedcategoryName = "";
-            } else {
-              selectedcategoryName =
-                  (selectedCategory as CategoryModel).name ?? "";
-            }*/
           }, buttonTitle: "applyFilter".translate(context), radius: 8),
         ),
         body: SingleChildScrollView(
@@ -339,36 +293,31 @@ class FilterScreenState extends State<FilterScreen> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text('locationLbl'.translate(context))
-                    .bold(weight: FontWeight.w600)
-                    .color(context.color.textDefaultColor),
+                CustomText('locationLbl'.translate(context),
+                    color: context.color.textDefaultColor,
+                    fontWeight: FontWeight.w600),
                 const SizedBox(height: 5),
                 locationWidget(context),
                 if (widget.categoryIds == null ||
                     widget.categoryIds!.isEmpty) ...[
                   const SizedBox(height: 15),
-                  Text('category'.translate(context))
-                      .bold(weight: FontWeight.w600)
-                      .color(context.color.textDefaultColor),
+                  CustomText('category'.translate(context),
+                      fontWeight: FontWeight.w600),
                   const SizedBox(height: 5),
                   categoryWidget(context),
                   const SizedBox(height: 5),
                 ],
-                //categoryModule(),
                 const SizedBox(
                   height: 15,
                 ),
-                Text('budgetLbl'.translate(context))
-                    .bold(weight: FontWeight.w600)
-                    .color(context.color.textDefaultColor),
+                CustomText('budgetLbl'.translate(context),
+                    fontWeight: FontWeight.w600),
                 const SizedBox(height: 15),
                 budgetOption(),
                 const SizedBox(height: 15),
-                Text('postedSinceLbl'.translate(context))
-                    .bold(weight: FontWeight.w600)
-                    .color(context.color.textDefaultColor),
+                CustomText('postedSinceLbl'.translate(context),
+                    fontWeight: FontWeight.w600),
                 const SizedBox(height: 5),
                 postedSinceOption(context),
                 const SizedBox(height: 15),
@@ -389,7 +338,9 @@ class FilterScreenState extends State<FilterScreen> {
               .read<FetchCustomFieldsCubit>()
               .getFields()
               .where((field) =>
-                  field.type != "fileinput" && field.type != "textbox" && field.type != "number")
+                  field.type != "fileinput" &&
+                  field.type != "textbox" &&
+                  field.type != "number")
               .map((field) {
             Map<String, dynamic> fieldData = field.toMap();
 
@@ -460,7 +411,7 @@ class FilterScreenState extends State<FilterScreen> {
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(start: 10.0),
                     child: /*(city != "" && city != null)
-                        ? Text(
+                        ? CustomText(
                             "${area != null && area != "" ? '$area,' : ''}$city, $_state, $country",
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
@@ -470,7 +421,7 @@ class FilterScreenState extends State<FilterScreen> {
                                     element != null && element.isNotEmpty)
                                 .join(", ")
                                 .isNotEmpty
-                            ? Text(
+                            ? CustomText(
                                 [area, city, _state, country]
                                     .where((element) =>
                                         element != null && element.isNotEmpty)
@@ -478,9 +429,9 @@ class FilterScreenState extends State<FilterScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 softWrap: true,
                               )
-                            : Text("allCities".translate(context)).color(context
-                                .color.textDefaultColor
-                                .withOpacity(0.5)),
+                            : CustomText("allCities".translate(context),
+                                color: context.color.textDefaultColor
+                                    .withValues(alpha: 0.5)),
                   ),
                 ),
               ],
@@ -531,10 +482,13 @@ class FilterScreenState extends State<FilterScreen> {
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(start: 15.0),
                     child: categoryList.isNotEmpty
-                        ? Text("${categoryList.map((e) => e.name).join(' - ')}",
-                            maxLines: 1, overflow: TextOverflow.ellipsis)
-                        : Text("allInClassified".translate(context)).color(
-                            context.color.textDefaultColor.withOpacity(0.5)),
+                        ? CustomText(
+                            "${categoryList.map((e) => e.name).join(' - ')}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis)
+                        : CustomText("allInClassified".translate(context),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5)),
                   ),
                 ),
                 Padding(
@@ -616,16 +570,16 @@ class FilterScreenState extends State<FilterScreen> {
             onChanged: ((value) {
               bool isEmpty = value.trim().isEmpty;
               if (minMax == "minLbl".translate(context)) {
-                if (isEmpty && searchbody.containsKey(Api.minPrice)) {
-                  searchbody.remove(Api.minPrice);
+                if (isEmpty && searchBody.containsKey(Api.minPrice)) {
+                  searchBody.remove(Api.minPrice);
                 } else {
-                  searchbody[Api.minPrice] = value;
+                  searchBody[Api.minPrice] = value;
                 }
               } else {
-                if (isEmpty && searchbody.containsKey(Api.maxPrice)) {
-                  searchbody.remove(Api.maxPrice);
+                if (isEmpty && searchBody.containsKey(Api.maxPrice)) {
+                  searchBody.remove(Api.maxPrice);
                 } else {
-                  searchbody[Api.maxPrice] = value;
+                  searchBody[Api.maxPrice] = value;
                 }
               }
             }),
@@ -641,9 +595,10 @@ class FilterScreenState extends State<FilterScreen> {
                     borderSide: BorderSide(
                         color: context.color.borderColor.darken(30))),
                 labelStyle: TextStyle(
-                    color: context.color.textDefaultColor.withOpacity(0.5)),
+                    color:
+                        context.color.textDefaultColor.withValues(alpha: 0.5)),
                 hintText: "00",
-                label: Text(
+                label: CustomText(
                   minMax,
                 ),
                 prefixText: '${Constant.currencySymbol} ',
@@ -658,7 +613,7 @@ class FilterScreenState extends State<FilterScreen> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly]));
   }
 
-  postedSinceUpdate(String value) {
+  void postedSinceUpdate(String value) {
     setState(() {
       postedOn = value;
     });
@@ -667,7 +622,6 @@ class FilterScreenState extends State<FilterScreen> {
   Widget postedSinceOption(BuildContext context) {
     int index =
         Constant.postedSince.indexWhere((item) => item.value == postedOn);
-
 
     return InkWell(
       onTap: () {
@@ -697,10 +651,10 @@ class FilterScreenState extends State<FilterScreen> {
                 UiUtils.getSvg(AppIcons.sinceIcon,
                     color: context.color.textDefaultColor),
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 15.0),
-                  child: Text(Constant.postedSince[index].status)
-                      .color(context.color.textDefaultColor.withOpacity(0.5)),
-                ),
+                    padding: const EdgeInsetsDirectional.only(start: 15.0),
+                    child: CustomText(Constant.postedSince[index].status,
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.5))),
                 Spacer(),
                 Padding(
                   padding: EdgeInsetsDirectional.only(end: 14.0),
@@ -717,10 +671,10 @@ class FilterScreenState extends State<FilterScreen> {
 
   void onClickPosted(String val) {
     if (val == Constant.postedSince[0].value &&
-        searchbody.containsKey(Api.postedSince)) {
-      searchbody[Api.postedSince] = "";
+        searchBody.containsKey(Api.postedSince)) {
+      searchBody[Api.postedSince] = "";
     } else {
-      searchbody[Api.postedSince] = val;
+      searchBody[Api.postedSince] = val;
     }
 
     postedOn = val;

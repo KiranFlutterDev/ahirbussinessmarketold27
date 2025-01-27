@@ -1,14 +1,12 @@
 import 'package:eClassify/data/cubits/report/fetch_item_report_reason_list.dart';
 import 'package:eClassify/data/cubits/report/item_report_cubit.dart';
+import 'package:eClassify/data/model/report_item/reason_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-
-import 'package:eClassify/data/model/report_item/reason_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class ReportItemScreen extends StatefulWidget {
   final int itemId;
@@ -47,17 +45,16 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
     return BlocListener<ItemReportCubit, ItemReportState>(
       listener: (context, state) {
         if (state is ItemReportFailure) {
-
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error.toString()),
+              content: CustomText(state.error.toString()),
             ),
           );
         }
         if (state is ItemReportInSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.responseMessage),
+              content: CustomText(state.responseMessage),
             ),
           );
         }
@@ -71,7 +68,10 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("reportItem".translate(context)).size(context.font.larger),
+                CustomText(
+                  "reportItem".translate(context),
+                  fontSize: context.font.larger,
+                ),
                 const SizedBox(
                   height: 15,
                 ),
@@ -103,10 +103,9 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(14.0),
-                          child: Text(
-                            reasons![index].reason.firstUpperCase() ?? "",
-                          ).color(
-                            selectedId == reasons![index].id
+                          child: CustomText(
+                            reasons![index].reason.firstUpperCase(),
+                            color: selectedId == reasons![index].id
                                 ? context.color.territoryColor
                                 : context.color.textColorDark,
                           ),
@@ -154,7 +153,7 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
                     children: [
                       MaterialButton(
                         height: 40,
-                        minWidth: 104.rw(context),
+                        minWidth: 104,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                           side: BorderSide(
@@ -165,15 +164,15 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text("cancelLbl".translate(context))
-                            .color(context.color.territoryColor),
+                        child: CustomText("cancelLbl".translate(context),
+                            color: context.color.territoryColor),
                       ),
                       const SizedBox(
                         width: 10,
                       ),
                       MaterialButton(
                         height: 40,
-                        minWidth: 104.rw(context),
+                        minWidth: 104,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -195,8 +194,10 @@ class _ReportItemScreenState extends State<ReportItemScreen> {
                             Navigator.pop(context);
                           }
                         },
-                        child: Text("report".translate(context))
-                            .color(context.color.buttonColor),
+                        child: CustomText(
+                          "report".translate(context),
+                          color: context.color.buttonColor,
+                        ),
                       ),
                     ],
                   ),

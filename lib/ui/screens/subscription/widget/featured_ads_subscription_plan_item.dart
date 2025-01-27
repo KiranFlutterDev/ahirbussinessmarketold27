@@ -1,24 +1,24 @@
 import 'dart:io';
 
+import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
+import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
+import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/data/model/subscription_pacakage_model.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/screens/subscription/payment_gatways.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
 import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/payment/gateaways/inapp_purchase_manager.dart';
+import 'package:eClassify/utils/payment/gateaways/payment_webview.dart';
+import 'package:eClassify/utils/payment/gateaways/stripe_service.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
-import 'package:eClassify/data/model/subscription_pacakage_model.dart';
 import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/payment/gatways/inAppPurchaseManager.dart';
-import 'package:eClassify/utils/payment/gatways/payment_webview.dart';
-import 'package:eClassify/utils/payment/gatways/stripe_service.dart';
-import 'package:eClassify/data/helper/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class FeaturedAdsSubscriptionPlansItem extends StatefulWidget {
   final List<SubscriptionPackageModel> modelList;
@@ -73,9 +73,11 @@ class _FeaturedAdsSubscriptionPlansItemState
             SizedBox(
               height: 35,
             ),
-            Text("featureAd".translate(context))
-                .bold(weight: FontWeight.w600)
-                .size(context.font.larger),
+            CustomText(
+              "featureAd".translate(context),
+              fontWeight: FontWeight.w600,
+              fontSize: context.font.larger,
+            ),
             Expanded(
               child: ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 18),
@@ -240,12 +242,13 @@ class _FeaturedAdsSubscriptionPlansItemState
                                   ? context.color.textLightColor.brighten(300)
                                   : context.color.territoryColor,
                           textColor: widget.modelList[selectedIndex!].isActive!
-                              ? context.color.textDefaultColor.withOpacity(0.5)
+                              ? context.color.textDefaultColor
+                                  .withValues(alpha: 0.5)
                               : context.color.secondaryColor,
                           buttonTitle: widget
                                       .modelList[selectedIndex!].finalPrice! >
                                   0
-                              ? "${"payLbl".translate(context)}\t${Constant.currencySymbol}${widget.modelList[selectedIndex!].finalPrice!.toDouble()}"
+                              ? "${"payLbl".translate(context)}\t${widget.modelList[selectedIndex!].finalPrice!.currencyFormat}"
                               : "purchaseThisPackage".translate(context),
 
                           //TODO: change title to Your Current Plan according to condition
@@ -257,16 +260,6 @@ class _FeaturedAdsSubscriptionPlansItemState
       ),
     );
   }
-
-/*  Future<void> _purchaseSubscription(SubscriptionPackageModel model) async {
-    bool success = await widget.inAppPurchaseManager
-        .purchaseSubscription(model.iosProductId!);
-    if (success) {
-      // Handle successful purchase
-    } else {
-      // Handle failed purchase
-    }
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -302,11 +295,11 @@ class _FeaturedAdsSubscriptionPlansItemState
                   width: MediaQuery.of(context).size.width / 3,
                   height: 17,
                   padding: EdgeInsets.only(top: 3),
-                  child: Text('activePlanLbl'.translate(context))
-                      .color(context.color.secondaryColor)
-                      .centerAlign()
-                      .bold(weight: FontWeight.w500)
-                      .size(12),
+                  child: CustomText('activePlanLbl'.translate(context),
+                      color: context.color.secondaryColor,
+                      textAlign: TextAlign.center,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12),
                 ),
               ),
             ),
@@ -327,7 +320,8 @@ class _FeaturedAdsSubscriptionPlansItemState
                       color: widget.modelList[index].isActive! ||
                               index == selectedIndex
                           ? context.color.territoryColor
-                          : context.color.textDefaultColor.withOpacity(0.1),
+                          : context.color.textDefaultColor
+                              .withValues(alpha: 0.1),
                       width: 1.5)),
               child: !widget.modelList[index].isActive!
                   ? adsWidget(index)
@@ -349,26 +343,31 @@ class _FeaturedAdsSubscriptionPlansItemState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.modelList[index].name!)
-                  .firstUpperCaseWidget()
-                  .bold(weight: FontWeight.w600)
-                  .size(context.font.large),
+              CustomText(
+                widget.modelList[index].name!,
+                firstUpperCaseWidget: true,
+                fontWeight: FontWeight.w600,
+                fontSize: context.font.large,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  CustomText(
                     '${widget.modelList[index].limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.modelList[index].limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
-                  ).color(context.color.textDefaultColor.withOpacity(0.5)),
+                    color:
+                        context.color.textDefaultColor.withValues(alpha: 0.5),
+                  ),
                   Flexible(
-                    child: Text(
+                    child: CustomText(
                       '${widget.modelList[index].duration.toString()}\t${"days".translate(context)}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
-                    ).color(context.color.textDefaultColor.withOpacity(0.5)),
+                      color: context.color.textDefaultColor.withAlpha(50),
+                    ),
                   ),
                 ],
               ),
@@ -377,14 +376,12 @@ class _FeaturedAdsSubscriptionPlansItemState
         ),
         Padding(
           padding: EdgeInsetsDirectional.only(start: 10.0),
-          child: Text(
+          child: CustomText(
             widget.modelList[index].finalPrice! > 0
-                ? "${Constant.currencySymbol}${widget.modelList[index].finalPrice.toString()}"
+                ? widget.modelList[index].finalPrice!.currencyFormat
                 : "free".translate(context),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
@@ -401,10 +398,12 @@ class _FeaturedAdsSubscriptionPlansItemState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.modelList[index].name!)
-                  .firstUpperCaseWidget()
-                  .bold(weight: FontWeight.w600)
-                  .size(context.font.large),
+              CustomText(
+                widget.modelList[index].name!,
+                firstUpperCaseWidget: true,
+                fontWeight: FontWeight.w600,
+                fontSize: context.font.large,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,7 +414,8 @@ class _FeaturedAdsSubscriptionPlansItemState
                           ? "${"unlimitedLbl".translate(context)}\t${"adsLbl".translate(context)}\t\t·\t\t"
                           : '',
                       style: TextStyle(
-                        color: context.color.textDefaultColor.withOpacity(0.5),
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.5),
                       ),
                       children: [
                         if (widget.modelList[index].limit != "unlimited")
@@ -442,8 +442,8 @@ class _FeaturedAdsSubscriptionPlansItemState
                             ? "${"unlimitedLbl".translate(context)}\t${"days".translate(context)}"
                             : '',
                         style: TextStyle(
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.5),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.5),
                         ),
                         children: [
                           if (widget.modelList[index].duration != "unlimited")
@@ -472,14 +472,12 @@ class _FeaturedAdsSubscriptionPlansItemState
         ),
         Padding(
           padding: EdgeInsetsDirectional.only(start: 10.0),
-          child: Text(
+          child: CustomText(
             widget.modelList[index].finalPrice! > 0
                 ? "${Constant.currencySymbol}${widget.modelList[index].finalPrice.toString()}"
                 : "free".translate(context),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
@@ -527,8 +525,8 @@ class _FeaturedAdsSubscriptionPlansItemState
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(3),
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.1),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1),
                         ),
                         height: 6,
                         width: 60,
@@ -537,10 +535,12 @@ class _FeaturedAdsSubscriptionPlansItemState
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 5),
-                    child: Text('selectPaymentMethod'.translate(context))
-                        .bold(weight: FontWeight.w600)
-                        .size(context.font.larger)
-                        .centerAlign(),
+                    child: CustomText(
+                      'selectPaymentMethod'.translate(context),
+                      fontWeight: FontWeight.bold,
+                      fontSize: context.font.larger,
+                      color: context.color.textDefaultColor,
+                    ),
                   ),
                   ListView.builder(
                     shrinkWrap: true,
@@ -594,11 +594,11 @@ class PaymentMethodTile extends StatelessWidget {
     return ListTile(
       leading: UiUtils.getSvg(gatewayIcon(gateway.type),
           width: 23, height: 23, fit: BoxFit.contain),
-      title: Text(gateway.name),
+      title: CustomText(gateway.name),
       trailing: isSelected
           ? Icon(Icons.check_circle, color: context.color.territoryColor)
           : Icon(Icons.radio_button_unchecked,
-              color: context.color.textDefaultColor.withOpacity(0.5)),
+              color: context.color.textDefaultColor.withValues(alpha: 0.5)),
       onTap: () => onSelect(gateway.type),
     );
   }

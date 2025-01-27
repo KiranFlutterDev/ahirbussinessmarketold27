@@ -1,10 +1,8 @@
-
+import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/login/lib/login_status.dart';
+import 'package:eClassify/utils/login/lib/login_system.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/login/lib/login_system.dart';
 
 class PhoneLogin extends LoginSystem {
   String? verificationId;

@@ -2,20 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/data/cubits/custom_field/fetch_custom_fields_cubit.dart';
 import 'package:eClassify/data/model/custom_field/custom_field_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
-
-import 'package:flutter/material.dart';
-
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddMoreDetailsScreen extends StatefulWidget {
@@ -33,7 +31,7 @@ class AddMoreDetailsScreen extends StatefulWidget {
       builder: (context) {
         return BlocProvider.value(
           value:
-          (args?['context'] as BuildContext).read<FetchCustomFieldsCubit>(),
+              (args?['context'] as BuildContext).read<FetchCustomFieldsCubit>(),
           child: AddMoreDetailsScreen(
             isEdit: args?['isEdit'],
             mainImage: args?['mainImage'],
@@ -57,35 +55,35 @@ class _AddMoreDetailsScreenState extends CloudState<AddMoreDetailsScreen> {
   void initState() {
     Future.delayed(
       Duration.zero,
-          () {
+      () {
         moreDetailDynamicFields =
             context.read<FetchCustomFieldsCubit>().getFields().map((field) {
-              Map<String, dynamic> fieldData = field.toMap();
-              // Assuming 'getCloudData' returns the correct item based on 'edit_request'
+          Map<String, dynamic> fieldData = field.toMap();
+          // Assuming 'getCloudData' returns the correct item based on 'edit_request'
 
-              // Check if 'item' and 'item.customFields' are not null before accessing them
-              if (widget.isEdit == true) {
-                ItemModel item = getCloudData('edit_request') as ItemModel;
+          // Check if 'item' and 'item.customFields' are not null before accessing them
+          if (widget.isEdit == true) {
+            ItemModel item = getCloudData('edit_request') as ItemModel;
 
-                /*CustomFieldModel matchingField =
+            /*CustomFieldModel matchingField =
                 item.customFields!.firstWhere((e) => e.id == field.id);*/
 
-                CustomFieldModel? matchingField =
+            CustomFieldModel? matchingField =
                 item.customFields!.any((e) => e.id == field.id)
                     ? item.customFields?.firstWhere((e) => e.id == field.id)
                     : null;
-                if (matchingField != null) {
-                  // Set 'value' in 'fieldData' based on the matching field's value
-                  fieldData['value'] = matchingField.value;
-                } // Use null-aware operator '?.' for safety
-              }
+            if (matchingField != null) {
+              // Set 'value' in 'fieldData' based on the matching field's value
+              fieldData['value'] = matchingField.value;
+            } // Use null-aware operator '?.' for safety
+          }
 
-              fieldData['isEdit'] = widget.isEdit == true;
-              CustomFieldBuilder customFieldBuilder = CustomFieldBuilder(fieldData);
-              customFieldBuilder.stateUpdater(setState);
-              customFieldBuilder.init();
-              return customFieldBuilder;
-            }).toList();
+          fieldData['isEdit'] = widget.isEdit == true;
+          CustomFieldBuilder customFieldBuilder = CustomFieldBuilder(fieldData);
+          customFieldBuilder.stateUpdater(setState);
+          customFieldBuilder.init();
+          return customFieldBuilder;
+        }).toList();
 
         setState(() {});
       },
@@ -151,7 +149,7 @@ class _AddMoreDetailsScreenState extends CloudState<AddMoreDetailsScreen> {
                   });
                 }
               },
-              height: 48.rh(context),
+              height: 48,
               fontSize: context.font.large,
               buttonTitle: "next".translate(context),
             ),
@@ -179,7 +177,7 @@ class _AddMoreDetailsScreenState extends CloudState<AddMoreDetailsScreen> {
           builder: (context, state) {
             if (state is FetchCustomFieldFail) {
               return Center(
-                child: Text(state.error.toString()),
+                child: CustomText(state.error.toString()),
               );
             }
 
@@ -193,11 +191,13 @@ class _AddMoreDetailsScreenState extends CloudState<AddMoreDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("giveMoreDetailsAboutYourAds".translate(context))
-                          .size(context.font.large)
-                          .bold(weight: FontWeight.w600),
+                      CustomText(
+                        "giveMoreDetailsAboutYourAds".translate(context),
+                        fontSize: context.font.large,
+                        fontWeight: FontWeight.w600,
+                      ),
                       ...moreDetailDynamicFields.map(
-                            (field) {
+                        (field) {
                           field.stateUpdater(setState);
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 9.0),

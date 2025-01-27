@@ -1,34 +1,61 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
+import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/cubits/report/fetch_item_report_reason_list.dart';
-import 'package:eClassify/data/cubits/subscription/fetch_ads_listing_subscription_packages_cubit.dart';
-import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
+import 'package:eClassify/data/cubits/chat/delete_message_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/chat/load_chat_messages.dart';
 import 'package:eClassify/data/cubits/chat/make_an_offer_item_cubit.dart';
+import 'package:eClassify/data/cubits/chat/send_message.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
+import 'package:eClassify/data/cubits/favorite/manage_fav_cubit.dart';
+import 'package:eClassify/data/cubits/item/change_my_items_status_cubit.dart';
 import 'package:eClassify/data/cubits/item/create_featured_ad_cubit.dart';
+import 'package:eClassify/data/cubits/item/delete_item_cubit.dart';
+import 'package:eClassify/data/cubits/item/fetch_item_from_slug_cubit.dart';
 import 'package:eClassify/data/cubits/item/fetch_my_item_cubit.dart';
 import 'package:eClassify/data/cubits/item/item_total_click_cubit.dart';
 import 'package:eClassify/data/cubits/item/related_item_cubit.dart';
 import 'package:eClassify/data/cubits/renew_item_cubit.dart';
+import 'package:eClassify/data/cubits/report/fetch_item_report_reason_list.dart';
+import 'package:eClassify/data/cubits/report/item_report_cubit.dart';
+import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
 import 'package:eClassify/data/cubits/safety_tips_cubit.dart';
 import 'package:eClassify/data/cubits/seller/fetch_seller_ratings_cubit.dart';
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/cubits/subscription/fetch_ads_listing_subscription_packages_cubit.dart';
+import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
+import 'package:eClassify/data/helper/widgets.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
+import 'package:eClassify/data/model/report_item/reason_model.dart';
 import 'package:eClassify/data/model/safety_tips_model.dart';
 import 'package:eClassify/data/model/subscription_pacakage_model.dart';
-
+import 'package:eClassify/ui/screens/ad_banner_screen.dart';
+import 'package:eClassify/ui/screens/chat/chat_screen.dart';
+import 'package:eClassify/ui/screens/google_map_screen.dart';
+import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
+import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
+import 'package:eClassify/ui/screens/subscription/widget/featured_ads_subscription_plan_item.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
+import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/screens/widgets/video_view_screen.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/utils/validator.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/material.dart';
@@ -38,39 +65,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
-import 'package:eClassify/utils/customHeroAnimation.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/cubits/report/item_report_cubit.dart';
-import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
-import 'package:eClassify/data/cubits/chat/delete_message_cubit.dart';
-import 'package:eClassify/data/cubits/chat/load_chat_messages.dart';
-import 'package:eClassify/data/cubits/chat/send_message.dart';
-import 'package:eClassify/data/cubits/favorite/manage_fav_cubit.dart';
-import 'package:eClassify/data/cubits/item/change_my_items_status_cubit.dart';
-import 'package:eClassify/data/cubits/item/delete_item_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
-import 'package:eClassify/data/model/report_item/reason_model.dart';
-import 'package:eClassify/ui/screens/ad_banner_screen.dart';
-import 'package:eClassify/ui/screens/chat/chat_screen.dart';
-import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
-import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
-import 'package:eClassify/ui/screens/subscription/widget/featured_ads_subscription_plan_item.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
-import 'package:eClassify/ui/screens/widgets/video_view_screen.dart';
-import 'package:eClassify/ui/screens/google_map_screen.dart';
 
 class AdDetailsScreen extends StatefulWidget {
-  final ItemModel model;
-
+  final ItemModel? model;
+  final String? slug;
   const AdDetailsScreen({
     super.key,
-    required this.model,
+    this.model,
+    this.slug,
   });
 
   @override
@@ -96,9 +98,11 @@ class AdDetailsScreen extends StatefulWidget {
                 BlocProvider(
                   create: (context) => MakeAnOfferItemCubit(),
                 ),
+                BlocProvider(create: (context) => FetchItemFromSlugCubit())
               ],
               child: AdDetailsScreen(
                 model: arguments?['model'],
+                slug: arguments?['slug'],
                 // from: arguments?['from'],
               ),
             ));
@@ -127,26 +131,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   final GlobalKey<FormState> _offerFormKey = GlobalKey();
   int? _selectedPackageIndex;
 
-  //int? packageId;
+  late ItemModel model;
 
-  /* [
-    "http://eclassify.thewrteam.in/storage/packages/M5t66y5DRVVOrxH7xjDoOg3PJnxavUqjZI1ILlHn.jpg",
-    "http://eclassify.thewrteam.in/storage/custom_field/655c7b73c8952.jpg",
-    "http://eclassify.thewrteam.in/storage/packages/M5t66y5DRVVOrxH7xjDoOg3PJnxavUqjZI1ILlHn.jpg",
-
-  ]; */
-  //ImageView
-
-/*  late final String from =
-      widget.from;*/ //"MyAds";//TODO: set it as an argument with Route
-
-  late final ItemModel model = widget.model;
-
-  late bool isAddedByMe = (widget.model.user?.id != null
-          ? widget.model.user!.id.toString()
-          : widget.model.userId) ==
-      HiveUtils.getUserId();
-
+  late bool isAddedByMe;
   bool isFeaturedWidget = true;
   String youtubeVideoThumbnail = "";
   int? categoryId;
@@ -155,29 +142,37 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   @override
   void initState() {
     super.initState();
-
-    if (!isAddedByMe) {
-      context.read<FetchItemReportReasonsListCubit>().fetch();
-      context.read<FetchSafetyTipsListCubit>().fetchSafetyTips();
-      context.read<FetchSellerRatingsCubit>().fetch(
-          sellerId: (widget.model.user?.id != null
-              ? widget.model.user!.id!
-              : widget.model.userId!));
-    } else {
-      context.read<FetchAdsListingSubscriptionPackagesCubit>().fetchPackages();
+    if (widget.model != null) {
+      initVariables(widget.model!);
     }
-    categoryId = widget.model.category != null
-        ? widget.model.category?.id
-        : widget.model.categoryId;
-
-    setItemClick();
-    //ImageView
-    combineImages();
     pageController.addListener(() {
       setState(() {
         currentPage = pageController.page!.round();
       });
     });
+    _pageScrollController.addListener(_pageScroll);
+  }
+
+  void initVariables(ItemModel itemModel) {
+    model = itemModel;
+
+    isAddedByMe =
+        (model.user?.id != null ? model.user!.id.toString() : model.userId) ==
+            HiveUtils.getUserId();
+
+    if (!isAddedByMe) {
+      context.read<FetchItemReportReasonsListCubit>().fetch();
+      context.read<FetchSafetyTipsListCubit>().fetchSafetyTips();
+      context.read<FetchSellerRatingsCubit>().fetch(
+          sellerId: (model.user?.id != null ? model.user!.id! : model.userId!));
+    } else {
+      context.read<FetchAdsListingSubscriptionPackagesCubit>().fetchPackages();
+    }
+    categoryId = model.category != null ? model.category?.id : model.categoryId;
+
+    setItemClick();
+    //ImageView
+    combineImages();
     context.read<FetchRelatedItemsCubit>().fetchRelatedItems(
         categoryId: categoryId!,
         city: HiveUtils.getCityName(),
@@ -244,34 +239,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
 
         youtubeVideoThumbnail = thumbnail;
       }
-      setState(() {});
     }
   }
-
-  /* void injectVideoInGallery() {
-    ///This will inject video in image list just like another platforms
-    if ((gallary?.length ?? 0) < 2) {
-      if (model.videoLink != null) {
-        gallary?.add(GalleryImages(
-
-            id: 99999999999,
-
-            image: property!.video ?? "",
-            imageUrl: "",
-            isVideo: true));
-      }
-    } else {
-      gallary?.insert(
-          0,
-          GalleryImages(
-              id: 99999999999,
-              image: property!.video!,
-              imageUrl: "",
-              isVideo: true));
-    }
-
-    setState(() {});
-  }*/
 
   void setItemClick() {
     if (!isAddedByMe) {
@@ -285,231 +254,278 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         value: SystemUiOverlayStyle(
           statusBarColor: context.color.secondaryDetailsColor,
         ),
-        child: Scaffold(
-          appBar: UiUtils.buildAppBar(
-            context,
-            backgroundColor: context.color.secondaryDetailsColor,
-            showBackButton: true,
-            actions: [
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                    end: isAddedByMe &&
-                            (model.status != "sold out" &&
-                                model.status != "review" &&
-                                model.status != "inactive" &&
-                                model.status != "rejected")
-                        ? 30.0
-                        : 15),
-                child: IconButton(
-                  onPressed: () {
-                    HelperUtils.share(context, model.slug!);
-                  },
-                  icon: Icon(
-                    Icons.share,
-                    size: 24,
-                    color: context.color.textDefaultColor,
-                  ),
-                ),
+        child: BlocConsumer<FetchItemFromSlugCubit, FetchItemFromSlugState>(
+            listener: (context, state) {
+          if (state is FetchItemFromSlugSuccess) {
+            log('success');
+            initVariables(state.item);
+          }
+        }, builder: (context, state) {
+          if (state is FetchItemFromSlugInitial && widget.slug != null) {
+            context
+                .read<FetchItemFromSlugCubit>()
+                .fetchItemFromSlug(slug: widget.slug!);
+            log('fetching item');
+            return Material(
+              child: Center(
+                child: UiUtils.progress(),
               ),
-              if (isAddedByMe &&
-                  (model.status != "sold out" &&
-                      model.status != "review" &&
-                      model.status != "inactive" &&
-                      model.status != "rejected"))
-                MultiBlocProvider(
-                  providers: [
-                    BlocProvider(
-                      create: (context) => DeleteItemCubit(),
-                    ),
-                    BlocProvider(
-                      create: (context) => ChangeMyItemStatusCubit(),
-                    ),
-                  ],
-                  child: Builder(builder: (context) {
-                    return BlocListener<DeleteItemCubit, DeleteItemState>(
-                      listener: (context, deleteState) {
-                        if (deleteState is DeleteItemSuccess) {
-                          HelperUtils.showSnackBarMessage(context,
-                              "deleteItemSuccessMsg".translate(context));
-                          context.read<FetchMyItemsCubit>().deleteItem(model);
-                          Navigator.pop(context, "refresh");
-                        } else if (deleteState is DeleteItemFailure) {
-                          HelperUtils.showSnackBarMessage(
-                              context, deleteState.errorMessage);
-                        }
-                      },
-                      child: BlocListener<ChangeMyItemStatusCubit,
-                          ChangeMyItemStatusState>(
-                        listener: (context, changeState) {
-                          if (changeState is ChangeMyItemStatusSuccess) {
-                            HelperUtils.showSnackBarMessage(
-                                context, changeState.message);
-                            Navigator.pop(context, "refresh");
-                          } else if (changeState is ChangeMyItemStatusFailure) {
-                            HelperUtils.showSnackBarMessage(
-                                context, changeState.errorMessage);
-                          }
+            );
+          } else if (state is FetchItemFromSlugLoading) {
+            log('loading');
+            return Material(
+              child: Center(
+                child: UiUtils.progress(),
+              ),
+            );
+          } else if (state is FetchItemFromSlugFailure) {
+            log('failure');
+            return SomethingWentWrong();
+          }
+          return BlocListener<MakeAnOfferItemCubit, MakeAnOfferItemState>(
+            listener: (context, state) {
+              if (state is MakeAnOfferItemInProgress) {
+                Widgets.showLoader(context);
+              }
+              if (state is MakeAnOfferItemSuccess ||
+                  state is MakeAnOfferItemFailure) {
+                Widgets.hideLoder(context);
+              }
+            },
+            child: Scaffold(
+              appBar: UiUtils.buildAppBar(
+                context,
+                backgroundColor: context.color.secondaryDetailsColor,
+                showBackButton: true,
+                actions: [
+                  if (isAddedByMe && model.status == "active" ||
+                      model.status == 'approved')
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                          end: isAddedByMe &&
+                                  (model.status != "sold out" &&
+                                      model.status != "review" &&
+                                      model.status != "inactive" &&
+                                      model.status != "rejected")
+                              ? 30.0
+                              : 15),
+                      child: IconButton(
+                        onPressed: () {
+                          HelperUtils.share(context, model.slug!);
                         },
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.only(end: 30.0),
-                          child: Container(
-                            height: 24,
-                            width: 24,
-                            alignment: AlignmentDirectional.center,
-                            child: PopupMenuButton(
-                              color: context.color.territoryColor,
-                              offset: Offset(-12, 15),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(17),
-                                  bottomRight: Radius.circular(17),
-                                  topLeft: Radius.circular(17),
-                                  topRight: Radius.circular(0),
-                                ),
-                              ),
-                              child: SvgPicture.asset(
-                                AppIcons.more,
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
-                                colorFilter: ColorFilter.mode(
-                                    context.color.textDefaultColor,
-                                    BlendMode.srcIn),
-                              ),
-                              itemBuilder: (context) => [
-                                if (model.status == "active" ||
-                                    model.status == "approved")
-                                  PopupMenuItem(
-                                    onTap: () {
-                                      Future.delayed(Duration.zero, () {
-                                        /*if (Constant.isDemoModeOn) {
-                                          HelperUtils.showSnackBarMessage(
-                                              context,
-                                              UiUtils.getTranslatedLabel(
-                                                  context,
-                                                  "thisActionNotValidDemo"));
-                                          return;
-                                        }*/
-                                        context
-                                            .read<ChangeMyItemStatusCubit>()
-                                            .changeMyItemStatus(
-                                                id: model.id!,
-                                                status: 'inactive');
-                                      });
-                                    },
-                                    child: Text("deactivate".translate(context))
-                                        .color(context.color.buttonColor),
-                                  ),
-                                if (model.status == "active" ||
-                                    model.status == "approved")
-                                  PopupMenuItem(
-                                    child: Text("lblremove".translate(context))
-                                        .color(context.color.buttonColor),
-                                    onTap: () async {
-                                      var delete =
-                                          await UiUtils.showBlurredDialoge(
-                                        context,
-                                        dialoge: BlurredDialogBox(
-                                          title:
-                                              "deleteBtnLbl".translate(context),
-                                          content: Text(
-                                            "deleteitemwarning"
-                                                .translate(context),
-                                          ),
-                                        ),
-                                      );
-                                      if (delete == true) {
-                                        Future.delayed(
-                                          Duration.zero,
-                                          () {
-                                            context
-                                                .read<DeleteItemCubit>()
-                                                .deleteItem(model.id!);
-                                          },
-                                        );
-                                      }
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
+                        icon: Icon(
+                          Icons.share,
+                          size: 24,
+                          color: context.color.textDefaultColor,
                         ),
                       ),
-                    );
-                  }),
-                ),
-            ],
-          ),
-          backgroundColor: context.color.secondaryDetailsColor,
-          bottomNavigationBar: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: bottomButtonWidget()),
-          body: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(13.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  setImageViewer(),
-                  if (isAddedByMe) setLikesAndViewsCount(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(model.name!)
-                        .size(context.font.large)
-                        .setMaxLines(lines: 2)
-                        .color(context.color.textDefaultColor),
-                  ),
-                  setPriceAndStatus(),
-                  if (isAddedByMe) setRejectedReason(),
-                  if (model.address != null) setAddress(isDate: true),
-
-                  if (Constant.isGoogleBannerAdsEnabled == "1") ...[
-                    Divider(
-                        thickness: 1,
-                        color: context.color.textDefaultColor.withOpacity(0.1)),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      child: AdBannerWidget(), // Custom widget for banner ad
                     ),
-                  ],
-
-                  if (isAddedByMe)
-                    if (!model.isFeature!) createFeaturesAds(),
-                  if (model.customFields!.isNotEmpty) customFields(),
-                  //detailsContainer Widget
-                  //Dynamic Ads here
-                  Divider(
-                      thickness: 1,
-                      color: context.color.textDefaultColor.withOpacity(0.1)),
-                  setDescription(),
-                  Divider(
-                      thickness: 1,
-                      color: context.color.textDefaultColor.withOpacity(0.1)),
-                  if (!isAddedByMe && model.user != null) setSellerDetails(),
-                  //Dynamic Ads here
-                  setLocation(),
-                  if (Constant.isGoogleBannerAdsEnabled == "1") ...[
-                    Divider(
-                        thickness: 1,
-                        color: context.color.textDefaultColor.withOpacity(0.1)),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      child: AdBannerWidget(), // Custom widget for banner ad
+                  if (isAddedByMe &&
+                      (model.status != "sold out" &&
+                          model.status != "review" &&
+                          model.status != "inactive" &&
+                          model.status != "rejected"))
+                    MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => DeleteItemCubit(),
+                        ),
+                        BlocProvider(
+                          create: (context) => ChangeMyItemStatusCubit(),
+                        ),
+                      ],
+                      child: Builder(builder: (context) {
+                        return BlocListener<DeleteItemCubit, DeleteItemState>(
+                          listener: (context, deleteState) {
+                            if (deleteState is DeleteItemSuccess) {
+                              HelperUtils.showSnackBarMessage(context,
+                                  "deleteItemSuccessMsg".translate(context));
+                              context
+                                  .read<FetchMyItemsCubit>()
+                                  .deleteItem(model);
+                              Navigator.pop(context, "refresh");
+                            } else if (deleteState is DeleteItemFailure) {
+                              HelperUtils.showSnackBarMessage(
+                                  context, deleteState.errorMessage);
+                            }
+                          },
+                          child: BlocListener<ChangeMyItemStatusCubit,
+                              ChangeMyItemStatusState>(
+                            listener: (context, changeState) {
+                              if (changeState is ChangeMyItemStatusSuccess) {
+                                HelperUtils.showSnackBarMessage(
+                                    context, changeState.message);
+                                Navigator.pop(context, "refresh");
+                              } else if (changeState
+                                  is ChangeMyItemStatusFailure) {
+                                HelperUtils.showSnackBarMessage(
+                                    context, changeState.errorMessage);
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.only(end: 30.0),
+                              child: Container(
+                                height: 24,
+                                width: 24,
+                                alignment: AlignmentDirectional.center,
+                                child: PopupMenuButton(
+                                  color: context.color.territoryColor,
+                                  offset: Offset(-12, 15),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(17),
+                                      bottomRight: Radius.circular(17),
+                                      topLeft: Radius.circular(17),
+                                      topRight: Radius.circular(0),
+                                    ),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    AppIcons.more,
+                                    width: 20,
+                                    height: 20,
+                                    fit: BoxFit.contain,
+                                    colorFilter: ColorFilter.mode(
+                                        context.color.textDefaultColor,
+                                        BlendMode.srcIn),
+                                  ),
+                                  itemBuilder: (context) => [
+                                    if (model.status == "active" ||
+                                        model.status == "approved")
+                                      PopupMenuItem(
+                                          onTap: () {
+                                            Future.delayed(Duration.zero, () {
+                                              context
+                                                  .read<
+                                                      ChangeMyItemStatusCubit>()
+                                                  .changeMyItemStatus(
+                                                      id: model.id!,
+                                                      status: 'inactive');
+                                            });
+                                          },
+                                          child: CustomText(
+                                            "deactivate".translate(context),
+                                            color: context.color.buttonColor,
+                                          )),
+                                    if (model.status == "active" ||
+                                        model.status == "approved")
+                                      PopupMenuItem(
+                                        child: CustomText(
+                                          "lblremove".translate(context),
+                                          color: context.color.buttonColor,
+                                        ),
+                                        onTap: () async {
+                                          var delete =
+                                              await UiUtils.showBlurredDialoge(
+                                            context,
+                                            dialoge: BlurredDialogBox(
+                                              title: "deleteBtnLbl"
+                                                  .translate(context),
+                                              content: CustomText(
+                                                "deleteitemwarning"
+                                                    .translate(context),
+                                              ),
+                                            ),
+                                          );
+                                          if (delete == true) {
+                                            Future.delayed(
+                                              Duration.zero,
+                                              () {
+                                                context
+                                                    .read<DeleteItemCubit>()
+                                                    .deleteItem(model.id!);
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                     ),
-                  ],
-
-                  if (!isAddedByMe) reportedAdsWidget(),
-                  /*if (model.isAlreadyReported != null &&
-                        model.isAlreadyReported!)
-                      setReportAd(),*/
-                  relatedAds(),
-                  // const SizedBox(height: 15),
                 ],
               ),
+              backgroundColor: context.color.secondaryDetailsColor,
+              bottomNavigationBar: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: bottomButtonWidget()),
+              body: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(13.0, 0.0, 13.0, 13.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      setImageViewer(),
+                      if (isAddedByMe) setLikesAndViewsCount(),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: CustomText(
+                            model.name!,
+                            color: context.color.textDefaultColor,
+                            fontSize: context.font.large,
+                            maxLines: 2,
+                          )),
+                      setPriceAndStatus(),
+                      if (isAddedByMe) setRejectedReason(),
+                      if (model.address != null) setAddress(isDate: true),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      if (Constant.isGoogleBannerAdsEnabled == "1") ...[
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          child:
+                              AdBannerWidget(), // Custom widget for banner ad
+                        ),
+                      ],
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      if (isAddedByMe)
+                        if (!model.isFeature!) createFeaturesAds(),
+                      if (model.customFields!.isNotEmpty) customFields(),
+                      //detailsContainer Widget
+                      //Dynamic Ads here
+                      Divider(
+                          thickness: 1,
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1)),
+                      setDescription(),
+                      Divider(
+                          thickness: 1,
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1)),
+                      if (!isAddedByMe && model.user != null)
+                        setSellerDetails(),
+                      //Dynamic Ads here
+                      setLocation(),
+                      if (Constant.isGoogleBannerAdsEnabled == "1") ...[
+                        Divider(
+                            thickness: 1,
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.1)),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          child:
+                              AdBannerWidget(), // Custom widget for banner ad
+                        ),
+                      ],
+
+                      if (!isAddedByMe) reportedAdsWidget(),
+                      if (!isAddedByMe) relatedAds(),
+                      // const SizedBox(height: 15),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ));
+          );
+        }));
   }
 
   Widget reportedAdsWidget() {
@@ -572,21 +588,24 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 10.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("relatedAds".translate(context))
-              .size(context.font.large)
-              .bold(weight: FontWeight.w600)
-              .setMaxLines(lines: 1),
+          CustomText(
+            "relatedAds".translate(context),
+            fontSize: context.font.large,
+            fontWeight: FontWeight.w600,
+            maxLines: 1,
+          ),
           SizedBox(
             height: 15,
           ),
           GridListAdapter(
             type: ListUiType.List,
-            height: MediaQuery.of(context).size.height / 3.5.rh(context),
+            height: MediaQuery.of(context).size.height / 3.5,
             controller: _pageScrollController,
             listAxis: Axis.horizontal,
-            listSaperator: (BuildContext p0, int p1) => const SizedBox(
+            listSeparator: (BuildContext p0, int p1) => const SizedBox(
               width: 14,
             ),
             isNotSidePadding: true,
@@ -668,11 +687,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     context,
                     dialoge: BlurredDialogBox(
                         title: "createFeaturedAd".translate(context),
-                        content: Text(
+                        content: CustomText(
                           "areYouSureToCreateThisItemAsAFeaturedAd"
                               .translate(context),
                         ),
-                        isAcceptContainesPush: true,
+                        isAcceptContainerPush: true,
                         onAccept: () => Future.value().then((_) {
                               Future.delayed(
                                 Duration.zero,
@@ -701,7 +720,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   //height: 116,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: context.color.territoryColor.withOpacity(0.1),
+                    color: context.color.territoryColor.withValues(alpha: 0.1),
                     border:
                         Border.all(color: context.color.borderColor.darken(30)),
                   ),
@@ -721,13 +740,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            CustomText(
                               "${"featureYourAdsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
-                              style: TextStyle(
-                                color: context.color.textDefaultColor
-                                    .withOpacity(0.7),
-                                fontSize: context.font.large,
-                              ),
+                              color: context.color.textDefaultColor
+                                  .withValues(alpha: 0.7),
+                              fontSize: context.font.large,
                             ),
                             const SizedBox(height: 12),
                             InkWell(
@@ -745,12 +762,10 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                   color: context.color.territoryColor,
                                 ),
-                                child: Text(
+                                child: CustomText(
                                   "createFeaturedAd".translate(context),
-                                  style: TextStyle(
-                                    color: context.color.secondaryColor,
-                                    fontSize: context.font.small,
-                                  ),
+                                  color: context.color.secondaryColor,
+                                  fontSize: context.font.small,
                                 ),
                               ),
                             ),
@@ -778,9 +793,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         children: [
           ...List.generate(model.customFields!.length, (index) {
             if (model.customFields![index].value!.isNotEmpty) {
-              if (model.customFields![index].type != "textbox") {
-                return SizedBox(
-                  width: (context.screenWidth / 2) - (sidePadding / 2) - 5,
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                    border:
+                        Border.all(color: Colors.red.withValues(alpha: 0.0))),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width * .45,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -789,105 +807,37 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         height: 33,
                         width: 33,
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          /*border: Border.all(
-                                color: context.color.textLightColor, width: 0.5)*/
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
-                          child: UiUtils.imageType(
-                              model.customFields![index].image!,
-                              fit: BoxFit.cover),
-                        ),
+                        child: UiUtils.imageType(
+                            model.customFields![index].image!,
+                            fit: BoxFit.contain),
                       ),
                       SizedBox(width: 7),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Tooltip(
-                              message: model.customFields![index].name,
-                              child:
-                                  Text((model.customFields?[index].name) ?? "")
-                                      .setMaxLines(lines: 1)
-                                      .size(context.font.small)
-                                      .color(context.color.textDefaultColor
-                                          .withOpacity(0.5)),
-                            ),
-                            valueContent(model.customFields![index].value),
-                            const SizedBox(
-                              height: 12,
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                return SizedBox();
-              }
-            } else {
-              return SizedBox();
-            }
-          }),
-          ...List.generate(model.customFields!.length, (index) {
-            if (model.customFields![index].value!.isNotEmpty) {
-              if (model.customFields![index].type == "textbox") {
-                return SizedBox(
-                  width: (context.screenWidth / 2) - (sidePadding / 2) - 5,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 33,
-                        width: 33,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          /*border: Border.all(
-                                color: context.color.textLightColor, width: 0.5)*/
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
-                          child: UiUtils.imageType(
-                              model.customFields![index].image!,
-                              fit: BoxFit.cover),
-                        ),
-                      ),
-                      SizedBox(width: 7),
-                      Expanded(
-                          //padding: EdgeInsetsDirectional.only(start: 7.0),
-                          child: Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Tooltip(
                             message: model.customFields![index].name,
-                            child: Text((model.customFields?[index].name) ?? "")
-                                .setMaxLines(lines: 1)
-                                .size(context.font.small)
-                                .color(context.color.textDefaultColor
-                                    .withOpacity(0.5)),
+                            child: CustomText(
+                                (model.customFields?[index].name) ?? "",
+                                maxLines: 1,
+                                fontSize: context.font.small,
+                                color: context.color.textLightColor),
                           ),
                           valueContent(model.customFields![index].value),
                           const SizedBox(
                             height: 12,
                           )
                         ],
-                      )),
+                      ),
                     ],
                   ),
-                );
-              } else {
-                return SizedBox();
-              }
+                ),
+              );
             } else {
               return SizedBox();
             }
-          })
+          }),
         ],
       ),
     );
@@ -928,7 +878,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               margin: EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: context.color.territoryColor.withOpacity(0.1)),
+                  color: context.color.territoryColor.withValues(alpha: 0.1)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: UiUtils.imageType(
@@ -942,12 +892,14 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     }
 
     // Default text if not a supported format or not a URL
-    return Text(
-      value.length == 1 ? value[0].toString() : value.join(','),
-      //maxLines: 4,
-      //overflow: TextOverflow.ellipsis,
-      //softWrap: true,
-    ).color(context.color.textDefaultColor);
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width * .3,
+      child: CustomText(
+        value.length == 1 ? value[0].toString() : value.join(','),
+        softWrap: true,
+        color: context.color.textDefaultColor,
+      ),
+    );
   }
 
   Widget itemData(
@@ -963,16 +915,17 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               child: ClipPath(
                 clipper: CapShapeClipper(),
                 child: Container(
-                  color: context.color.territoryColor,
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: 17,
-                  padding: EdgeInsets.only(top: 3),
-                  child: Text('activePlanLbl'.translate(context))
-                      .color(context.color.secondaryColor)
-                      .centerAlign()
-                      .bold(weight: FontWeight.w500)
-                      .size(12),
-                ),
+                    color: context.color.territoryColor,
+                    width: MediaQuery.of(context).size.width / 3,
+                    height: 17,
+                    padding: EdgeInsets.only(top: 3),
+                    child: CustomText(
+                      'activePlanLbl'.translate(context),
+                      color: context.color.secondaryColor,
+                      textAlign: TextAlign.center,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    )),
               ),
             ),
           InkWell(
@@ -989,7 +942,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   border: Border.all(
                       color: index == _selectedPackageIndex
                           ? context.color.territoryColor
-                          : context.color.textDefaultColor.withOpacity(0.1),
+                          : context.color.textDefaultColor
+                              .withValues(alpha: 0.1),
                       width: 1.5)),
               child:
                   !model.isActive! ? adsWidget(model) : activeAdsWidget(model),
@@ -1010,26 +964,32 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(model.name!)
-                  .firstUpperCaseWidget()
-                  .bold(weight: FontWeight.w600)
-                  .size(context.font.large),
+              CustomText(
+                model.name!,
+                firstUpperCaseWidget: true,
+                fontWeight: FontWeight.w600,
+                fontSize: context.font.large,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  CustomText(
                     '${model.limit == "unlimited" ? "unlimitedLbl".translate(context) : model.limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
-                  ).color(context.color.textDefaultColor.withOpacity(0.5)),
+                    color:
+                        context.color.textDefaultColor.withValues(alpha: 0.5),
+                  ),
                   Flexible(
-                    child: Text(
+                    child: CustomText(
                       '${model.duration.toString()}\t${"days".translate(context)}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
-                    ).color(context.color.textDefaultColor.withOpacity(0.5)),
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5),
+                    ),
                   ),
                 ],
               ),
@@ -1038,14 +998,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         ),
         Padding(
           padding: EdgeInsetsDirectional.only(start: 10.0),
-          child: Text(
+          child: CustomText(
             model.finalPrice! > 0
-                ? "${Constant.currencySymbol}${model.finalPrice.toString()}"
+                ? "${model.finalPrice!.currencyFormat}"
                 : "free".translate(context),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
@@ -1062,10 +1020,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(model.name!)
-                  .firstUpperCaseWidget()
-                  .bold(weight: FontWeight.w600)
-                  .size(context.font.large),
+              CustomText(
+                model.name!,
+                firstUpperCaseWidget: true,
+                fontWeight: FontWeight.w600,
+                fontSize: context.font.large,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1076,7 +1036,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           ? "${"unlimitedLbl".translate(context)}\t${"adsLbl".translate(context)}\t\t·\t\t"
                           : '',
                       style: TextStyle(
-                        color: context.color.textDefaultColor.withOpacity(0.5),
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.5),
                       ),
                       children: [
                         if (model.limit != "unlimited")
@@ -1103,8 +1064,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                             ? "${"unlimitedLbl".translate(context)}\t${"days".translate(context)}"
                             : '',
                         style: TextStyle(
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.5),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.5),
                         ),
                         children: [
                           if (model.duration != "unlimited")
@@ -1133,39 +1094,19 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         ),
         Padding(
           padding: EdgeInsetsDirectional.only(start: 10.0),
-          child: Text(
+          child: CustomText(
             model.finalPrice! > 0
-                ? "${Constant.currencySymbol}${model.finalPrice.toString()}"
+                ? "${model.finalPrice!.currencyFormat}"
                 : "free".translate(context),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
   }
 
-/*  void selectPackageDialog() async {
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-
-      // Set to false if you don't want the dialog to close by tapping outside
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: context.color.secondaryColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Center(child: Text("selectPackage".translate(context))),
-          content: packageList(),
-        );
-      },
-    );
-  }*/
-
-  showPackageSelectBottomSheet() {
+  void showPackageSelectBottomSheet() {
     showModalBottomSheet(
       context: context,
       backgroundColor: context.color.secondaryColor,
@@ -1206,10 +1147,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 17, horizontal: 20),
-                child: Text(
+                child: CustomText(
                   'selectPackage'.translate(context),
                   textAlign: TextAlign.start,
-                ).bold(weight: FontWeight.bold).size(context.font.large),
+                  fontWeight: FontWeight.bold,
+                  fontSize: context.font.large,
+                ),
               ),
 
               Divider(height: 1), // Add some space between title and options
@@ -1312,7 +1255,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         height: 46,
                         disabled: _selectedPackageIndex == null,
                         disabledColor:
-                            context.color.textLightColor.withOpacity(0.3),
+                            context.color.textLightColor.withValues(alpha: 0.3),
                         fontSize: context.font.large,
                         buttonColor: context.color.territoryColor,
                         textColor: context.color.secondaryColor,
@@ -1334,7 +1277,6 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
 
   Widget bottomButtonWidget() {
     if (isAddedByMe) {
-      final model = widget.model;
       final contextColor = context.color;
 
       if (model.status == "review") {
@@ -1349,7 +1291,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     arguments: {"isEdit": true});
               }, contextColor.secondaryColor, contextColor.territoryColor),
             ),
-            SizedBox(width: 10.rw(context)),
+            SizedBox(width: 10),
             BlocProvider(
               create: (context) => DeleteItemCubit(),
               child: Builder(builder: (context) {
@@ -1366,20 +1308,21 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     }
                   },
                   child: Expanded(
-                    child: _buildButton("lblremove".translate(context), () {
-                      Future.delayed(
-                        Duration.zero,
-                        () {
-                          /*  if (Constant.isDemoModeOn) {
-                            HelperUtils.showSnackBarMessage(
-                                context,
-                                UiUtils.getTranslatedLabel(
-                                    context, "thisActionNotValidDemo"));
-                            return;
-                          }*/
-                          context.read<DeleteItemCubit>().deleteItem(model.id!);
-                        },
-                      );
+                    child:
+                        _buildButton("lblremove".translate(context), () async {
+                      final delete = await UiUtils.showBlurredDialoge(
+                            context,
+                            dialoge: BlurredDialogBox(
+                              title: "deleteBtnLbl".translate(context),
+                              content: CustomText(
+                                "deleteitemwarning".translate(context),
+                              ),
+                            ),
+                          ) as bool? ??
+                          false;
+                      if (delete) {
+                        context.read<DeleteItemCubit>().deleteItem(model.id!);
+                      }
                     }, null, null),
                   ),
                 );
@@ -1399,7 +1342,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     arguments: {"isEdit": true});
               }, contextColor.secondaryColor, contextColor.territoryColor),
             ),
-            SizedBox(width: 10.rw(context)),
+            SizedBox(width: 10),
             Expanded(
               child: _buildButton("soldOut".translate(context), () async {
                 Navigator.pushNamed(context, Routes.soldOutBoughtScreen,
@@ -1453,7 +1396,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                 showPackageSelectBottomSheet();
               }, contextColor.secondaryColor, contextColor.territoryColor),
             ),
-            SizedBox(width: 10.rw(context)),
+            SizedBox(width: 10),
             BlocProvider(
               create: (context) => DeleteItemCubit(),
               child: Builder(builder: (context) {
@@ -1491,33 +1434,35 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
       return BlocBuilder<GetBuyerChatListCubit, GetBuyerChatListState>(
         bloc: context.read<GetBuyerChatListCubit>(),
         builder: (context, State) {
-          ChatedUser? chatedUser = context.select(
-              (GetBuyerChatListCubit cubit) =>
-                  cubit.getOfferForItem(model.id!));
+          ChatUser? chatedUser = context.select((GetBuyerChatListCubit cubit) =>
+              cubit.getOfferForItem(model.id!));
 
           return BlocListener<MakeAnOfferItemCubit, MakeAnOfferItemState>(
             listener: (context, state) {
               if (state is MakeAnOfferItemSuccess) {
+                dynamic data = state.data;
+
+                context.read<GetBuyerChatListCubit>().addOrUpdateChat(ChatUser(
+                    itemId: data['item_id'] is String
+                        ? int.parse(data['item_id'])
+                        : data['item_id'],
+                    amount: data['amount'] != null
+                        ? double.parse(data['amount'])
+                        : null,
+                    buyerId: data['buyer_id'],
+                    createdAt: data['created_at'],
+                    id: data['id'],
+                    sellerId: data['seller_id'],
+                    updatedAt: data['updated_at'],
+                    buyer: Buyer.fromJson(data['buyer']),
+                    item: Item.fromJson(data['item']),
+                    seller: Seller.fromJson(data['seller'])));
+
                 if (state.from == 'offer') {
                   HelperUtils.showSnackBarMessage(
                     context,
                     state.message.toString(),
                   );
-                  dynamic data = state.data;
-
-                  context.read<GetBuyerChatListCubit>().addNewChat(ChatedUser(
-                      itemId: data['item_id'] is String
-                          ? int.parse(data['item_id'])
-                          : data['item_id'],
-                      amount: double.parse(data['amount']),
-                      buyerId: data['buyer_id'],
-                      createdAt: data['created_at'],
-                      id: data['id'],
-                      sellerId: data['seller_id'],
-                      updatedAt: data['updated_at'],
-                      buyer: Buyer.fromJson(data['buyer']),
-                      item: Item.fromJson(data['item']),
-                      seller: Seller.fromJson(data['seller'])));
                 }
 
                 Navigator.push(context, BlurredRouter(
@@ -1535,27 +1480,28 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         ),
                       ],
                       child: ChatScreen(
-                        profilePicture: widget.model.user!.profile ?? "",
-                        userName: widget.model.user!.name!,
-                        userId: widget.model.user!.id!.toString(),
+                        profilePicture: model.user!.profile ?? "",
+                        userName: model.user!.name!,
+                        userId: model.user!.id!.toString(),
                         from: "item",
-                        itemImage: widget.model.image!,
-                        itemId: widget.model.id.toString(),
-                        date: widget.model.created!,
-                        itemTitle: widget.model.name!,
+                        itemImage: model.image!,
+                        itemId: model.id.toString(),
+                        date: model.created!,
+                        itemTitle: model.name!,
                         itemOfferId: state.data['id'],
-                        itemPrice: widget.model.price!,
-                        status: widget.model.status!,
+                        itemPrice: model.price!,
+                        status: model.status!,
                         buyerId: HiveUtils.getUserId(),
                         itemOfferPrice: state.data['amount'] != null
                             ? double.parse(state.data['amount'])
                             : null,
-                        isPurchased: widget.model.isPurchased!,
-                        alreadyReview: widget.model.review == null
+                        isPurchased: model.isPurchased!,
+                        alreadyReview: model.review == null
                             ? false
-                            : widget.model.review!.isEmpty
+                            : model.review!.isEmpty
                                 ? false
                                 : true,
+                        isFromBuyerList: true,
                       ),
                     );
                   },
@@ -1571,15 +1517,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //if(!model.isAlreadyOffered!)
-                if (chatedUser == null /*!model.isAlreadyOffered!*/)
+                if (chatedUser == null)
                   Expanded(
                     child: _buildButton("makeAnOffer".translate(context), () {
-                      /* if (Constant.isDemoModeOn) {
-                        HelperUtils.showSnackBarMessage(context,
-                            "thisActionNotValidDemo".translate(context));
-                        return;
-                      }*/
                       UiUtils.checkUser(
                           onNotGuest: () {
                             safetyTipsBottomSheet();
@@ -1588,8 +1528,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           context: context);
                     }, null, null),
                   ),
-                if (chatedUser == null) SizedBox(width: 10.rw(context)),
-
+                if (chatedUser == null) SizedBox(width: 10),
                 Expanded(
                   child: _buildButton("chat".translate(context), () {
                     UiUtils.checkUser(
@@ -1641,12 +1580,13 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                     buyerId: chatedUser.buyerId.toString(),
                                     status: chatedUser.item!.status,
                                     from: "item",
-                                    isPurchased: widget.model.isPurchased!,
-                                    alreadyReview: widget.model.review == null
+                                    isPurchased: model.isPurchased!,
+                                    alreadyReview: model.review == null
                                         ? false
-                                        : widget.model.review!.isEmpty
+                                        : model.review!.isEmpty
                                             ? false
                                             : true,
+                                    isFromBuyerList: true,
                                   ),
                                 );
                               },
@@ -1654,8 +1594,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           } else {
                             context
                                 .read<MakeAnOfferItemCubit>()
-                                .makeAnOfferItem(
-                                    id: widget.model.id!, from: "chat");
+                                .makeAnOfferItem(id: model.id!, from: "chat");
                           }
                         },
                         context: context);
@@ -1706,7 +1645,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: context.color.textColorDark.withOpacity(0.1),
+                      color: context.color.textColorDark.withValues(alpha: 0.1),
                     ),
                     height: 6,
                     width: 60,
@@ -1721,12 +1660,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 24.0, bottom: 5),
-                child: Text(
+                child: CustomText(
                   'safetyTips'.translate(context),
-                )
-                    .bold(weight: FontWeight.w600)
-                    .size(context.font.larger)
-                    .centerAlign(),
+                  fontWeight: FontWeight.w600,
+                  fontSize: context.font.larger,
+                  textAlign: TextAlign.center,
+                ),
               ),
               ListView.builder(
                 shrinkWrap: true,
@@ -1769,14 +1708,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-              child: Text(
+              child: CustomText(
             text.firstUpperCase(),
             textAlign: TextAlign.start,
-          )
-                  .color(
-                    context.color.textDefaultColor,
-                  )
-                  .size(context.font.large)),
+            color: context.color.textDefaultColor,
+            fontSize: context.font.large,
+          )),
         ],
       ),
     );
@@ -1795,14 +1732,14 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
       buttonColor: buttonColor,
       textColor: textColor,
       buttonTitle: title,
-      width: 50.rw(context),
+      width: 50,
     );
   }
 
 //ImageView
   Widget setImageViewer() {
     return Container(
-      height: 250.rh(context),
+      height: 250,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),
       padding: const EdgeInsets.symmetric(vertical: 10),
       // decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
@@ -1839,7 +1776,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         child: UiUtils.getImage(
                           youtubeVideoThumbnail,
                           fit: BoxFit.cover,
-                          height: 250.rh(context),
+                          height: 250,
                           width: double.maxFinite,
                         ),
                       ),
@@ -1866,7 +1803,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                               ),
                               padding: EdgeInsets.all(12),
                               child: Icon(
@@ -1881,11 +1818,6 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     ),
                   ],
                 );
-
-                /*  if (model.videoLink!.contains("youtube.com"))
-                  return buildYouTubePlayer(model.videoLink!);
-                else
-                  return buildVideoPlayer(model.videoLink!);*/
               } else {
                 // Display image
                 return ShaderMask(
@@ -1895,11 +1827,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Color(0x00FFFFFF),
+                        Color(0x00FFFFFF),
+                        Color(0x00FFFFFF),
                         Color(0x7F060606)
-
-                        /*Colors.black.withOpacity(0.01),
-                        Colors.black.withOpacity(0.30),
-                        Colors.black.withOpacity(0.55)*/
                       ],
                     ).createShader(bounds);
                     //TODO: change black color to some other app color if required
@@ -1909,7 +1839,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     child: UiUtils.getImage(
                       images[index]!,
                       fit: BoxFit.cover,
-                      height: 250.rh(context),
+                      height: 250,
                     ),
                     onTap: () {
                       UiUtils.imageGallaryView(context,
@@ -1934,38 +1864,24 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
             ),
           ),
-          if (widget.model.isFeature != null)
-            if (widget.model.isFeature!)
+          if (model.isFeature != null)
+            if (model.isFeature!)
               setTopRowItem(
-                  alignment: AlignmentDirectional.topStart,
-                  marginVal: 15,
-                  cornerRadius: 5,
-                  backgroundColor: context.color.territoryColor,
-                  childWidget: Text("featured".translate(context))
-                      .size(context.font.small)
-                      .color(context.color.backgroundColor)),
+                alignment: AlignmentDirectional.topStart,
+                marginVal: 15,
+                cornerRadius: 5,
+                backgroundColor: context.color.territoryColor,
+                childWidget: CustomText(
+                  "featured".translate(context),
+                  fontSize: context.font.small,
+                  color: context.color.backgroundColor,
+                ),
+              ),
           favouriteButton()
         ]),
       ),
     );
   }
-
-/*  Widget buildYouTubePlayer(String videoLink) {
-    // Implement YouTube video player widget here
-    // Example:
-    return YouTubePlayer(
-        controller: // your controller,
-      // other properties...
-    );
-  }
-
-  Widget buildVideoPlayer(String videoLink) {
-    // Implement normal video player widget here
-    // Example:
-    return VideoPlayer(
-      // Your video player initialization code...
-    );
-  }*/
 
   Widget favouriteButton() {
     if (!isAddedByMe) {
@@ -2067,10 +1983,10 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                           width: 1,
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.1))),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1))),
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  height: 46.rh(context),
+                  height: 46,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -2079,23 +1995,25 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       const SizedBox(
                         width: 8,
                       ),
-                      Text(model.views != null ? model.views!.toString() : "0")
-                          .color(
-                              context.color.textDefaultColor.withOpacity(0.8))
-                          .size(context.font.large)
+                      CustomText(
+                        model.views != null ? model.views!.toString() : "0",
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.8),
+                        fontSize: context.font.large,
+                      )
                     ],
                   ))),
-          SizedBox(width: 20.rw(context)),
+          SizedBox(width: 20),
           Expanded(
               child: Container(
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                           width: 1,
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.1))),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.1))),
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  height: 46.rh(context),
+                  height: 46,
                   //alignment: AlignmentDirectional.center,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -2105,12 +2023,13 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       const SizedBox(
                         width: 8,
                       ),
-                      Text(model.totalLikes == null
+                      CustomText(
+                          model.totalLikes == null
                               ? "0"
-                              : model.totalLikes.toString())
-                          .color(
-                              context.color.textDefaultColor.withOpacity(0.8))
-                          .size(context.font.large)
+                              : model.totalLikes.toString(),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.8),
+                          fontSize: context.font.large)
                     ],
                   ))),
         ],
@@ -2125,7 +2044,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-              color: context.color.textDefaultColor.withOpacity(0.1)),
+              color: context.color.textDefaultColor.withValues(alpha: 0.1)),
 
           // Background color
         ),
@@ -2144,11 +2063,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                 width: 5,
               ),
               Expanded(
-                child: Text(
-                  '${"rejection_reason".translate(context)}: ${model.rejectedReason}',
-                )
-                    .color(context.color.textDefaultColor)
-                    .size(context.font.large),
+                child: CustomText(
+                  '${"rejection_reason".translate(context)}: ${model.rejectedReason ?? 'N/A'}',
+                  color: context.color.textDefaultColor,
+                  fontSize: context.font.large,
+                ),
               ),
             ]),
       );
@@ -2163,10 +2082,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Text("${Constant.currencySymbol} ${model.price.toString()}")
-              .size(context.font.larger)
-              .color(context.color.territoryColor)
-              .bold(),
+          child: CustomText(
+            model.price!.currencyFormat,
+            fontSize: context.font.larger,
+            color: context.color.territoryColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         if (model.status != null && isAddedByMe)
           Container(
@@ -2175,11 +2096,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               borderRadius: BorderRadius.circular(20),
               color: _getStatusColor(model.status),
             ),
-            child: Text(
-              _getStatusText(model.status)!,
-            ).size(context.font.normal).color(
-                  _getStatusTextColor(model.status),
-                ),
+            child: CustomText(
+              _getStatusCustomText(model.status)!,
+              fontSize: context.font.normal,
+              color: _getStatusTextColor(model.status),
+            ),
           )
 
         //TODO: change color according to status - confirm,pending,etc..
@@ -2187,7 +2108,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  String? _getStatusText(String? status) {
+  String? _getStatusCustomText(String? status) {
     switch (status) {
       case "review":
         return "underReview".translate(context);
@@ -2211,19 +2132,19 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   Color _getStatusColor(String? status) {
     switch (status) {
       case "review":
-        return pendingButtonColor.withOpacity(0.1);
+        return pendingButtonColor.withValues(alpha: 0.1);
       case "active" || "approved":
-        return activateButtonColor.withOpacity(0.1);
+        return activateButtonColor.withValues(alpha: 0.1);
       case "inactive":
-        return deactivateButtonColor.withOpacity(0.1);
+        return deactivateButtonColor.withValues(alpha: 0.1);
       case "sold out":
-        return soldOutButtonColor.withOpacity(0.1);
+        return soldOutButtonColor.withValues(alpha: 0.1);
       case "rejected":
-        return deactivateButtonColor.withOpacity(0.1);
+        return deactivateButtonColor.withValues(alpha: 0.1);
       case "expired":
-        return deactivateButtonColor.withOpacity(0.1);
+        return deactivateButtonColor.withValues(alpha: 0.1);
       default:
-        return context.color.territoryColor.withOpacity(0.1);
+        return context.color.territoryColor.withValues(alpha: 0.1);
     }
   }
 
@@ -2263,15 +2184,19 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             flex: 3,
             child: Padding(
               padding: EdgeInsetsDirectional.only(start: 5.0),
-              child: Text(model.address!)
-                  .color(context.color.textDefaultColor.withOpacity(0.5)),
+              child: CustomText(
+                model.address!,
+                color: context.color.textDefaultColor.withValues(alpha: 0.5),
+              ),
             ),
           ),
           (isDate)
               ? Expanded(
-                  child: Text(model.created!.formatDate(format: "d MMM yyyy"))
-                      .setMaxLines(lines: 1)
-                      .color(context.color.textDefaultColor.withOpacity(0.5)))
+                  child: CustomText(
+                  model.created!.formatDate(format: "d MMM yyyy"),
+                  maxLines: 1,
+                  color: context.color.textDefaultColor.withValues(alpha: 0.5),
+                ))
               : const SizedBox.shrink()
           //TODO: add DATE from model
         ],
@@ -2283,12 +2208,17 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("aboutThisItemLbl".translate(context)).bold().size(context
-            .font.large), //TODO: replace label with your own - aboutThisPropLbl
+        CustomText(
+          "aboutThisItemLbl".translate(context),
+          fontWeight: FontWeight.bold,
+          fontSize: context.font.large,
+        ), //TODO: replace label with your own - aboutThisPropLbl
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5.0),
-          child: Text(model.description!)
-              .color(context.color.textDefaultColor.withOpacity(0.5)),
+          child: CustomText(
+            model.description!,
+            color: context.color.textDefaultColor.withValues(alpha: 0.5),
+          ),
         ),
       ],
     );
@@ -2316,7 +2246,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("locationLbl".translate(context)).bold().size(context.font.large),
+        CustomText(
+          "locationLbl".translate(context),
+          fontWeight: FontWeight.bold,
+          fontSize: context.font.large,
+        ),
         setAddress(isDate: false),
         SizedBox(
           height: 5,
@@ -2324,7 +2258,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: SizedBox(
-            height: 200.rh(context),
+            height: 200,
             child: GoogleMap(
               zoomControlsEnabled: false,
               zoomGesturesEnabled: false,
@@ -2351,57 +2285,6 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-/*  Widget setLocation() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text("locationLbl".translate(context)).bold().size(context.font.large),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5.0),
-        child: Text("${"addressLbl".translate(context)} :")
-            .color(context.color.textDefaultColor),
-      ),
-      setAddress(isDate: false),
-      SizedBox(
-        height: 5,
-      ),
-      InkWell(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
-                  "assets/map.png",
-                  fit: BoxFit.cover,
-                  height: 200.rh(context),
-                ),
-              ),
-              Center(
-                child: Icon(
-                  Icons.location_on,
-                  size: 40,
-                  color: context
-                      .color.territoryColor, // Change to your desired color
-                ),
-              ),
-            ],
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              BlurredRouter(
-                barrierDismiss: true,
-                builder: (context) {
-                  return GoogleMapScreen(
-                      item: model,
-                      kInitialPlace: _kInitialPlace,
-                      controller: _controller);
-                },
-              ),
-            );
-          })
-    ]);
-  }*/
-
   Widget setReportAd() {
     return AnimatedCrossFade(
       duration: Duration(milliseconds: 500),
@@ -2412,7 +2295,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-              color: context.color.textDefaultColor.withOpacity(0.1)),
+              color: context.color.textDefaultColor.withValues(alpha: 0.1)),
 
           // Background color
         ),
@@ -2434,12 +2317,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     width: 5,
                   ),
                   Expanded(
-                    child: Text(
+                    child: CustomText(
                       "didYouFindAnyProblemWithThisItem".translate(context),
                       maxLines: 2,
-                    )
-                        .color(context.color.textDefaultColor)
-                        .size(context.font.large),
+                      fontSize: context.font.large,
+                    ),
                   ),
                 ]),
             SizedBox(height: 15),
@@ -2473,13 +2355,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: context.color.territoryColor
-                        .withOpacity(0.1), // Button color can be adjusted
+                        .withValues(alpha: 0.1), // Button color can be adjusted
                   ),
-                  child: Text(
+                  child: CustomText(
                     "reportThisAd".translate(context),
-                  )
-                      .color(context.color.territoryColor)
-                      .size(context.font.normal),
+                    color: context.color.territoryColor,
+                  ),
                 ),
               ),
             )
@@ -2499,11 +2380,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
           _makeAnOffermessageController.clear();
         },
         acceptButtonName: "send".translate(context),
-        isAcceptContainesPush: true,
+        isAcceptContainerPush: true,
         onAccept: () => Future.value().then((_) {
           if (_offerFormKey.currentState!.validate()) {
             context.read<MakeAnOfferItemCubit>().makeAnOfferItem(
-                id: widget.model.id!,
+                id: model.id!,
                 from: "offer",
                 amount:
                     double.parse(_makeAnOffermessageController.text.trim()));
@@ -2513,26 +2394,11 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         }),
       ),
     );
-    /* if (offer == true) {
-      if (_offerFormKey.currentState!.validate()) {
-        context.read<MakeAnOfferItemCubit>().makeAnOfferItem(widget.model.id!,
-            int.parse(_makeAnOffermessageController.text.trim()));
-      }
-    }*/
-    /*UiUtils.showBlurredDialoge(context,
-        dialoge: EmptyDialogBox(
-            child: AlertDialog(
-          backgroundColor: context.color.secondaryColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          content: MakeAnOfferItemScreen(
-            model: model,
-          ),
-        )));*/
   }
 
   Widget makeAnOffer() {
     double bottomPadding = (MediaQuery.of(context).viewInsets.bottom - 50);
-    bool isBottomPaddingNagative = bottomPadding.isNegative;
+    bool isBottomPaddingNegative = bottomPadding.isNegative;
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: SingleChildScrollView(
@@ -2541,10 +2407,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("makeAnOffer".translate(context))
-                  .size(context.font.larger)
-                  .centerAlign()
-                  .bold(),
+              CustomText(
+                "makeAnOffer".translate(context),
+                fontSize: context.font.larger,
+                fontWeight: FontWeight.bold,
+                textAlign: TextAlign.center,
+              ),
               Divider(
                 thickness: 1,
                 color: context.color.borderColor.darken(30),
@@ -2554,13 +2422,14 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
               RichText(
                 text: TextSpan(
-                  text: "sellerPrice".translate(context),
+                  text: '${"sellerPrice".translate(context)} ',
                   style: TextStyle(
-                      color: context.color.textDefaultColor.withOpacity(0.5),
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5),
                       fontSize: 16),
                   children: <TextSpan>[
                     TextSpan(
-                      text: "\t${Constant.currencySymbol}${widget.model.price}",
+                      text: model.price!.currencyFormat,
                       style: TextStyle(
                           color: context.color.textDefaultColor,
                           fontSize: 16,
@@ -2571,7 +2440,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
               Padding(
                 padding: EdgeInsetsDirectional.only(
-                    bottom: isBottomPaddingNagative ? 0 : bottomPadding,
+                    bottom: isBottomPaddingNegative ? 0 : bottomPadding,
                     start: 20,
                     end: 20,
                     top: 18),
@@ -2595,7 +2464,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       if (parsedVal <= 0.0) {
                         return "valueMustBeGreaterThanZeroLbl"
                             .translate(context);
-                      } else if (parsedVal > widget.model.price!) {
+                      } else if (parsedVal > model.price!) {
                         return "offerPriceWarning".translate(context);
                       }
                       return null;
@@ -2610,8 +2479,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       hintStyle: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
-                          color:
-                              context.color.textDefaultColor.withOpacity(0.3)),
+                          color: context.color.textDefaultColor
+                              .withValues(alpha: 0.3)),
                       focusColor: context.color.territoryColor,
                       enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -2639,7 +2508,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
       dialoge: BlurredDialogBox(
           title: "reportItem".translate(context),
           content: reportReason(),
-          isAcceptContainesPush: true,
+          isAcceptContainerPush: true,
           onAccept: () => Future.value().then((_) {
                 if (selectedId.isNegative) {
                   if (_formKey.currentState!.validate()) {
@@ -2688,8 +2557,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(children: [
           SizedBox(
-              height: 60.rh(context),
-              width: 60.rw(context),
+              height: 60,
+              width: 60,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: model.user!.profile != null &&
@@ -2719,21 +2588,20 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           children: [
                             UiUtils.getSvg(AppIcons.verifiedIcon,
                                 width: 14, height: 14),
-                            /*Icon(
-                              Icons.verified_user_rounded,
-                              color: context.color.secondaryColor,
-                              size: 14,
-                            ),*/
                             SizedBox(
                               width: 4,
                             ),
-                            Text("verifiedLbl".translate(context))
-                                .color(context.color.secondaryColor)
-                                .bold(weight: FontWeight.w500)
+                            CustomText(
+                              "verifiedLbl".translate(context),
+                              color: context.color.secondaryColor,
+                              fontWeight: FontWeight.w500,
+                            )
                           ],
                         ),
                       ),
-                    Text(model.user!.name!).bold().size(context.font.large),
+                    CustomText(model.user!.name!,
+                        fontWeight: FontWeight.bold,
+                        fontSize: context.font.large),
                     if (context.watch<FetchSellerRatingsCubit>().sellerData() !=
                         null)
                       if (context
@@ -2766,7 +2634,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: context.color.textDefaultColor
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                                 TextSpan(
@@ -2776,22 +2644,22 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: context.color.textDefaultColor
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                    if (widget.model.user!.showPersonalDetails == 1)
+                    if (model.user!.showPersonalDetails == 1)
                       if (model.user!.email != null || model.user!.email != "")
-                        Text(model.user!.email!)
-                            .color(context.color.textLightColor)
-                            .size(context.font.small)
+                        CustomText(model.user!.email!,
+                            color: context.color.textLightColor,
+                            fontSize: context.font.small),
                   ]),
             ),
           ),
-          if (widget.model.user!.showPersonalDetails == 1)
+          if (model.user!.showPersonalDetails == 1)
             if (model.user!.mobile != null || model.user!.mobile != "")
               setIconButtons(
                   assetName: AppIcons.message,
@@ -2804,8 +2672,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                             model.user!.mobile!, Constant.defaultCountryCode),
                         context: context);
                   }),
-          SizedBox(width: 10.rw(context)),
-          if (widget.model.user!.showPersonalDetails == 1)
+          SizedBox(width: 10),
+          if (model.user!.showPersonalDetails == 1)
             if (model.user!.mobile != null || model.user!.mobile != "")
               setIconButtons(
                   assetName: AppIcons.call,
@@ -2909,10 +2777,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(14.0),
-                          child: Text(
-                            reasons![index].reason.firstUpperCase() ?? "",
-                          ).color(
-                            selectedId == reasons![index].id
+                          child: CustomText(
+                            reasons![index].reason.firstUpperCase(),
+                            color: selectedId == reasons![index].id
                                 ? context.color.territoryColor
                                 : context.color.textColorDark,
                           ),
@@ -2950,63 +2817,6 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       ),
                     ),
                   ),
-                /*  const SizedBox(
-                    height: 14,
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        MaterialButton(
-                          height: 40,
-                          minWidth: 104.rw(context),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: BorderSide(
-                              color: context.color.borderColor,
-                              width: 1.5,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("cancelLbl".translate(context))
-                              .color(context.color.territoryColor),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        MaterialButton(
-                          height: 40,
-                          minWidth: 104.rw(context),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          color: context.color.territoryColor,
-                          onPressed: () async {
-                            if (selectedId.isNegative) {
-                              if (_formKey.currentState!.validate()) {
-                                context.read<ItemReportCubit>().report(
-                                      item_id: model.id!,
-                                      reason_id: selectedId,
-                                      message: _reportmessageController.text,
-                                    );
-                              }
-                            } else {
-                              context.read<ItemReportCubit>().report(
-                                    item_id: model.id!,
-                                    reason_id: selectedId,
-                                  );
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text("report".translate(context))
-                              .color(context.color.buttonColor),
-                        ),
-                      ],
-                    ),
-                  )*/
               ],
             ),
           ),

@@ -248,7 +248,7 @@ class _ChooseLocationMapState extends State<ChooseLocationMap> {
         setState(() {});
 
         return true;
-      },*//*
+      },*/ /*
 
       child: Scaffold(
         bottomNavigationBar: SizedBox(
@@ -322,13 +322,13 @@ class _ChooseLocationMapState extends State<ChooseLocationMap> {
 
                       if (e.toString().contains("IO_ERROR")) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("pleaseChangeNetwork"
+                            content: CustomText("pleaseChangeNetwork"
                                 .translate(context)
                                 .toString())));
                       }
                     }
                   },
-            child: Text("proceed".translate(context)).color(marker == null
+            child: CustomText("proceed".translate(context) , style : TextStyle()).color(marker == null
                 ? context.color.textColorDark
                 : context.color.buttonColor),
           ),
@@ -386,8 +386,8 @@ class _ChooseLocationMapState extends State<ChooseLocationMap> {
                   ),
                 ),
           title: Container(
-              width: 270.rw(context),
-              height: 50.rh(context),
+              width: 270,
+              height: 50,
               alignment: AlignmentDirectional.center,
               decoration: BoxDecoration(
                   border:
@@ -467,8 +467,8 @@ class _ChooseLocationMapState extends State<ChooseLocationMap> {
                         colorFilter: ColorFilter.mode(
                             context.color.textColorDark, BlendMode.srcIn),
                       ),
-                      title: Text(cities?.elementAt(index).city ?? ""),
-                      subtitle: Text(
+                      title: CustomText(cities?.elementAt(index).city ?? ""),
+                      subtitle: CustomText(
                           "${cities?.elementAt(index).state ?? ""},${cities?.elementAt(index).country ?? ""}"),
                     );
                   },

@@ -31,8 +31,17 @@ class LanguageCubit extends Cubit<LanguageState> {
     }
   }
 
+  void changeLanguages(dynamic map) {
+    emit(LanguageLoader(map));
+  }
+
   dynamic currentLanguageCode() {
     return Hive.box(HiveKeys.languageBox)
         .get(HiveKeys.currentLanguageKey)['code'];
+  }
+
+  dynamic currentCountryCode() {
+    return Hive.box(HiveKeys.languageBox)
+        .get(HiveKeys.currentLanguageKey)['country_code'];
   }
 }

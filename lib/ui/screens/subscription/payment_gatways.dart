@@ -3,21 +3,15 @@ import 'dart:io';
 
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/payment/gatways/stripe_service.dart';
-
+import 'package:eClassify/utils/payment/gateaways/stripe_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
-import 'package:eClassify/utils/ui_utils.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-
 class PaymentGateways {
-  //static PaystackPlugin payStackPlugin = PaystackPlugin();
-
   static String generateReference(String email) {
     late String platform;
     if (Platform.isIOS) {
@@ -34,7 +28,6 @@ class PaymentGateways {
       {required double price,
       required int packageId,
       required dynamic paymentIntent}) async {
-
     String paymentIntentId = paymentIntent["id"].toString();
     String clientSecret =
         paymentIntent['payment_gateway_response']["client_secret"].toString();
@@ -48,9 +41,6 @@ class PaymentGateways {
       paymentIntentId: paymentIntentId,
     );
   }
-
-
-
 
 /*  static Future<void> paystack(
       BuildContext context, dynamic price, dynamic packageId) async {
@@ -126,7 +116,7 @@ class PaymentGateways {
         Razorpay.EVENT_PAYMENT_ERROR,
         (PaymentFailureResponse response) {
           HelperUtils.showSnackBarMessage(
-              context, UiUtils.getTranslatedLabel(context, "purchaseFailed"));
+              context, "purchaseFailed".translate(context));
         },
       );
       razorpay.on(
@@ -134,64 +124,16 @@ class PaymentGateways {
         (e) {},
       );
     } else {
-      HelperUtils.showSnackBarMessage(
-          context, UiUtils.getTranslatedLabel(context, "setAPIkey"));
+      HelperUtils.showSnackBarMessage(context, "setAPIkey".translate(context));
     }
   }
-
-  /*static void razorpay(
-    BuildContext context, {
-    required price,
-    required package,
-  }) {
-    final Razorpay razorpay = Razorpay();
-
-    var options = {
-      'key': AppSettings.razorpayKey,
-      'amount': price! * 100,
-      'name': package.name,
-      'description': '',
-      'prefill': {
-        'contact': HiveUtils.getUserDetails().mobile ?? "",
-        'email': HiveUtils.getUserDetails().email ?? ""
-      },
-      "notes": {"package_id": package.id, "user_id": HiveUtils.getUserId()},
-    };
-
-    if (AppSettings.razorpayKey != "") {
-      razorpay.open(options);
-      razorpay.on(
-        Razorpay.EVENT_PAYMENT_SUCCESS,
-        (
-          PaymentSuccessResponse response,
-        ) async {
-          await _purchase(context);
-        },
-      );
-      razorpay.on(
-        Razorpay.EVENT_PAYMENT_ERROR,
-        (PaymentFailureResponse response) {
-          HelperUtils.showSnackBarMessage(
-              context, UiUtils.getTranslatedLabel(context, "purchaseFailed"));
-        },
-      );
-      razorpay.on(
-        Razorpay.EVENT_EXTERNAL_WALLET,
-        (e) {},
-      );
-    } else {
-      HelperUtils.showSnackBarMessage(
-          context, UiUtils.getTranslatedLabel(context, "setAPIkey"));
-    }
-  }*/
 
   static Future<void> _purchase(BuildContext context) async {
     try {
       Future.delayed(
         Duration.zero,
         () {
-          HelperUtils.showSnackBarMessage(
-              context, UiUtils.getTranslatedLabel(context, "success"),
+          HelperUtils.showSnackBarMessage(context, "success".translate(context),
               type: MessageType.success, messageDuration: 5);
 
           Navigator.of(context).popUntil((route) => route.isFirst);
@@ -199,7 +141,7 @@ class PaymentGateways {
       );
     } catch (e) {
       HelperUtils.showSnackBarMessage(
-          context, UiUtils.getTranslatedLabel(context, "purchaseFailed"),
+          context, "purchaseFailed".translate(context),
           type: MessageType.error);
     }
   }

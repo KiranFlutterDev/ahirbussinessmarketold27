@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:eClassify/utils/constant.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-
-
 class AdHelper {
   static final AdHelper _instance = AdHelper._internal();
 
@@ -19,7 +17,7 @@ class AdHelper {
   static bool isAdLoaded = false;
 
   static void loadInterstitialAd() {
-    if (Constant.isGoogleInterstitialAdsEnabled!="1") {
+    if (Constant.isGoogleInterstitialAdsEnabled != "1") {
       return;
     }
     InterstitialAd.load(
@@ -44,7 +42,7 @@ class AdHelper {
   }
 
   static void showInterstitialAd() {
-    if (Constant.isGoogleInterstitialAdsEnabled!="1") {
+    if (Constant.isGoogleInterstitialAdsEnabled != "1") {
       return;
     }
     if (_interstitialAd == null) {

@@ -1,4 +1,4 @@
-
+import 'dart:developer';
 
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/notification_data.dart';
@@ -21,7 +21,9 @@ class NotificationsRepository {
       ).toList();
 
       return DataOutput(total: response['data']['total'], modelList: modelList);
-    } catch (e) {
+    } catch (e, stack) {
+      log(e.toString());
+      log('$stack');
       rethrow;
     }
   }

@@ -1,15 +1,14 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:device_region/device_region.dart';
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
-
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/auth/login_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
-import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
@@ -19,6 +18,7 @@ import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
@@ -34,8 +34,10 @@ import 'package:sms_autofill/sms_autofill.dart';
 class LoginScreen extends StatefulWidget {
   final bool? isDeleteAccount;
   final bool? popToCurrent;
+  final String? email;
 
-  const LoginScreen({super.key, this.isDeleteAccount, this.popToCurrent});
+  const LoginScreen(
+      {super.key, this.isDeleteAccount, this.popToCurrent, this.email});
 
   @override
   State<LoginScreen> createState() => LoginScreenState();
@@ -46,13 +48,16 @@ class LoginScreen extends StatefulWidget {
         builder: (_) => LoginScreen(
               isDeleteAccount: args?['isDeleteAccount'],
               popToCurrent: args?['popToCurrent'],
+              email: args?['email'] as String?,
             ));
   }
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailMobileTextController = TextEditingController(
-      text: Constant.isDemoModeOn ? Constant.demoMobileNumber : "");
+  late final TextEditingController emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  late final TextEditingController mobileController = TextEditingController(
+      text: Constant.isDemoModeOn ? Constant.demoMobileNumber : '');
   bool isOtpSent = false;
   String? phone, otp, countryCode, countryName, flagEmoji;
 
@@ -60,15 +65,13 @@ class LoginScreenState extends State<LoginScreen> {
   late Size size;
   CountryService countryCodeService = CountryService();
   bool isLoginButtonDisabled = true;
-  bool isMobileNumberField = false;
-  String numberOrEmail = "";
+  ValueNotifier<bool> isLoginWithMobile = ValueNotifier(true);
   bool sendMailClicked = false;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _passwordController = TextEditingController();
 
   bool isObscure = true;
   late PhoneLoginPayload phoneLoginPayload =
-      PhoneLoginPayload(emailMobileTextController.text, countryCode!);
+      PhoneLoginPayload(mobileController.text, countryCode!);
   bool isBack = false;
   String signature = "";
 
@@ -76,15 +79,11 @@ class LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
 
-    if (Constant.mobileAuthentication == "1") {
-      if (Constant.isDemoModeOn) {
-        isMobileNumberField = true;
-        numberOrEmail = Constant.demoMobileNumber;
-      }
+    if (Constant.mobileAuthentication == "0") {
+      isLoginWithMobile.value = false;
     }
     getSignature();
     context.read<AuthenticationCubit>().init();
-    context.read<FetchSystemSettingsCubit>().fetchSettings();
     context.read<AuthenticationCubit>().listen((MLoginState state) {
       if (state is MOtpSendInProgress) {
         if (mounted) Widgets.showLoader(context);
@@ -98,7 +97,7 @@ class LoginScreenState extends State<LoginScreen> {
 
           isOtpSent = true;
           setState(() {});
-          if (isMobileNumberField) {
+          if (isLoginWithMobile.value) {
             HelperUtils.showSnackBarMessage(
                 context, "optsentsuccessflly".translate(context));
           }
@@ -106,27 +105,28 @@ class LoginScreenState extends State<LoginScreen> {
       }
 
       if (state is MFail) {
-        //Widgets.hideLoder(context);
-
-        if (!isOtpSent && isMobileNumberField) {
-          Widgets.hideLoder(context);
-        }
+        Widgets.hideLoder(context);
+        // log('$isOtpSent - ${isLoginWithMobile.value}');
+        // if (!isOtpSent && isLoginWithMobile.value) {
+        //   Widgets.hideLoder(context);
+        // }
 
         if (isOtpSent && (otp!.trim().isEmpty)) {
           HelperUtils.showSnackBarMessage(context,
-              "${"weSentCodeOnNumber".translate(context)}\t${emailMobileTextController.text}",
+              "${"weSentCodeOnNumber".translate(context)}\t${mobileController.text}",
               type: MessageType.error);
         } else {
           if (state.error is FirebaseAuthException) {
-            try {
-              HelperUtils.showSnackBarMessage(context,
-                  (state.error as FirebaseAuthException).message!.toString());
-            } catch (e) {}
+            final errorCode = (state.error as FirebaseAuthException).code;
+            if (errorCode == 'invalid-credential') {
+              HelperUtils.showSnackBarMessage(
+                  context, 'You have entered an invalid username or password');
+            } else {
+              HelperUtils.showSnackBarMessage(context, 'Something went wrong');
+            }
           } else {
-            HelperUtils.showSnackBarMessage(context, state.error.toString());
+            HelperUtils.showSnackBarMessage(context, 'Something went wrong');
           }
-          /*HelperUtils.showSnackBarMessage(context, state.error.toString(),
-              type: MessageType.error);*/
         }
       }
       if (state is MSuccess) {
@@ -192,16 +192,17 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     _passwordController.dispose();
-    emailMobileTextController.dispose();
-
+    emailController.dispose();
+    mobileController.dispose();
+    isLoginWithMobile.dispose();
     super.dispose();
   }
 
   void _onTapContinue() {
-    if (isMobileNumberField) {
+    if (isLoginWithMobile.value) {
       // isOtpSent = true;
       phoneLoginPayload =
-          PhoneLoginPayload(emailMobileTextController.text, countryCode!);
+          PhoneLoginPayload(mobileController.text, countryCode!);
 
       context
           .read<AuthenticationCubit>()
@@ -237,12 +238,11 @@ class LoginScreenState extends State<LoginScreen> {
         _onTapContinue();
       }
     }
-    // showSnackBar( UiUtils.getTranslatedLabel(context, "acceptPolicy"), context);
   }
 
   void setDemoOTP() {
     if (Constant.mobileAuthentication == "1") {
-      if (emailMobileTextController.text == Constant.demoMobileNumber) {
+      if (mobileController.text == Constant.demoMobileNumber) {
         otp = Constant.demoModeOTP;
       }
     }
@@ -254,12 +254,6 @@ class LoginScreenState extends State<LoginScreen> {
 
     setDemoOTP();
 
-    /* if (emailMobileTextController.text == Constant.demoMobileNumber) {
-      _otpController.text = Constant.demoModeOTP;
-    } else {
-      _otpController.text = "";
-    }*/
-
     return AnnotatedRegion(
       value: UiUtils.getSystemUiOverlayStyle(
         context: context,
@@ -270,14 +264,14 @@ class LoginScreenState extends State<LoginScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: PopScope(
             canPop: isBack,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, result) {
               if (widget.isDeleteAccount ?? false) {
                 Navigator.pop(context);
               } else {
                 if (isOtpSent) {
+                  isLoginWithMobile.value = true;
                   setState(() {
                     isOtpSent = false;
-                    isMobileNumberField = true;
                   });
                 } else if (sendMailClicked) {
                   setState(() {
@@ -307,14 +301,11 @@ class LoginScreenState extends State<LoginScreen> {
                 body: BlocListener<LoginCubit, LoginState>(
                   listener: (context, state) {
                     if (state is LoginSuccess) {
-                      HiveUtils.setUserIsAuthenticated(true);
-                      //GuestChecker.set(isGuest: false);
-                      //context.read<AuthCubit>().updateFCM(context);
-
                       context
                           .read<UserDetailsCubit>()
                           .fill(HiveUtils.getUserDetails());
                       if (state.isProfileCompleted) {
+                        HiveUtils.setUserIsAuthenticated(true);
                         if (HiveUtils.getCityName() != null &&
                             HiveUtils.getCityName() != "") {
                           HelperUtils.killPreviousPages(
@@ -325,13 +316,13 @@ class LoginScreenState extends State<LoginScreen> {
                               (route) => false);
                         }
                       } else {
-                        Navigator.pushReplacementNamed(
+                        Navigator.pushNamed(
                           context,
                           Routes.completeProfile,
                           arguments: {
                             "from": "login",
                             "popToCurrent": false,
-                            "type": isMobileNumberField
+                            "type": isLoginWithMobile.value
                                 ? AuthenticationType.phone
                                 : AuthenticationType.email,
                             "extraData": {
@@ -357,7 +348,6 @@ class LoginScreenState extends State<LoginScreen> {
                         Widgets.hideLoder(context);
 
                         if (state.type == AuthenticationType.email) {
-                          //FirebaseAuth.instance.currentUser?.sendEmailVerification();
                           if (state.credential.user!.emailVerified) {
                             context.read<LoginCubit>().login(
                                 phoneNumber: state.credential.user!.phoneNumber,
@@ -365,8 +355,6 @@ class LoginScreenState extends State<LoginScreen> {
                                 type: state.type.name,
                                 credential: state.credential,
                                 countryCode: null);
-                          } else {
-                            // HelperUtils.showSnackBarMessage(context,"Please Verify Your email first" );
                           }
                         } else if (state.type == AuthenticationType.phone) {
                           context.read<LoginCubit>().login(
@@ -388,6 +376,7 @@ class LoginScreenState extends State<LoginScreen> {
                       }
 
                       if (state is AuthenticationFail) {
+                        log('- ${state.error}');
                         Widgets.hideLoder(context);
                       }
 
@@ -397,13 +386,13 @@ class LoginScreenState extends State<LoginScreen> {
                     },
                     builder: (context, state) {
                       return Builder(builder: (context) {
-                        return Form(
-                          key: _formKey,
-                          child: isOtpSent
-                              ? verifyOTPWidget()
-                              : sendMailClicked
-                                  ? enterPasswordWidget()
-                                  : buildLoginWidget(),
+                        return SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: isOtpSent
+                                ? verifyOTPWidget()
+                                : buildLoginWidget(),
+                          ),
                         );
                       });
                     },
@@ -417,84 +406,141 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget mobileOrEmailLogin() {
+  Widget mobileLogin() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("loginToeClassify".translate(context))
-            .size(context.font.large)
-            .color(
-              context.color.textColorDark,
-            ),
+        CustomText(
+          'loginWithPhoneNumber'.translate(context),
+          fontSize: context.font.large,
+          color: context.color.textColorDark,
+        ),
         const SizedBox(
           height: 24,
         ),
         CustomTextFormField(
-            controller: emailMobileTextController,
+            controller: mobileController,
             fillColor: context.color.secondaryColor,
             borderColor: context.color.borderColor.darken(30),
-            onChange: (value) {
-              bool isNumber = value.toString().contains(RegExp(r'^[0-9]+$'));
+            keyboard: TextInputType.phone,
+            validator: CustomTextFieldValidator.phoneNumber,
+            fixedPrefix: SizedBox(
+              width: 55,
+              child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: GestureDetector(
+                    onTap: () {
+                      showCountryCode();
+                    },
+                    child: Container(
+                      // color: Colors.red,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 8),
+                      child: Center(
+                          child: CustomText(
+                        "+$countryCode",
+                        fontSize: context.font.large,
+                        textAlign: TextAlign.center,
+                      )),
+                    ),
+                  )),
+            ),
+            hintText: "mobileNumberLbl".translate(context)),
+        const SizedBox(
+          height: 25,
+        ),
+        ListenableBuilder(
+            listenable: mobileController,
+            builder: (context, child) {
+              return UiUtils.buildButton(context,
+                  onPressed: sendVerificationCode,
+                  buttonTitle: 'continue'.translate(context),
+                  radius: 10,
+                  disabled: mobileController.text.isEmpty,
+                  disabledColor: const Color.fromARGB(255, 104, 102, 106));
+            }),
+      ],
+    );
+  }
 
-              //isMobileNumberField = isNumber;
-              isMobileNumberField =
-                  Constant.mobileAuthentication == "1" ? isNumber : false;
-
-              numberOrEmail = value;
+  Widget emailLogin() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomText(
+          'loginWithEmail'.translate(context),
+          fontSize: context.font.large,
+          color: context.color.textColorDark,
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        CustomTextFormField(
+            controller: emailController,
+            fillColor: context.color.secondaryColor,
+            borderColor: context.color.borderColor.darken(30),
+            keyboard: TextInputType.emailAddress,
+            validator: CustomTextFieldValidator.email,
+            hintText: "emailAddress".translate(context)),
+        const SizedBox(
+          height: 10,
+        ),
+        CustomTextFormField(
+          hintText: "${"password".translate(context)}",
+          controller: _passwordController,
+          validator: CustomTextFieldValidator.nullCheck,
+          obscureText: isObscure,
+          suffix: IconButton(
+            onPressed: () {
+              isObscure = !isObscure;
               setState(() {});
             },
-            keyboard: (Constant.mobileAuthentication == "1" &&
-                    Constant.emailAuthentication == "1")
-                ? (isMobileNumberField
-                    ? TextInputType.phone
-                    : TextInputType.emailAddress)
-                : (Constant.mobileAuthentication == "1")
-                    ? TextInputType.phone
-                    : TextInputType.emailAddress,
-            validator: (Constant.mobileAuthentication == "1" &&
-                    Constant.emailAuthentication == "1")
-                ? (isMobileNumberField
-                    ? CustomTextFieldValidator.phoneNumber
-                    : CustomTextFieldValidator.email)
-                : (Constant.mobileAuthentication == "1")
-                    ? CustomTextFieldValidator.phoneNumber
-                    : CustomTextFieldValidator.email,
-            fixedPrefix: (isMobileNumberField)
-                ? SizedBox(
-                    width: 55,
-                    child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: GestureDetector(
-                          onTap: () {
-                            showCountryCode();
-                          },
-                          child: Container(
-                            // color: Colors.red,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 8),
-                            child: Center(
-                                child: Text("+$countryCode")
-                                    .size(context.font.large)
-                                    .centerAlign()),
-                          ),
-                        )),
-                  )
-                : null,
-            hintText: (Constant.mobileAuthentication == "1" &&
-                    Constant.emailAuthentication == "1")
-                ? "emailOrPhone".translate(context)
-                : (Constant.mobileAuthentication == "1")
-                    ? "mobileNumberLbl".translate(context)
-                    : "emailAddress".translate(context)),
-        const SizedBox(
-          height: 46,
+            icon: Icon(
+              !isObscure ? Icons.visibility : Icons.visibility_off,
+              color: context.color.textColorDark.withValues(alpha: 0.3),
+            ),
+          ),
         ),
-        UiUtils.buildButton(context,
-            onPressed: sendVerificationCode,
-            buttonTitle: "continue".translate(context),
-            radius: 10,
-            disabled: numberOrEmail.isEmpty,
-            disabledColor: const Color.fromARGB(255, 104, 102, 106)),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: MaterialButton(
+            onPressed: () {
+              Navigator.pushNamed(context, Routes.forgotPassword);
+            },
+            child: CustomText(
+              "${"forgotPassword".translate(context)}?",
+              color: context.color.textLightColor,
+              fontSize: context.font.normal,
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        ListenableBuilder(
+            listenable:
+                Listenable.merge([emailController, _passwordController]),
+            builder: (context, child) {
+              return UiUtils.buildButton(context, onPressed: () {
+                if (_passwordController.text.trim().isEmpty) {
+                  HelperUtils.showSnackBarMessage(
+                      context, 'Password cannot be empty');
+                  return;
+                }
+                context.read<AuthenticationCubit>().setData(
+                    payload: EmailLoginPayload(
+                        email: emailController.text,
+                        password: _passwordController.text,
+                        type: EmailLoginType.login),
+                    type: AuthenticationType.email);
+                context.read<AuthenticationCubit>().authenticate();
+              },
+                  buttonTitle: 'signIn'.translate(context),
+                  radius: 10,
+                  disabled: emailController.text.isEmpty ||
+                      _passwordController.text.isEmpty,
+                  disabledColor: const Color.fromARGB(255, 104, 102, 106));
+            }),
       ],
     );
   }
@@ -514,45 +560,44 @@ class LoginScreenState extends State<LoginScreen> {
                   fit: BoxFit.none,
                   child: MaterialButton(
                     onPressed: () {
-                      //HiveUtils.setUserIsNotNew();
                       HiveUtils.setUserSkip();
                       HelperUtils.killPreviousPages(context, Routes.main,
                           {"from": "login", "isSkipped": true});
-                      /*Navigator.pushReplacementNamed(
-                        context,
-                        Routes.main,
-                        arguments: {
-                          "from": "login",
-                          "isSkipped": true,
-                        },
-                      );*/
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    color: context.color.forthColor.withOpacity(0.102),
+                    color: context.color.forthColor.withValues(alpha: 0.102),
                     elevation: 0,
                     height: 28,
                     minWidth: 64,
-                    child: Text("skip".translate(context))
-                        .color(context.color.forthColor),
+                    child: CustomText(
+                      "skip".translate(context),
+                      color: context.color.forthColor,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(
                 height: 66,
               ),
-              Text("welcomeback".translate(context))
-                  .size(context.font.extraLarge)
-                  .color(context.color.textDefaultColor),
+              CustomText(
+                "welcomeback".translate(context),
+                fontSize: context.font.extraLarge,
+                color: context.color.textDefaultColor,
+              ),
               const SizedBox(
                 height: 8,
               ),
               if (Constant.mobileAuthentication == "1" ||
                   Constant.emailAuthentication == "1")
-                mobileOrEmailLogin(),
+                ValueListenableBuilder(
+                    valueListenable: isLoginWithMobile,
+                    builder: (context, isMobileLogin, child) {
+                      return isMobileLogin ? mobileLogin() : emailLogin();
+                    }),
               const SizedBox(
-                height: 68,
+                height: 20,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -562,24 +607,25 @@ class LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("dontHaveAcc".translate(context))
-                            .color(context.color.textColorDark.brighten(50)),
+                        CustomText("dontHaveAcc".translate(context),
+                            color: context.color.textColorDark.brighten(50)),
                         const SizedBox(
                           width: 12,
                         ),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                                context, Routes.signupMainScreen);
-                          },
-                          child: Text("signUp".translate(context))
-                              .underline()
-                              .color(context.color.territoryColor),
-                        )
+                            onTap: () {
+                              Navigator.pushReplacementNamed(
+                                  context, Routes.signupMainScreen);
+                            },
+                            child: CustomText(
+                              "signUp".translate(context),
+                              color: context.color.territoryColor,
+                              showUnderline: true,
+                            ))
                       ],
                     ),
                   const SizedBox(
-                    height: 24,
+                    height: 20,
                   ),
                   if (Constant.googleAuthentication == "1" ||
                       Constant.appleAuthentication == "1")
@@ -595,20 +641,21 @@ class LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("dontHaveAcc".translate(context))
-                              .color(context.color.textColorDark.brighten(50)),
+                          CustomText("dontHaveAcc".translate(context),
+                              color: context.color.textColorDark.brighten(50)),
                           const SizedBox(
                             width: 12,
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, Routes.signupMainScreen);
-                            },
-                            child: Text("signUp".translate(context))
-                                .underline()
-                                .color(context.color.territoryColor),
-                          )
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                    context, Routes.signupMainScreen);
+                              },
+                              child: CustomText(
+                                "signUp".translate(context),
+                                color: context.color.territoryColor,
+                                showUnderline: true,
+                              ))
                         ],
                       )
                     ],
@@ -632,12 +679,12 @@ class LoginScreenState extends State<LoginScreen> {
             Constant.emailAuthentication == "1")
           if ((Constant.googleAuthentication == "1") ||
               (Constant.appleAuthentication == "1" && Platform.isIOS))
-            Text("orSignInWith".translate(context))
-                .color(context.color.textDefaultColor),
+            CustomText("orSignInWith".translate(context),
+                color: context.color.textDefaultColor),
         const SizedBox(
-          height: 24,
+          height: 20,
         ),
-        if (Constant.googleAuthentication == "1")
+        if (Constant.googleAuthentication == "1") ...[
           UiUtils.buildButton(context,
               prefixWidget: Padding(
                 padding: EdgeInsetsDirectional.only(end: 10.0),
@@ -649,7 +696,8 @@ class LoginScreenState extends State<LoginScreen> {
               border: context.watch<AppThemeCubit>().state.appTheme !=
                       AppTheme.dark
                   ? BorderSide(
-                      color: context.color.textDefaultColor.withOpacity(0.5))
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5))
                   : null,
               textColor: textDarkColor, onPressed: () {
             context.read<AuthenticationCubit>().setData(
@@ -659,10 +707,11 @@ class LoginScreenState extends State<LoginScreen> {
               radius: 8,
               height: 46,
               buttonTitle: "continueWithGoogle".translate(context)),
-        const SizedBox(
-          height: 12,
-        ),
-        if (Constant.appleAuthentication == "1" && Platform.isIOS)
+          const SizedBox(
+            height: 12,
+          ),
+        ],
+        if (Constant.appleAuthentication == "1" && Platform.isIOS) ...[
           UiUtils.buildButton(context,
               prefixWidget: Padding(
                 padding: EdgeInsetsDirectional.only(end: 10.0),
@@ -674,7 +723,8 @@ class LoginScreenState extends State<LoginScreen> {
               border: context.watch<AppThemeCubit>().state.appTheme !=
                       AppTheme.dark
                   ? BorderSide(
-                      color: context.color.textDefaultColor.withOpacity(0.5))
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5))
                   : null,
               textColor: textDarkColor, onPressed: () {
             context.read<AuthenticationCubit>().setData(
@@ -684,6 +734,37 @@ class LoginScreenState extends State<LoginScreen> {
               height: 46,
               radius: 8,
               buttonTitle: "continueWithApple".translate(context)),
+          const SizedBox(
+            height: 12,
+          ),
+        ],
+        if (Constant.emailAuthentication == "1" &&
+            Constant.mobileAuthentication == "1")
+          ValueListenableBuilder(
+              valueListenable: isLoginWithMobile,
+              builder: (context, isMobileField, child) {
+                return UiUtils.buildButton(context, onPressed: () {
+                  isLoginWithMobile.value = !isLoginWithMobile.value;
+                },
+                    prefixWidget: Padding(
+                        padding: EdgeInsetsDirectional.only(end: 10.0),
+                        child: Icon(isMobileField ? Icons.email : Icons.phone)),
+                    showElevation: false,
+                    buttonColor: secondaryColor_,
+                    textColor: textDarkColor,
+                    border: context.watch<AppThemeCubit>().state.appTheme !=
+                            AppTheme.dark
+                        ? BorderSide(
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.5))
+                        : null,
+                    height: 46,
+                    radius: 8,
+                    buttonTitle: (isMobileField
+                            ? 'continueWithEmail'
+                            : 'continueWithMobile')
+                        .translate(context));
+              })
       ],
     );
   }
@@ -695,64 +776,47 @@ class LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("bySigningUpLoggingIn".translate(context))
-              .centerAlign()
-              .size(context.font.small)
-              .color(context.color.textLightColor.withOpacity(0.8)),
+          CustomText("bySigningUpLoggingIn".translate(context),
+              color: context.color.textLightColor.withValues(alpha: 0.8),
+              fontSize: context.font.small,
+              textAlign: TextAlign.center),
           const SizedBox(
             height: 3,
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             InkWell(
-                child: Text("termsOfService".translate(context))
-                    .underline()
-                    .color(context.color.territoryColor)
-                    .size(context.font.small),
+                child: CustomText("termsOfService".translate(context),
+                    color: context.color.territoryColor,
+                    fontSize: context.font.small,
+                    showUnderline: true),
                 onTap: () => Navigator.pushNamed(
                         context, Routes.profileSettings, arguments: {
                       'title': "termsConditions".translate(context),
                       'param': Api.termsAndConditions
                     })),
-            /*CustomTextButton(
-                text:Text("termsOfService".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
-                onPressed: () => Navigator.pushNamed(
-                        context, Routes.profileSettings,
-                        arguments: {
-                          'title': UiUtils.getTranslatedLabel(
-                              context, "termsConditions"),
-                          'param': Api.termsAndConditions
-                        })),*/
             const SizedBox(
               width: 5.0,
             ),
-            Text("andTxt".translate(context))
-                .size(context.font.small)
-                .color(context.color.textLightColor.withOpacity(0.8)),
+            CustomText(
+              "andTxt".translate(context),
+              color: context.color.textLightColor.withValues(alpha: 0.8),
+              fontSize: context.font.small,
+            ),
             const SizedBox(
               width: 5.0,
             ),
             InkWell(
-                child: Text("privacyPolicy".translate(context))
-                    .underline()
-                    .color(context.color.territoryColor)
-                    .size(context.font.small),
+                child: CustomText(
+                  "privacyPolicy".translate(context),
+                  color: context.color.territoryColor,
+                  fontSize: context.font.small,
+                  showUnderline: true,
+                ),
                 onTap: () => Navigator.pushNamed(
                         context, Routes.profileSettings, arguments: {
                       'title': "privacyPolicy".translate(context),
                       'param': Api.privacyPolicy
                     })),
-            /*CustomTextButton(
-                text:
-                    Text("privacyPolicy".translate(context)).underline().color(context.color.teritoryColor).size(context.font.small),
-                onPressed: () => Navigator.pushNamed(
-                      context,
-                      Routes.profileSettings,
-                      arguments: {
-                        'title': UiUtils.getTranslatedLabel(
-                            context, "privacyPolicy"),
-                        'param': Api.privacyPolicy
-                      },
-                    )),*/
           ]),
         ],
       ),
@@ -818,50 +882,49 @@ class LoginScreenState extends State<LoginScreen> {
             child: FittedBox(
               fit: BoxFit.none,
               child: MaterialButton(
-                onPressed: () {
-                  HelperUtils.killPreviousPages(context, Routes.main,
-                      {"from": "login", "isSkipped": true});
-                  /*Navigator.pushReplacementNamed(
-                    context,
-                    Routes.main,
-                    arguments: {
-                      "from": "login",
-                      "isSkipped": true,
-                    },
-                  );*/
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                color: context.color.forthColor.withOpacity(0.102),
-                elevation: 0,
-                height: 28,
-                minWidth: 64,
-                child: Text("skip".translate(context))
-                    .color(context.color.forthColor),
-              ),
+                  onPressed: () {
+                    HelperUtils.killPreviousPages(context, Routes.main,
+                        {"from": "login", "isSkipped": true});
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  color: context.color.forthColor.withValues(alpha: 0.102),
+                  elevation: 0,
+                  height: 28,
+                  minWidth: 64,
+                  child: CustomText(
+                    "skip".translate(context),
+                    color: context.color.forthColor,
+                  )),
             ),
           ),
           const SizedBox(
             height: 66,
           ),
-          Text("signInWithMob".translate(context))
-              .size(context.font.extraLarge),
+          CustomText(
+            "signInWithMob".translate(context),
+            fontSize: context.font.extraLarge,
+          ),
           const SizedBox(
             height: 8,
           ),
           Row(
             children: [
-              Text("+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}")
-                  .size(context.font.large),
+              CustomText(
+                "+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}",
+                fontSize: context.font.large,
+              ),
               const SizedBox(
                 width: 5,
               ),
               InkWell(
-                  child: Text("change".translate(context))
-                      .underline()
-                      .color(context.color.territoryColor)
-                      .size(context.font.large),
+                  child: CustomText(
+                    "change".translate(context),
+                    color: context.color.territoryColor,
+                    fontSize: context.font.large,
+                    showUnderline: true,
+                  ),
                   onTap: () => Navigator.pushNamed(context, Routes.login)),
             ],
           ),
@@ -869,12 +932,6 @@ class LoginScreenState extends State<LoginScreen> {
             height: 24,
           ),
           otpInput(),
-          /* CustomTextFormField(
-              controller: _otpController,
-              keyboard: TextInputType.number,
-              hintText: "enterOTPHere".translate(context),
-              //maxLength: 6,
-              validator: CustomTextFieldValidator.otpSix),*/
           const SizedBox(
             height: 8,
           ),
@@ -888,8 +945,8 @@ class LoginScreenState extends State<LoginScreen> {
                     );
                 context.read<AuthenticationCubit>().verify();
               },
-              child: Text("resendOTP".translate(context))
-                  .color(context.color.textColorDark.withOpacity(0.7)),
+              child: CustomText("resendOTP".translate(context),
+                  color: context.color.textColorDark.withValues(alpha: 0.7)),
             ),
           ),
           const SizedBox(
@@ -928,77 +985,30 @@ class LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   HelperUtils.killPreviousPages(context, Routes.main,
                       {"from": "login", "isSkipped": true});
-                  /* Navigator.pushReplacementNamed(
-                    context,
-                    Routes.main,
-                    arguments: {
-                      "from": "login",
-                      "isSkipped": true,
-                    },
-                  );*/
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                color: context.color.forthColor.withOpacity(0.102),
+                color: context.color.forthColor.withValues(alpha: 0.102),
                 elevation: 0,
                 height: 28,
                 minWidth: 64,
-                child: Text("skip".translate(context))
-                    .color(context.color.forthColor),
+                child: CustomText(
+                  "skip".translate(context),
+                  color: context.color.forthColor,
+                ),
               ),
             ),
           ),
           const SizedBox(
             height: 66,
           ),
-          Text("signInWithEmail".translate(context))
-              .size(context.font.extraLarge),
+          CustomText(
+            "signInWithEmail".translate(context),
+            fontSize: context.font.extraLarge,
+          ),
           const SizedBox(
             height: 8,
-          ),
-          Row(
-            children: [
-              Text(emailMobileTextController.text).size(context.font.large),
-              const SizedBox(
-                width: 5,
-              ),
-              InkWell(
-                  child: Text("change".translate(context))
-                      .underline()
-                      .color(context.color.territoryColor)
-                      .size(context.font.large),
-                  onTap: () => Navigator.pushNamed(context, Routes.login)),
-            ],
-          ),
-          const SizedBox(
-            height: 24,
-          ),
-          CustomTextFormField(
-            hintText: "${"password".translate(context)}*",
-            controller: _passwordController,
-            obscureText: isObscure,
-            suffix: IconButton(
-              onPressed: () {
-                isObscure = !isObscure;
-                setState(() {});
-              },
-              icon: Icon(
-                !isObscure ? Icons.visibility : Icons.visibility_off,
-                color: context.color.textColorDark.withOpacity(0.3),
-              ),
-            ),
-          ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: MaterialButton(
-              onPressed: () {
-                Navigator.pushNamed(context, Routes.forgotPassword);
-              },
-              child: Text("${"forgotPassword".translate(context)}?")
-                  .color(context.color.textLightColor)
-                  .size(context.font.normal),
-            ),
           ),
           const SizedBox(
             height: 19,
@@ -1006,9 +1016,14 @@ class LoginScreenState extends State<LoginScreen> {
           UiUtils.buildButton(
             context,
             onPressed: () {
+              if (_passwordController.text.trim().isEmpty) {
+                HelperUtils.showSnackBarMessage(
+                    context, 'Password cannot be empty');
+                return;
+              }
               context.read<AuthenticationCubit>().setData(
                   payload: EmailLoginPayload(
-                      email: emailMobileTextController.text,
+                      email: emailController.text,
                       password: _passwordController.text,
                       type: EmailLoginType.login),
                   type: AuthenticationType.email);

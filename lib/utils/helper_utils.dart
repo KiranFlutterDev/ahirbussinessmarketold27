@@ -7,11 +7,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eClassify/data/helper/custom_exception.dart';
 import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -19,7 +20,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:eClassify/utils/constant.dart';
 
 enum MessageType {
   success(successMessageColor),
@@ -42,43 +42,6 @@ extension StringCasingExtension on String {
 }
 
 class HelperUtils {
-/*  static String decryptString(
-      String encryptedValue) {
-    final encryptedData = encrypt.Encrypted(base64.decode(encryptedValue));
-    final iv = encrypt.IV.fromLength(16);
-    final ivBytes = base64.decode(iv);
-    final tagBytes = "" != [] ? base64.decode("") : null;
-
-    final decrypter = encrypt.Encrypter(
-        encrypt.AES(encrypt.Key.fromUtf8("0123456789123456"), mode: encrypt.AESMode.cbc));
-
-    final decryptedData = decrypter.decrypt(
-      encryptedData,
-      iv: encrypt.IV(ivBytes),
-    );
-
-    return decryptedData;
-  }*/
-
-  /* static String decryptString(String encryptionText) {
-    try {
-      final key = encrypt.Key.fromUtf8("0123456789123456");
-
-      final iv = encrypt.IV.fromBase64("DFGDxdfdfEREfgvC");
-
-      final encrypter =
-          encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
-
-      final decrypted = encrypter
-          .decrypt(encrypt.Encrypted.fromBase64(encryptionText), iv: iv);
-
-      return decrypted;
-    } catch (e) {
-      //log("error in encryption");
-      return "get error";
-    }
-  }*/
-
   static String decryptString(String encryptedText) {
     try {
       final encrypter = encrypt.Encrypter(encrypt.AES(
@@ -95,45 +58,6 @@ class HelperUtils {
       return encryptedText;
     }
   }
-
-  /*static String decryptString(String encryptedText) {
-    try {
-      //final key = encrypt.Key.fromUtf8("0123456789123456");
-      final key = getEncDecKey();
-      print("key11****$key");
-      final iv = encrypt.IV.fromBase64("");
-      // final iv = encrypt.IV.fromBase64("DFGDxdfdfEREfgvC");
-      encrypt.Encrypter encrypter = encrypt.Encrypter(encrypt.AES(
-        key,
-        mode: encrypt.AESMode.cbc,
-      ));
-
-      final encryptedTest = encrypt.Encrypted.fromBase64(encryptedText);
-      final decryptedText = encrypter.decrypt(encryptedTest, iv: iv);
-      print("decryptedText**$decryptedText");
-      return decryptedText;
-    } catch (e) {
-      print("error***$e");
-      return encryptedText;
-    }
-  }
-
-  static encrypt.Key getEncDecKey() {
-    try {
-      String mainBackendKey = "0123456789123456";
-
-      String hashedData =
-          sha256.convert(utf8.encode(mainBackendKey)).toString();
-      String substring = hashedData.substring(0, 16);
-
-      final encrypt.Key key = encrypt.Key.fromUtf8(substring);
-      print("key***$key");
-      return key;
-    } catch (e) {
-      print("error key***$e");
-      throw Exception(e.toString());
-    }
-  }*/
 
   static Future<bool> checkInternet() async {
     bool check = false;
@@ -183,15 +107,12 @@ class HelperUtils {
           children: [
             ListTile(
               leading: const Icon(Icons.copy),
-              title: Text("copylink".translate(context)),
+              title: CustomText("copylink".translate(context)),
               onTap: () async {
                 String deepLink = "";
                 if (AppSettings.deepLinkingType == DeepLinkType.native) {
                   deepLink = nativeDeepLinkUrlOfItem(itemSlug);
                 }
-                /*else {
-                  deepLink = await DeepLinkManager.buildDynamicLink(itemId);
-                }*/
 
                 await Clipboard.setData(ClipboardData(text: deepLink));
 
@@ -204,16 +125,13 @@ class HelperUtils {
             ),
             ListTile(
               leading: const Icon(Icons.share),
-              title: Text("share".translate(context)),
+              title: CustomText("share".translate(context)),
               onTap: () async {
                 String deepLink = "";
 
                 if (AppSettings.deepLinkingType == DeepLinkType.native) {
                   deepLink = nativeDeepLinkUrlOfItem(itemSlug);
                 }
-                /*else {
-                  deepLink = await DeepLinkManager.buildDynamicLink(itemId);
-                }*/
 
                 final box = context.findRenderObject() as RenderBox?;
 
@@ -254,14 +172,14 @@ class HelperUtils {
     return mobileNumber;
   }
 
-  static showSnackBarMessage(BuildContext? context, String message,
+  static dynamic showSnackBarMessage(BuildContext context, String message,
       {int messageDuration = 3,
       MessageType? type,
       bool? isFloating,
       VoidCallback? onClose}) async {
-    var snackBar = ScaffoldMessenger.of(context!).showSnackBar(
+    var snackBar = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: CustomText(message),
         behavior: (isFloating ?? false) ? SnackBarBehavior.floating : null,
         backgroundColor: type?.value,
         duration: Duration(seconds: messageDuration),
@@ -326,12 +244,12 @@ class HelperUtils {
     return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
   }
 
-  static killPreviousPages(BuildContext context, var nextpage, var args) {
+  static void killPreviousPages(BuildContext context, var nextpage, var args) {
     Navigator.of(context)
         .pushNamedAndRemoveUntil(nextpage, (route) => false, arguments: args);
   }
 
-  static goToNextPage(var nextpage, BuildContext bcontext, bool isreplace,
+  static void goToNextPage(var nextpage, BuildContext bcontext, bool isreplace,
       {Map? args}) {
     if (isreplace) {
       Navigator.of(bcontext).pushReplacementNamed(nextpage, arguments: args);
@@ -370,21 +288,6 @@ class HelperUtils {
       return false;
     }
   }
-
-/*
-  static Future<File?> compressImageFile(File file) async {
-    try {
-      //final compressedFile = await FlutterNativeImage.compressImage(file.path,quality: Constant.imgQuality,targetWidth: Constant.maxImgWidth,targetHeight: Constant.maxImgHeight);
-      final compressedFile = await FlutterNativeImage.compressImage(
-        file.path,
-        quality: Constant.uploadImageQuality,
-      );
-      return File(compressedFile.path);
-    } catch (e) {
-      return null; //If any error occurs during compression, the process is stopped.
-    }
-  }
-*/
 
   static Future<File> compressImageFile(File file) async {
     try {

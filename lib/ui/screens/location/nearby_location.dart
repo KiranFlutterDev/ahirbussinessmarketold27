@@ -2,14 +2,18 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/confirm_location_screen.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +22,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/confirm_location_screen.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 
 class NearbyLocationScreen extends StatefulWidget {
   final String from;
@@ -111,7 +109,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
     setState(() {});
   }
 
-  preFillLocationWhileEdit() async {
+  void preFillLocationWhileEdit() async {
     latitude = HiveUtils.getLatitude();
     longitude = HiveUtils.getLongitude();
     if (latitude != "" &&
@@ -128,6 +126,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
         markerId: const MarkerId('currentLocation'),
         position: LatLng(latitude!, longitude!),
       ));
+      radius = HiveUtils.getNearbyRadius();
       _addCircle(LatLng(latitude!, longitude!), radius);
       setState(() {});
     } else {
@@ -139,7 +138,8 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
       ].where((part) => part != null && part.isNotEmpty).join(', ');
       if (currentLocation == "") {
         Position position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
+            locationSettings:
+                LocationSettings(accuracy: LocationAccuracy.high));
         _cameraPosition = CameraPosition(
           target: LatLng(position.latitude, position.longitude),
           zoom: 14.4746,
@@ -168,6 +168,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
           zoom: 14.4746,
           bearing: 0,
         );
+        radius = HiveUtils.getNearbyRadius();
         _addCircle(LatLng(latitude!, longitude!), radius);
         getLocationFromLatitudeLongitude(latLng: LatLng(latitude!, longitude!));
         _markers.add(Marker(
@@ -180,7 +181,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
     setState(() {});
   }
 
-  getLocationFromLatitudeLongitude({LatLng? latLng}) async {
+  void getLocationFromLatitudeLongitude({LatLng? latLng}) async {
     try {
       Placemark? placeMark = (await placemarkFromCoordinates(
               latLng?.latitude ?? _cameraPosition!.target.latitude,
@@ -205,8 +206,8 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
   void _showLocationServiceInstructions() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text('pleaseEnableLocationServicesManually'.translate(context)),
+        content: CustomText(
+            'pleaseEnableLocationServicesManually'.translate(context)),
         action: SnackBarAction(
           label: 'ok'.translate(context),
           textColor: context.color.secondaryColor,
@@ -223,10 +224,6 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
     );
   }
 
-/*  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }*/
-
   void _addCircle(LatLng position, double radiusInKm) {
     final double radiusInMeters = radiusInKm * 1000; // Convert km to meters
 
@@ -238,7 +235,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
           center: position,
           radius: radiusInMeters,
           // Set radius in meters
-          fillColor: context.color.territoryColor.withOpacity(0.15),
+          fillColor: context.color.territoryColor.withValues(alpha: 0.15),
           strokeColor: context.color.territoryColor,
           strokeWidth: 2,
         ),
@@ -299,7 +296,8 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
           area: formatedAddress!.area,
           country: formatedAddress!.country,
           latitude: latitude,
-          longitude: longitude);
+          longitude: longitude,
+          radius: radius);
 
       Future.delayed(
         Duration.zero,
@@ -326,7 +324,8 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
           area: formatedAddress!.area,
           country: formatedAddress!.country,
           latitude: latitude,
-          longitude: longitude);
+          longitude: longitude,
+          radius: radius);
       HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
     } else {
       Map<String, dynamic> result = {
@@ -345,22 +344,17 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
   }
 
   Set<Factory<OneSequenceGestureRecognizer>> getMapGestureRecognizers() {
-    return <Factory<OneSequenceGestureRecognizer>>{}
-      ..add(Factory<PanGestureRecognizer>(
-          () => PanGestureRecognizer()..onUpdate = (dragUpdateDetails) {}))
-      ..add(Factory<ScaleGestureRecognizer>(
-          () => ScaleGestureRecognizer()..onStart = (dragUpdateDetails) {}))
-      ..add(Factory<TapGestureRecognizer>(() => TapGestureRecognizer()))
-      ..add(Factory<VerticalDragGestureRecognizer>(
-          () => VerticalDragGestureRecognizer()
-            ..onDown = (dragUpdateDetails) {
-              if (markerMove == false) {
-              } else {
-                setState(() {
-                  markerMove = false;
-                });
-              }
-            }));
+    return <Factory<OneSequenceGestureRecognizer>>{}..add(
+        Factory<VerticalDragGestureRecognizer>(
+            () => VerticalDragGestureRecognizer()
+              ..onDown = (dragUpdateDetails) {
+                if (markerMove == false) {
+                } else {
+                  setState(() {
+                    markerMove = false;
+                  });
+                }
+              }));
   }
 
   @override
@@ -429,8 +423,6 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                           mapToolbarEnabled: true,
                                           myLocationButtonEnabled: true,
                                           mapType: MapType.normal,
-                                          gestureRecognizers:
-                                              getMapGestureRecognizers(),
                                           onMapCreated:
                                               (GoogleMapController controller) {
                                             Future.delayed(const Duration(
@@ -463,10 +455,6 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                                   LatLng(latitude!, longitude!),
                                                   radius); // Get location details
                                             });
-                                            /* initialCameraPosition: CameraPosition(
-                                target: center,
-                                zoom: 12.0, // Set zoom level
-                              ),*/
                                           }))),
                               if (formatedAddress != null)
                                 PositionedDirectional(
@@ -494,7 +482,7 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                                 decoration: BoxDecoration(
                                                   color: context
                                                       .color.territoryColor
-                                                      .withOpacity(0.15),
+                                                      .withValues(alpha: 0.15),
                                                   borderRadius:
                                                       BorderRadius.circular(5),
                                                 ),
@@ -505,10 +493,10 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                                         .color.territoryColor),
                                               ),
                                               SizedBox(
-                                                width: 10.rw(context),
+                                                width: 10,
                                               ),
                                               Expanded(
-                                                child: Text(
+                                                child: CustomText(
                                                   [
                                                     if (formatedAddress!.area !=
                                                             null &&
@@ -573,11 +561,9 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                                       TextOverflow.ellipsis,
                                                   softWrap: true,
                                                   maxLines: 3,
-                                                )
-                                                    .size(context.font.normal)
-                                                    .bold(
-                                                        weight:
-                                                            FontWeight.w500),
+                                                  fontSize: context.font.normal,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
                                               )
                                             ],
                                           )),
@@ -585,58 +571,54 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
                                   ),
                                 ),
                               PositionedDirectional(
-                                end: 30,
-                                bottom: 15,
-                                child: InkWell(
-                                  child: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: context.color.borderColor,
-                                        width: Constant.borderWidth,
+                                end: 5,
+                                bottom: 5,
+                                child: Card(
+                                  child: InkWell(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: const Icon(
+                                        Icons.my_location_sharp,
+                                        size: 30,
+                                        // Change the icon color if needed
                                       ),
-                                      color: context.color.secondaryColor,
-                                      // Adjust the opacity as needed
-                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Icon(
-                                      Icons.my_location_sharp,
-                                      // Change the icon color if needed
-                                    ),
-                                  ),
-                                  onTap: () async {
-                                    Position position =
-                                        await Geolocator.getCurrentPosition(
-                                      desiredAccuracy: LocationAccuracy.high,
-                                    );
+                                    onTap: () async {
+                                      Position position =
+                                          await Geolocator.getCurrentPosition(
+                                              locationSettings:
+                                                  LocationSettings(
+                                                      accuracy: LocationAccuracy
+                                                          .high));
 
-                                    _markers.clear(); // Clear existing markers
-                                    _markers.add(Marker(
-                                      markerId: MarkerId('selectedLocation'),
-                                      position: LatLng(position.latitude,
-                                          position.longitude),
-                                    ));
-
-                                    _cameraPosition = CameraPosition(
-                                      target: LatLng(position.latitude,
-                                          position.longitude),
-                                      zoom: 14.4746,
-                                      bearing: 0,
-                                    );
-                                    latitude = position.latitude;
-                                    longitude = position.longitude;
-                                    getLocationFromLatitudeLongitude();
-                                    _addCircle(
-                                        LatLng(position.latitude,
+                                      _markers
+                                          .clear(); // Clear existing markers
+                                      _markers.add(Marker(
+                                        markerId: MarkerId('selectedLocation'),
+                                        position: LatLng(position.latitude,
                                             position.longitude),
-                                        radius);
-                                    mapController.animateCamera(
-                                      CameraUpdate.newCameraPosition(
-                                          _cameraPosition!),
-                                    );
-                                    setState(() {});
-                                  },
+                                      ));
+
+                                      _cameraPosition = CameraPosition(
+                                        target: LatLng(position.latitude,
+                                            position.longitude),
+                                        zoom: 14.4746,
+                                        bearing: 0,
+                                      );
+                                      latitude = position.latitude;
+                                      longitude = position.longitude;
+                                      getLocationFromLatitudeLongitude();
+                                      _addCircle(
+                                          LatLng(position.latitude,
+                                              position.longitude),
+                                          radius);
+                                      mapController.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                            _cameraPosition!),
+                                      );
+                                      setState(() {});
+                                    },
+                                  ),
                                 ),
                               )
                             ],
@@ -651,13 +633,12 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
               height: 10,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: sidePadding),
-              child: Text(
-                'selectAreaRange'.translate(context),
-              )
-                  .color(context.color.textDefaultColor)
-                  .bold(weight: FontWeight.w600),
-            ),
+                padding: const EdgeInsets.symmetric(horizontal: sidePadding),
+                child: CustomText(
+                  'selectAreaRange'.translate(context),
+                  color: context.color.textDefaultColor,
+                  fontWeight: FontWeight.w600,
+                )),
             SizedBox(
               height: 15,
             ),
@@ -681,12 +662,14 @@ class NearbyLocationScreenState extends State<NearbyLocationScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('1\t${"km".translate(context)}')
-                      .color(context.color.textDefaultColor)
-                      .bold(weight: FontWeight.w500),
-                  Text('100\t${"km".translate(context)}')
-                      .color(context.color.textDefaultColor)
-                      .bold(weight: FontWeight.w500),
+                  CustomText('1\t${"km".translate(context)}',
+                      color: context.color.textDefaultColor,
+                      fontWeight: FontWeight.w500),
+                  CustomText(
+                    '100\t${"km".translate(context)}',
+                    color: context.color.textDefaultColor,
+                    fontWeight: FontWeight.w500,
+                  )
                 ],
               ),
             ),

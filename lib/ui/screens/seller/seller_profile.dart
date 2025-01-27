@@ -1,28 +1,27 @@
+import 'dart:ui' as ui;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/data/cubits/seller/fetch_seller_item_cubit.dart';
 import 'package:eClassify/data/cubits/seller/fetch_seller_ratings_cubit.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
+import 'package:eClassify/ui/screens/home/home_screen.dart';
+import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
+import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/app_icon.dart';
+import 'package:eClassify/utils/custom_hero_animation.dart';
+import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/customHeroAnimation.dart';
-import 'package:eClassify/utils/sliver_grid_delegate_with_fixed_cross_axis_count_and_fixed_height.dart';
-
-import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
-import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
-import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 
 class SellerProfileScreen extends StatefulWidget {
   final User model;
@@ -84,10 +83,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
   @override
   void dispose() {
-    //controller.removeListener(_loadMore);
-    //controller.dispose();
-    //reviewController.removeListener(_reviewLoadMore);
-    //reviewController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -118,7 +113,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
       child: Scaffold(
         backgroundColor: context.color.backgroundColor,
         body: NestedScrollView(
-          //controller: _tabController.index == 0 ? controller : reviewController,
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               leading: Material(
@@ -159,35 +153,76 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(
-                        height: 100.rh(context),
+                        height: 100,
                       ),
-                      SizedBox(
-                          height: 95.rh(context),
-                          width: 95.rw(context),
-                          child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          CircleAvatar(
+                            radius: 45,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(45),
                               child: widget.model.profile != null
                                   ? UiUtils.getImage(widget.model.profile!,
-                                      fit: BoxFit.fill)
-                                  : UiUtils.getSvg(
-                                      AppIcons.defaultPersonLogo,
+                                      fit: BoxFit.fill, width: 95, height: 95)
+                                  : UiUtils.getSvg(AppIcons.defaultPersonLogo,
                                       color: context.color.territoryColor,
                                       fit: BoxFit.none,
-                                    ))),
-                      SizedBox(
-                        height: 7,
+                                      width: 95,
+                                      height: 95),
+                            ),
+                          ),
+                          if (widget.model.isVerified == 1)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: -10,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: context.color.forthColor),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 1),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      UiUtils.getSvg(AppIcons.verifiedIcon,
+                                          width: 14, height: 14),
+                                      SizedBox(
+                                        width: 4,
+                                      ),
+                                      CustomText(
+                                        "verifiedLbl".translate(context),
+                                        color: context.color.secondaryColor,
+                                        fontWeight: FontWeight.w500,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      Text(widget.model.name!)
-                          .bold()
-                          .color(context.color.textDefaultColor),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CustomText(
+                        widget.model.name!,
+                        color: context.color.textDefaultColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                       if (widget.model.createdAt != null &&
                           widget.model.createdAt != '') ...[
                         SizedBox(
                           height: 7,
                         ),
-                        Text("${"memberSince".translate(context)}\t${UiUtils.monthYearDate(widget.model.createdAt!)}")
-                            .bold(weight: FontWeight.w400)
-                            .color(context.color.textDefaultColor),
+                        CustomText(
+                          "${"memberSince".translate(context)}\t${UiUtils.monthYearDate(widget.model.createdAt!)}",
+                          color: context.color.textDefaultColor,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ],
                       if (widget.rating != null)
                         Padding(
@@ -215,7 +250,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: context.color.textDefaultColor
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                                 TextSpan(
@@ -225,7 +260,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: context.color.textDefaultColor
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                                   ),
                                 ),
                               ],
@@ -254,8 +289,8 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                             .textTheme
                             .titleMedium!
                             .copyWith(fontWeight: FontWeight.w500),
-                        unselectedLabelColor:
-                            context.color.textDefaultColor.withOpacity(0.7),
+                        unselectedLabelColor: context.color.textDefaultColor
+                            .withValues(alpha: 0.7),
                         unselectedLabelStyle: Theme.of(context)
                             .textTheme
                             .titleMedium!
@@ -268,7 +303,8 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                       Divider(
                         height: 0,
                         thickness: 2,
-                        color: context.color.textDefaultColor.withOpacity(0.2),
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.2),
                       ),
                     ],
                   ),
@@ -277,7 +313,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
             ),
           ],
           body: SafeArea(
-            bottom: true,
+            top: false,
             child: TabBarView(
               controller: _tabController,
               children: [
@@ -300,7 +336,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
       if (state is FetchSellerItemsFail) {
         return Center(
-          child: Text(state.error),
+          child: CustomText(state.error),
         );
       }
       if (state is FetchSellerItemsSuccess) {
@@ -317,13 +353,15 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
           );
         }
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("${state.total.toString()}\t${"itemsLive".translate(context)}")
-                  .bold(weight: FontWeight.w600)
-                  .size(context.font.large),
+              CustomText(
+                "${state.total.toString()}\t${"itemsLive".translate(context)}",
+                fontWeight: FontWeight.w600,
+                fontSize: context.font.large,
+              ),
               Expanded(
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
@@ -343,8 +381,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     gridDelegate:
                         SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
                             crossAxisCount: 2,
-                            height: MediaQuery.of(context).size.height /
-                                3.5.rh(context),
+                            height: MediaQuery.of(context).size.height / 3.5,
                             mainAxisSpacing: 7,
                             crossAxisSpacing: 10),
                     itemCount: state.items.length,
@@ -406,7 +443,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        height: 120.rh(context),
+        height: 120,
         decoration: BoxDecoration(
             border: Border.all(width: 1.5, color: context.color.borderColor),
             color: context.color.secondaryColor,
@@ -414,33 +451,33 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
         child: Row(
           children: [
             CustomShimmer(
-              height: 120.rh(context),
-              width: 100.rw(context),
+              height: 120,
+              width: 100,
             ),
             SizedBox(
-              width: 10.rw(context),
+              width: 10,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CustomShimmer(
-                  width: 100.rw(context),
+                  width: 100,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 150.rw(context),
+                  width: 150,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 120.rw(context),
+                  width: 120,
                   height: 10,
                   borderRadius: 7,
                 ),
                 CustomShimmer(
-                  width: 80.rw(context),
+                  width: 80,
                   height: 10,
                   borderRadius: 7,
                 )
@@ -467,7 +504,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
       if (state is FetchSellerRatingsFail) {
         return Center(
-          child: Text(state.error),
+          child: CustomText(state.error),
         );
       }
       if (state is FetchSellerRatingsSuccess) {
@@ -521,16 +558,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
       }
       return Container();
     });
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: sidePadding, vertical: 10),
-      child: Column(children: [
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: context.color.secondaryColor),
-        )
-      ]),
-    );
   }
 
 // Rating summary widget (similar to the top section of your image)
@@ -561,13 +588,15 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     CustomRatingBar(
                       rating: seller.averageRating!,
                       itemSize: 25.0,
-                      activeColor: Colors.orange.darken(20),
+                      activeColor: Colors.amber,
                       inactiveColor: context.color.backgroundColor.darken(10),
                       allowHalfRating: true,
                     ),
                     SizedBox(height: 3),
-                    Text("${total.toString()}\t${"ratings".translate(context)}")
-                        .size(context.font.large),
+                    CustomText(
+                      "${total.toString()}\t${"ratings".translate(context)}",
+                      fontSize: context.font.large,
+                    )
                   ],
                 ),
                 SizedBox(width: 20),
@@ -596,20 +625,20 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
   Widget _buildRatingBar(int starCount, int ratingCount, int total) {
     return Row(
       children: [
-        Row(
-          children: [
-            Text("$starCount")
-                .bold(weight: FontWeight.w500)
-                .color(context.color.textDefaultColor),
-            SizedBox(
-              width: 2,
-            ),
-            Icon(
-              Icons.star_rounded,
-              size: 15,
+        SizedBox(
+          width: 10.0,
+          child: CustomText("$starCount",
               color: context.color.textDefaultColor,
-            )
-          ],
+              textAlign: TextAlign.center,
+              fontWeight: FontWeight.w500),
+        ),
+        SizedBox(
+          width: 2,
+        ),
+        Icon(
+          Icons.star_rounded,
+          size: 15,
+          color: context.color.textDefaultColor,
         ),
         SizedBox(width: 5),
         Expanded(
@@ -620,9 +649,13 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
           ),
         ),
         SizedBox(width: 10),
-        Text(ratingCount.toString())
-            .bold(weight: FontWeight.w600)
-            .color(context.color.textDefaultColor.withOpacity(0.7)),
+        SizedBox(
+          width: 10.0,
+          child: CustomText(ratingCount.toString(),
+              color: context.color.textDefaultColor.withValues(alpha: 0.7),
+              textAlign: TextAlign.center,
+              fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }
@@ -689,18 +722,21 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      CustomText(
                         ratings.buyer!.name!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                       if (ratings.createdAt != null)
-                        Text(
-                          dateTime(ratings.createdAt!),
-                        ).size(context.font.small).color(
-                            context.color.textDefaultColor.withOpacity(0.3)),
+                        CustomText(
+                          dateTime(
+                            ratings.createdAt!,
+                          ),
+                          fontSize: context.font.small,
+                          color: context.color.textDefaultColor.withValues(
+                            alpha: .3,
+                          ),
+                        )
                     ],
                   ),
                   SizedBox(height: 5),
@@ -714,13 +750,15 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                         allowHalfRating: true,
                       ),
                       SizedBox(width: 5),
-                      Text(ratings.ratings!.toString())
-                          .color(context.color.textDefaultColor)
+                      CustomText(
+                        ratings.ratings!.toString(),
+                        color: context.color.textDefaultColor,
+                      )
                     ],
                   ),
                   SizedBox(height: 5),
                   SizedBox(
-                    width: context.screenWidth * 0.63.rw(context),
+                    width: context.screenWidth * 0.63,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final span = TextSpan(
@@ -742,14 +780,15 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Expanded(
-                              child: Text(
+                              child: CustomText(
                                 "${ratings.review!}\t",
                                 maxLines: ratings.isExpanded! ? null : 2,
                                 softWrap: true,
                                 overflow: ratings.isExpanded!
                                     ? TextOverflow.visible
                                     : TextOverflow.ellipsis,
-                              ).color(context.color.textDefaultColor),
+                                color: context.color.textDefaultColor,
+                              ),
                             ),
                             if (isOverflowing)
                               Padding(
@@ -760,14 +799,14 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                                         .read<FetchSellerRatingsCubit>()
                                         .updateIsExpanded(index);
                                   },
-                                  child: Text(
+                                  child: CustomText(
                                     ratings.isExpanded!
                                         ? "readLessLbl".translate(context)
                                         : "readMoreLbl".translate(context),
-                                  )
-                                      .color(context.color.territoryColor)
-                                      .bold(weight: FontWeight.w400)
-                                      .size(context.font.small),
+                                    color: context.color.territoryColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: context.font.small,
+                                  ),
                                 ),
                               ),
                           ],
@@ -822,7 +861,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      CustomText(
                         ratings.buyer!.name!,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -830,10 +869,10 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                         ),
                       ),
                       if (ratings.createdAt != null)
-                        Text(
+                        CustomText(
                           dateTime(ratings.createdAt!),
                         ).size(context.font.small).color(
-                            context.color.textDefaultColor.withOpacity(0.3)),
+                            context.color.textDefaultColor.withValues(alpha: 0.3)),
                     ],
                   ),
                   SizedBox(height: 5),
@@ -847,14 +886,14 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                         allowHalfRating: true,
                       ),
                       SizedBox(width: 5),
-                      Text(ratings.ratings!.toString())
+                      CustomText(ratings.ratings!.toString())
                           .color(context.color.textDefaultColor)
                     ],
                   ),
                   SizedBox(height: 5),
-                  //Text(ratings.review!).color(context.color.textDefaultColor),
+                  //CustomText(ratings.review!).color(context.color.textDefaultColor),
                   SizedBox(
-                    width: context.screenWidth * 0.63.rw(context),
+                    width: context.screenWidth * 0.63,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         // Measure the rendered text
@@ -878,7 +917,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Expanded(
-                              child: Text(
+                              child: CustomText(
                                 "${ratings.review!}\t",
                                 maxLines: isExpanded ? null : 2,
                                 softWrap: true,
@@ -897,7 +936,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                                           !isExpanded; // Toggle the expanded state
                                     });
                                   },
-                                  child: Text(
+                                  child: CustomText(
                                     isExpanded
                                         ? "readLessLbl".translate(context)
                                         : "readMoreLbl".translate(context),
@@ -989,11 +1028,11 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(
-                        height: 100.rh(context),
+                        height: 100,
                       ),
                       SizedBox(
-                          height: 95.rh(context),
-                          width: 95.rw(context),
+                          height: 95,
+                          width: 95,
                           child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: widget.model.profile != null
@@ -1007,7 +1046,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                       SizedBox(
                         height: 7,
                       ),
-                      Text(widget.model.name!)
+                      CustomText(widget.model.name!)
                           .bold()
                           .color(context.color.textDefaultColor),
                       if (widget.model.createdAt != null &&
@@ -1015,7 +1054,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                         SizedBox(
                           height: 7,
                         ),
-                        Text("${"memberSince".translate(context)}\t${UiUtils.monthYearDate(widget.model.createdAt!)}")
+                        CustomText("${"memberSince".translate(context)}\t${UiUtils.monthYearDate(widget.model.createdAt!)}")
                             .bold(weight: FontWeight.w400)
                             .color(context.color.textDefaultColor),
                       ]
@@ -1041,7 +1080,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                               .titleMedium!
                               .copyWith(fontWeight: FontWeight.w500),
                           unselectedLabelColor:
-                              context.color.textDefaultColor.withOpacity(0.7),
+                              context.color.textDefaultColor.withValues(alpha: 0.7),
                           unselectedLabelStyle: Theme.of(context)
                               .textTheme
                               .titleMedium!
@@ -1055,7 +1094,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                           height: 0,
                           thickness: 2,
                           color:
-                              context.color.textDefaultColor.withOpacity(0.2),
+                              context.color.textDefaultColor.withValues(alpha: 0.2),
                         ),
                       ],
                     ),
@@ -1084,7 +1123,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
       if (state is FetchSellerItemsFail) {
         return Center(
-          child: Text(state.error),
+          child: CustomText(state.error),
         );
       }
       if (state is FetchSellerItemsSuccess) {
@@ -1104,7 +1143,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("${state.total.toString()}\t${"itemsLive".translate(context)}")
+              CustomText("${state.total.toString()}\t${"itemsLive".translate(context)}")
                   .bold(weight: FontWeight.w600)
                   .size(context.font.large),
               Expanded(
@@ -1116,7 +1155,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                       SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
                           crossAxisCount: 2,
                           height: MediaQuery.of(context).size.height /
-                              3.5.rh(context),
+                              3.5,
                           mainAxisSpacing: 7,
                           crossAxisSpacing: 10),
                   itemCount: state.items.length,
@@ -1156,14 +1195,14 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
-                width: 10.rw(context),
+                width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
             ],
@@ -1174,14 +1213,14 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
-                width: 10.rw(context),
+                width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 3.5.rh(context),
+                height: MediaQuery.of(context).size.height / 3.5,
                 width: context.screenWidth / 2.3,
               ),
             ],

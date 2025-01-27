@@ -1,4 +1,4 @@
-﻿import 'package:eClassify/data/model/data_output.dart';
+import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
 import 'package:eClassify/data/repositories/seller/seller_ratings_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -125,7 +125,7 @@ class FetchSellerRatingsCubit extends Cubit<FetchSellerRatingsState> {
     }
   }*/
 
- /* void toggleExpandedState(int index) {
+  /* void toggleExpandedState(int index) {
     if (state is FetchSellerRatingsSuccess) {
       FetchSellerRatingsSuccess currentState =
           state as FetchSellerRatingsSuccess;

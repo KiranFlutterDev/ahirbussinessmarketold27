@@ -1,7 +1,6 @@
-
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:flutter/material.dart';
-
 
 class ReadMoreText extends StatefulWidget {
   final String text;
@@ -31,12 +30,11 @@ class _ReadMoreTextState extends State<ReadMoreText> {
 
     final numLines = textPainter.computeLineMetrics().length;
 
-
     if (numLines > 5) {
       return Wrap(
         children: [
           Text(
-            showingFullText ? text : _truncateText(text),
+            showingFullText ? text : _truncateCustomText(text),
             style: widget.style,
           ),
           TextButton(
@@ -50,7 +48,7 @@ class _ReadMoreTextState extends State<ReadMoreText> {
             },
             child: Text(
               showingFullText
-                  ?"readLessLbl".translate(context)
+                  ? "readLessLbl".translate(context)
                   : "readMoreLbl".translate(context),
               style: widget.readMoreButtonStyle,
             ),
@@ -59,10 +57,10 @@ class _ReadMoreTextState extends State<ReadMoreText> {
       );
     }
 
-    return Text(text);
+    return CustomText(text);
   }
 
-  String _truncateText(String text) {
+  String _truncateCustomText(String text) {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: DefaultTextStyle.of(context).style),
       maxLines: 4,

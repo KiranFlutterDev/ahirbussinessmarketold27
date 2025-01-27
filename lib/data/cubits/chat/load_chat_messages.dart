@@ -1,11 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'package:eClassify/data/repositories/chat_repository.dart';
 import 'package:eClassify/data/model/data_output.dart';
+import 'package:eClassify/data/repositories/chat_repository.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-
 
 class LoadChatMessagesState {}
 
@@ -59,9 +57,9 @@ class LoadChatMessagesFailed extends LoadChatMessagesState {
   });
 }
 
-class LoadChatMessagesCubit extends Cubit<LoadChatMessagesState>{
+class LoadChatMessagesCubit extends Cubit<LoadChatMessagesState> {
   LoadChatMessagesCubit() : super(LoadChatMessagesInitial());
-  final ChatRepostiory _chatRepostiory = ChatRepostiory();
+  final ChatRepository _chatRepostiory = ChatRepository();
 
   Future<void> load({required int itemOfferId}) async {
     try {
@@ -121,13 +119,11 @@ class LoadChatMessagesCubit extends Cubit<LoadChatMessagesState>{
     return false;
   }
 
-  @override
   LoadChatMessagesState? fromJson(Map<String, dynamic> json) {
     // TODO: implement fromJson
     return null;
   }
 
-  @override
   Map<String, dynamic>? toJson(LoadChatMessagesState state) {
     return null;
   }

@@ -1,5 +1,5 @@
-import 'package:eClassify/utils/constant.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eClassify/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -17,16 +17,14 @@ Widget setNetworkImg(String? mainUrl,
     width: width,
     height: height,
     fit: boxFit,
-    memCacheHeight: 500,
-    memCacheWidth: 500,
     errorWidget: (context, url, error) {
       return setSVGImage("placeholder",
-          height: height, width: width, boxFit: placeboxfit ??= boxFit);
+          height: height, width: width, boxFit: placeboxfit ?? boxFit);
     },
     placeholder: (context, url) {
       return Center(
           child: setSVGImage("placeholder",
-              height: height, width: width, boxFit: placeboxfit ??= boxFit));
+              height: height, width: width, boxFit: placeboxfit ?? boxFit));
     },
   );
 }

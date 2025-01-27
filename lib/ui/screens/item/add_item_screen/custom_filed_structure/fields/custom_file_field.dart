@@ -2,18 +2,17 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/validator.dart';
+import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:flutter/material.dart';
+import 'package:eClassify/utils/validator.dart';
 import 'package:file_picker/file_picker.dart';
-
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
+import 'package:flutter/material.dart';
 
 class CustomFileField extends CustomField {
   @override
@@ -66,20 +65,6 @@ class CustomFileField extends CustomField {
     return imageExtensions.contains(extension);
   }
 
-/*  Future<File?> pickFile() async {
-    FilePickerResult? picker = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['png', 'jpg', 'jpeg', 'svg', 'pdf'],
-    );
-    if (picker != null) {
-      File file = File(picker.files.single.path!);
-      picked = file.path;
-      return file;
-    }
-    picked = null;
-    return null;
-  }*/
-
   @override
   Widget render() {
     return CustomValidator(
@@ -98,10 +83,11 @@ class CustomFileField extends CustomField {
               children: [
                 if (parameters['image'] != null) ...[
                   Container(
-                    width: 48.rw(context),
-                    height: 48.rh(context),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: context.color.territoryColor.withOpacity(0.1),
+                      color:
+                          context.color.territoryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: SizedBox(
@@ -118,26 +104,24 @@ class CustomFileField extends CustomField {
                     ),
                   ),
                   SizedBox(
-                    width: 10.rw(context),
+                    width: 10,
                   ),
                 ],
                 Expanded(
-                  child: Text(
+                  child: CustomText(
                     parameters['name'],
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
                     maxLines: 3,
-                  )
-                      .size(context.font.large)
-                      .bold(weight: FontWeight.w500)
-                      .color(state.hasError
-                          ? context.color.error
-                          : context.color.textColorDark),
+                    fontSize: context.font.large,
+                    fontWeight: FontWeight.w500,
+                    color: context.color.textColorDark,
+                  ),
                 ),
               ],
             ),
             SizedBox(
-              height: 14.rh(context),
+              height: 14,
             ),
             GestureDetector(
               onTap: () async {
@@ -173,12 +157,12 @@ class CustomFileField extends CustomField {
                       const SizedBox(
                         width: 5,
                       ),
-                      Text(
+                      CustomText(
                         "addFile".translate(context),
-                        style: TextStyle(
-                            color: context.color.textDefaultColor
-                                .withOpacity(0.5)),
-                      ).size(context.font.large),
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.5),
+                        fontSize: context.font.large,
+                      ),
                     ],
                   ),
                 ),
@@ -204,16 +188,19 @@ class CustomFileField extends CustomField {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(picked?.split("/").last ?? "")
-                              .setMaxLines(lines: 1)
-                              .bold(weight: FontWeight.w500),
+                          CustomText(
+                            picked?.split("/").last ?? "",
+                            maxLines: 1,
+                            fontWeight: FontWeight.w500,
+                          ),
                           if (!((picked ?? "").startsWith("http") ||
                               (picked ?? "").startsWith("https")))
-                            Text(
+                            CustomText(
                               HelperUtils.getFileSizeString(
                                 bytes: File((picked ?? "")).lengthSync(),
                               ).toUpperCase(),
-                            ).size(context.font.smaller),
+                              fontSize: context.font.smaller,
+                            ),
                         ],
                       ),
                     ),
@@ -231,9 +218,11 @@ class CustomFileField extends CustomField {
               );
             }),
             const SizedBox(height: 8),
-            Text(
+            CustomText(
               'allowedFileTypes'.translate(context),
-            ).color(context.color.error).size(context.font.small),
+              color: context.color.error,
+              fontSize: context.font.small,
+            ),
           ],
         );
       },

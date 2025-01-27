@@ -54,7 +54,8 @@ class CategorySlider {
   int? subCategoriesCount;
   int? parentCategoryId;
 
-  CategorySlider({this.id, this.name, this.subCategoriesCount,this.parentCategoryId});
+  CategorySlider(
+      {this.id, this.name, this.subCategoriesCount, this.parentCategoryId});
 
   CategorySlider.fromJson(Map<String, dynamic> json) {
     id = json['id'];

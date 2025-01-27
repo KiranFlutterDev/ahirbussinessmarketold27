@@ -1,12 +1,3 @@
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/utils/ui_utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eClassify/utils/cloudState/cloud_state.dart';
-import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/seller/fetch_seller_verification_field.dart';
 import 'package:eClassify/data/cubits/seller/fetch_verification_request_cubit.dart';
@@ -16,8 +7,17 @@ import 'package:eClassify/data/model/verification_request_model.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/custom_filed_structure/custom_field.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
-import 'package:eClassify/ui/screens/widgets/dynamic_field/dynamic_field.dart';
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
+import 'package:eClassify/ui/screens/widgets/dynamic_field.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/cloud_state/cloud_state.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/ui_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SellerVerificationScreen extends StatefulWidget {
   final bool isResubmitted;
@@ -247,15 +247,17 @@ class _SellerVerificationScreenState
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  CustomText(
                     'userVerification'.translate(context),
-                  )
-                      .color(context.color.textDefaultColor)
-                      .size(context.font.extraLarge)
-                      .bold(weight: FontWeight.w600),
+                    color: context.color.textDefaultColor,
+                    fontSize: context.font.extraLarge,
+                    fontWeight: FontWeight.w600,
+                  ),
                   Spacer(),
-                  Text('${"stepLbl".translate(context)}\t$page\t${"of2Lbl".translate(context)}')
-                      .color(context.color.textLightColor)
+                  CustomText(
+                    '${"stepLbl".translate(context)}\t$page\t${"of2Lbl".translate(context)}',
+                    color: context.color.textLightColor,
+                  )
                 ],
               ),
               linearIndicator(),
@@ -318,16 +320,18 @@ class _SellerVerificationScreenState
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: 16),
-        Text(
+        CustomText(
           'personalInformation'.translate(context),
-        )
-            .color(context.color.textDefaultColor)
-            .size(context.font.larger)
-            .bold(),
+          color: context.color.textDefaultColor,
+          fontSize: context.font.larger,
+          fontWeight: FontWeight.bold,
+        ),
         SizedBox(height: 8),
-        Text('pleaseProvideYourAccurateInformation'.translate(context))
-            .color(context.color.textDefaultColor)
-            .size(context.font.large),
+        CustomText(
+          'pleaseProvideYourAccurateInformation'.translate(context),
+          color: context.color.textDefaultColor,
+          fontSize: context.font.large,
+        ),
         SizedBox(height: 10),
         buildTextField(
           context,
@@ -375,11 +379,14 @@ class _SellerVerificationScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
-        Text(title.translate(context)).color(context.color.textDefaultColor),
+        CustomText(
+          title.translate(context),
+          color: context.color.textDefaultColor,
+        ),
         SizedBox(
-          height: 10.rh(context),
+          height: 10,
         ),
         CustomTextFormField(
           controller: controller,
@@ -398,16 +405,16 @@ class _SellerVerificationScreenState
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: 16),
-        Text(
+        CustomText(
           'idVerification'.translate(context),
-        )
-            .color(context.color.textDefaultColor)
-            .size(context.font.larger)
-            .bold(),
+          color: context.color.textDefaultColor,
+          fontSize: context.font.larger,
+          fontWeight: FontWeight.bold,
+        ),
         SizedBox(height: 8),
-        Text('selectDocumentToConfirmIdentity'.translate(context))
-            .color(context.color.textDefaultColor)
-            .size(context.font.large),
+        CustomText('selectDocumentToConfirmIdentity'.translate(context),
+            color: context.color.textDefaultColor,
+            fontSize: context.font.large),
         SizedBox(height: 10),
         BlocBuilder<FetchVerificationRequestsCubit,
             FetchVerificationRequestState>(
@@ -460,17 +467,7 @@ class _SellerVerificationScreenState
                         child: field.build(context),
                       );
                     },
-                  ); /*return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: moreDetailDynamicFields.map((field) {
-                  field.stateUpdater(setState);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 9.0),
-                    child: field.build(context),
                   );
-                }).toList(),
-              );*/
                 } else {
                   return SizedBox();
                 }

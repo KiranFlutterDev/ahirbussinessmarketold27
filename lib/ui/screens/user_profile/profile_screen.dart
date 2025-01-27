@@ -1,19 +1,32 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
+import 'package:eClassify/data/cubits/auth/delete_user_cubit.dart';
+import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
+import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
+import 'package:eClassify/data/cubits/seller/fetch_verification_request_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/data/model/system_settings_model.dart';
 import 'package:eClassify/ui/screens/main_activity.dart';
+import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
+import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_keys.dart';
 import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/network/api_call_trigger.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
-import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
-import 'package:eClassify/data/cubits/seller/fetch_verification_request_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -24,22 +37,6 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
-import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
-import 'package:eClassify/data/cubits/auth/delete_user_cubit.dart';
-import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
-import 'package:eClassify/data/model/system_settings_model.dart';
-
-import 'package:eClassify/utils/app_icon.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/network/apiCallTrigger.dart';
-import 'package:eClassify/utils/api.dart';
-
-import 'package:eClassify/utils/helper_utils.dart';
-
-import 'package:eClassify/utils/responsiveSize.dart';
-import 'package:eClassify/ui/screens/widgets/blurred_dialoge_box.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -116,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-              color: context.color.textDefaultColor.withOpacity(0.1))),
+              color: context.color.textDefaultColor.withValues(alpha: 0.1))),
       child: InkWell(
           onTap: onTap,
           child: SvgPicture.asset(
@@ -266,82 +263,84 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 5, vertical: 1),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         UiUtils.getSvg(AppIcons.verifiedIcon,
                                             width: 14, height: 14),
                                         SizedBox(width: 4),
-                                        Text("verifiedLbl".translate(context))
-                                            .color(context.color.secondaryColor)
-                                            .bold(weight: FontWeight.w500)
+                                        CustomText(
+                                            "verifiedLbl".translate(context),
+                                            color: context.color.secondaryColor,
+                                            fontWeight: FontWeight.w500),
                                       ],
                                     ),
                                   )
                                 : SizedBox(),
                         // If none of the conditions are met, return an empty widget
-                    
+
                         SizedBox(
                           height: 5,
                         ),
                         if (HiveUtils.isUserAuthenticated()) ...[
                           SizedBox(
                             width: context.screenWidth * 0.63,
-                            child: Text(
+                            child: CustomText(
                               HiveUtils.getUserDetails().name ?? '',
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
-                            )
-                                .color(context.color.textColorDark)
-                                .size(context.font.large)
-                                .bold(weight: FontWeight.w700),
+                              color: context.color.textColorDark,
+                              fontSize: context.font.large,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           SizedBox(
                             height: 3,
                           ),
                           SizedBox(
                             width: context.screenWidth * 0.63,
-                            child: Text(
+                            child: CustomText(
                               HiveUtils.getUserDetails().email ?? '',
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
-                            )
-                                .color(context.color.textColorDark)
-                                .size(context.font.small),
+                              color: context.color.textColorDark,
+                              fontSize: context.font.small,
+                            ),
                           ),
                         ],
-                    
+
                         if (!HiveUtils.isUserAuthenticated()) ...[
                           SizedBox(
                             width: context.screenWidth * 0.4,
-                            child: Text(
+                            child: CustomText(
                               "anonymous".translate(context),
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
-                            )
-                                .color(context.color.textColorDark)
-                                .size(context.font.large)
-                                .bold(weight: FontWeight.w700),
+                              color: context.color.textColorDark,
+                              fontSize: context.font.large,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           SizedBox(
                             height: 3,
                           ),
                           SizedBox(
                             width: context.screenWidth * 0.4,
-                            child: Text(
+                            child: CustomText(
                               "loginFirst".translate(context),
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 2,
-                            )
-                                .color(context.color.textColorDark)
-                                .size(context.font.small),
+                              color: context.color.textColorDark,
+                              fontSize: context.font.small,
+                            ),
                           ),
                         ],
-                    
+
                         (state is FetchVerificationRequestInProgress ||
                                 state is FetchVerificationRequestInitial ||
                                 state is FetchVerificationRequestFail)
@@ -358,8 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                           height: 7,
                                         ),
                                         SizedBox(
-                                          width: context.screenWidth *
-                                              0.63.rw(context),
+                                          width: context.screenWidth * 0.63,
                                           child: LayoutBuilder(
                                             builder: (context, constraints) {
                                               // Measure the rendered text
@@ -376,33 +374,36 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                 text: span,
                                                 maxLines: 2,
                                                 // Maximum number of lines before overflow
-                                                textDirection: TextDirection.ltr,
+                                                textDirection:
+                                                    TextDirection.ltr,
                                               );
                                               tp.layout(
-                                                  maxWidth: constraints.maxWidth);
-                    
+                                                  maxWidth:
+                                                      constraints.maxWidth);
+
                                               final isOverflowing =
                                                   tp.didExceedMaxLines;
-                    
+
                                               return Row(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.end,
                                                 children: [
                                                   Expanded(
-                                                    child: Text(
+                                                    child: CustomText(
                                                       "${state.data.rejectionReason!}\t",
                                                       maxLines:
                                                           isExpanded ? null : 2,
                                                       softWrap: true,
                                                       overflow: isExpanded
                                                           ? TextOverflow.visible
-                                                          : TextOverflow.ellipsis,
-                                                    )
-                                                        .color(Colors.red)
-                                                        .bold(
-                                                            weight:
-                                                                FontWeight.w400)
-                                                        .size(context.font.small),
+                                                          : TextOverflow
+                                                              .ellipsis,
+                                                      color: Colors.red,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize:
+                                                          context.font.small,
+                                                    ),
                                                   ),
                                                   if (isOverflowing) // Conditionally show the button
                                                     Padding(
@@ -416,7 +417,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                 !isExpanded; // Toggle the expanded state
                                                           });
                                                         },
-                                                        child: Text(
+                                                        child: CustomText(
                                                           isExpanded
                                                               ? "readLessLbl"
                                                                   .translate(
@@ -424,14 +425,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                               : "readMoreLbl"
                                                                   .translate(
                                                                       context),
-                                                        )
-                                                            .color(context.color
-                                                                .textDefaultColor)
-                                                            .bold(
-                                                                weight: FontWeight
-                                                                    .w400)
-                                                            .size(context
-                                                                .font.small),
+                                                          color: context.color
+                                                              .textDefaultColor,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontSize: context
+                                                              .font.small,
+                                                        ),
                                                       ),
                                                     ),
                                                 ],
@@ -441,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         )
                                       ])
                                 : SizedBox.shrink(),
-                    
+
                         (state is FetchVerificationRequestInProgress ||
                                 state is FetchVerificationRequestInitial ||
                                 state is FetchVerificationRequestFail)
@@ -464,23 +464,29 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         children: [
                                           SizedBox(
                                               child: Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                              color: ((state).data.status ==
-                                                      'rejected')
-                                                  ? Colors.red
-                                                  : context.color.territoryColor,
-                                            ),
-                                            child: Text(sellerStatus(
-                                                    (state).data.status!))
-                                                .color(
-                                                    context.color.secondaryColor)
-                                                .size(context.font.small)
-                                                .bold(weight: FontWeight.w500),
-                                          )),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5),
+                                                    color:
+                                                        ((state).data.status ==
+                                                                'rejected')
+                                                            ? Colors.red
+                                                            : context.color
+                                                                .territoryColor,
+                                                  ),
+                                                  child: CustomText(
+                                                    sellerStatus(
+                                                        (state).data.status!),
+                                                    color: context
+                                                        .color.secondaryColor,
+                                                    fontSize:
+                                                        context.font.small,
+                                                    fontWeight: FontWeight.w500,
+                                                  ))),
                                           if ((state).data.status ==
                                               'rejected') ...[
                                             SizedBox(
@@ -490,20 +496,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                                               child: SizedBox(
                                                   child: Container(
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: 12, vertical: 4),
+                                                    horizontal: 12,
+                                                    vertical: 4),
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(5),
                                                   color: context
                                                       .color.territoryColor,
                                                 ),
-                                                child: Text("resubmit"
-                                                        .translate(context))
-                                                    .color(context
-                                                        .color.secondaryColor)
-                                                    .size(context.font.small)
-                                                    .bold(
-                                                        weight: FontWeight.w500),
+                                                child: CustomText(
+                                                  "resubmit".translate(context),
+                                                  color: context
+                                                      .color.secondaryColor,
+                                                  fontSize: context.font.small,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
                                               )),
                                               onTap: () {
                                                 Navigator.pushNamed(
@@ -528,7 +535,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     ],
                                   )
                                 : SizedBox.shrink(),
-                    
+
                         (state is FetchVerificationRequestInProgress ||
                                 state is FetchVerificationRequestInitial ||
                                 state is FetchVerificationRequestSuccess)
@@ -546,19 +553,23 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       InkWell(
                                         child: SizedBox(
                                             child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                            color: context.color.territoryColor,
-                                          ),
-                                          child: Text("getVerificationBadge"
-                                                  .translate(context))
-                                              .color(context.color.secondaryColor)
-                                              .size(context.font.small)
-                                              .bold(weight: FontWeight.w500),
-                                        )),
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  color: context
+                                                      .color.territoryColor,
+                                                ),
+                                                child: CustomText(
+                                                  "getVerificationBadge"
+                                                      .translate(context),
+                                                  color: context
+                                                      .color.secondaryColor,
+                                                  fontSize: context.font.small,
+                                                  fontWeight: FontWeight.w500,
+                                                ))),
                                         onTap: () {
                                           Navigator.pushNamed(
                                               context,
@@ -589,8 +600,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                       child: MaterialButton(
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
-                            color:
-                                context.color.textDefaultColor.withOpacity(0.3),
+                            color: context.color.textDefaultColor
+                                .withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                           borderRadius: BorderRadius.circular(10),
@@ -605,7 +616,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           Navigator.of(context).pushNamedAndRemoveUntil(
                               Routes.login, (route) => false);
                         },
-                        child: Text("loginLbl".translate(context)),
+                        child: CustomText("loginLbl".translate(context)),
                       ),
                     )
                 ],
@@ -707,22 +718,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                           context: context);
                     },
                   ),
-
-                  /*   customTile(
-                    context,
-                    title: "personalized".translate(context),
-                    svgImagePath: AppIcons.magic,
-                    onTap: () {
-                      GuestChecker.check(onNotGuest: () {
-                        Navigator.pushNamed(
-                            context, Routes.personalizedItemScreen,
-                            arguments: {
-                              "type": PersonalizedVisitType.Normal
-                            });
-                      });
-                    },
-                  ),*/
-
                   customTile(
                     context,
                     title: "language".translate(context),
@@ -732,14 +727,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                           context, Routes.languageListScreenRoute);
                     },
                   ),
-                  /*  customTile(
-                    context,
-                    title: "Testing",
-                    svgImagePath: AppIcons.language,
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.soldOutBoughtScreen);
-                    },
-                  ),*/
                   ValueListenableBuilder(
                       valueListenable: isDarkTheme,
                       builder: (context, v, c) {
@@ -964,7 +951,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               height: 40,
               decoration: BoxDecoration(
                 color: context.color.territoryColor
-                    .withOpacity(0.10000000149011612),
+                    .withValues(alpha: 0.10000000149011612),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: FittedBox(
@@ -975,22 +962,26 @@ class _ProfileScreenState extends State<ProfileScreen>
                           color: context.color.territoryColor)),
             ),
             SizedBox(
-              width: 25.rw(context),
+              width: 25,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isUpdateAvailable == false
-                        ? "uptoDate".translate(context)
-                        : title)
-                    .bold(weight: FontWeight.w700)
-                    .color(context.color.textColorDark),
+                CustomText(
+                  isUpdateAvailable == false
+                      ? "uptoDate".translate(context)
+                      : title,
+                  fontWeight: FontWeight.w700,
+                  color: context.color.textColorDark,
+                ),
                 if (isUpdateAvailable)
-                  Text("v$newVersion")
-                      .bold(weight: FontWeight.w300)
-                      .color(context.color.textColorDark)
-                      .size(context.font.small)
-                      .italic()
+                  CustomText(
+                    "v$newVersion",
+                    fontWeight: FontWeight.w300,
+                    color: context.color.textColorDark,
+                    fontSize: context.font.small,
+                    fontStyle: FontStyle.italic,
+                  ),
               ],
             ),
             if (isUpdateAvailable) ...[
@@ -1002,7 +993,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   border:
                       Border.all(color: context.color.borderColor, width: 1.5),
                   color: context.color.secondaryColor
-                      .withOpacity(0.10000000149011612),
+                      .withValues(alpha: 0.10000000149011612),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: FittedBox(
@@ -1055,7 +1046,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: context.color.territoryColor.withOpacity(0.1),
+                    color: context.color.territoryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: FittedBox(
@@ -1066,13 +1057,15 @@ class _ProfileScreenState extends State<ProfileScreen>
                           color: context.color.territoryColor)),
                 ),
                 SizedBox(
-                  width: 25.rw(context),
+                  width: 25,
                 ),
                 Expanded(
                   flex: 3,
-                  child: Text(title)
-                      .bold(weight: FontWeight.w700)
-                      .color(context.color.textColorDark),
+                  child: CustomText(
+                    title,
+                    fontWeight: FontWeight.w700,
+                    color: context.color.textColorDark,
+                  ),
                 ),
                 const Spacer(),
                 if (isSwitchBox != true)
@@ -1110,7 +1103,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     height: 40,
                     width: 30,
                     child: CupertinoSwitch(
-                      activeColor: context.color.territoryColor,
+                      activeTrackColor: context.color.territoryColor,
                       value: switchValue ?? false,
                       onChanged: (value) {
                         onTapSwitch?.call(value);
@@ -1129,10 +1122,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("• "),
+        CustomText("• "),
         SizedBox(width: 3),
         Expanded(
-          child: Text(
+          child: CustomText(
             text,
             textAlign: TextAlign.left,
           ),
@@ -1141,7 +1134,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  deleteConfirmWidget() {
+  void deleteConfirmWidget() {
     UiUtils.showBlurredDialoge(
       context,
       dialoge: BlurredDialogBox(
@@ -1159,7 +1152,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       "savedPreferencesAndMessagesLost".translate(context)),
                 ],
               )
-            : Text("deleteRelogin".translate(context),
+            : CustomText("deleteRelogin".translate(context),
                 textAlign: TextAlign.center),
         cancelButtonName: (_auth.currentUser != null)
             ? 'no'.translate(context)
@@ -1169,32 +1162,17 @@ class _ProfileScreenState extends State<ProfileScreen>
             : 'logout'.translate(context),
         cancelTextColor: context.color.textColorDark,
         svgImagePath: AppIcons.deleteIcon,
-        isAcceptContainesPush: true,
+        isAcceptContainerPush: true,
         onAccept: () async {
           (_auth.currentUser != null)
               ? proceedToDeleteProfile()
               : askToLoginAgain();
-          /*Navigator.of(context).pop();
-          if (callDel) {
-            Future.delayed(
-              const Duration(microseconds: 100),
-                  () {
-                Navigator.pushNamed(context, Routes.login,
-                    arguments: {"isDeleteAccount": true});
-              },
-            );
-          } else {
-            HiveUtils.logoutUser(
-              context,
-              onLogout: () {},
-            );
-          }*/
         },
       ),
     );
   }
 
-  askToLoginAgain() {
+  void askToLoginAgain() {
     HelperUtils.showSnackBarMessage(context, 'loginReqMsg'.translate(context));
     HiveUtils.clear();
     Constant.favoriteItemList.clear();
@@ -1219,7 +1197,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  proceedToDeleteProfile() async {
+  void proceedToDeleteProfile() async {
     //delete user from firebase
     try {
       await _auth.currentUser!.delete().then((value) {
@@ -1272,7 +1250,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           }
         }
       } else {
-        throw HelperUtils.showSnackBarMessage(context, '${error.message}');
+        HelperUtils.showSnackBarMessage(context, '${error.message}');
       }
     } catch (e) {
       debugPrint("unable to delete user - ${e.toString()}");
@@ -1317,7 +1295,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Container(
       width: 49,
       height: 49,
-      color: context.color.territoryColor.withOpacity(0.1),
+      color: context.color.territoryColor.withValues(alpha: 0.1),
       child: FittedBox(
         fit: BoxFit.none,
         child: UiUtils.getSvg(AppIcons.defaultPersonLogo,
@@ -1372,6 +1350,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   context.read<UpdatedReportItemCubit>().clearItem();
                   context.read<GetBuyerChatListCubit>().resetState();
                   context.read<BlockedUsersListCubit>().resetState();
+                  context.read<AuthenticationCubit>().signOut();
                   HiveUtils.logoutUser(
                     context,
                     onLogout: () {},
@@ -1381,6 +1360,6 @@ class _ProfileScreenState extends State<ProfileScreen>
             },
             cancelTextColor: context.color.textColorDark,
             svgImagePath: AppIcons.logoutIcon,
-            content: Text("confirmLogOutMsg".translate(context))));
+            content: CustomText("confirmLogOutMsg".translate(context))));
   }
 }

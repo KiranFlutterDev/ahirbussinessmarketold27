@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 abstract class AuthState {}
 
@@ -42,27 +40,6 @@ class AuthCubit extends Cubit<AuthState> {
       emit(Unauthenticated());
     }
   }
-
-  /*Future<String?> getDeviceToken() async {
-    String? token;
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
-    } else {
-      token = await FirebaseMessaging.instance.getToken();
-    }
-    return token;
-  }*/
-
-/*  Future updateFCM(BuildContext context) async {
-    try {
-      await Api.post(
-        url: Api.updateProfileApi,
-        parameter: {
-          Api.fcmId: getDeviceToken,
-        },
-      );
-    } catch (e) {}
-  }*/
 
   Future<Map<String, dynamic>> updateuserdata(BuildContext context,
       {String? name,

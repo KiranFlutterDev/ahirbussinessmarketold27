@@ -1,7 +1,6 @@
 import 'package:eClassify/data/repositories/report_item_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class ItemReportState {}
 
 class ItemReportInitial extends ItemReportState {}
@@ -35,14 +34,12 @@ class ItemReportCubit extends Cubit<ItemReportState> {
       Map response = await repository.reportItem(
           reasonId: reason_id, itemId: item_id, message: message);
 
-
       if (response['error'] == false) {
         emit(ItemReportInSuccess(response['message']));
       } else {
         emit(ItemReportFailure(response['message']));
       }
     } catch (e) {
-
       emit(ItemReportFailure(e.toString()));
     }
   }

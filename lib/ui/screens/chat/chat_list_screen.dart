@@ -1,12 +1,12 @@
 import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
-import 'package:eClassify/data/model/chat/chated_user_model.dart';
+import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
+import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/ui/screens/chat/chatTile.dart';
 import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
-import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
-import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/api.dart';
@@ -41,8 +41,6 @@ class _ChatListScreenState extends State<ChatListScreen>
   @override
   void initState() {
     if (HiveUtils.isUserAuthenticated()) {
-      context.read<GetBuyerChatListCubit>().setContext(context);
-      context.read<GetSellerChatListCubit>().setContext(context);
       context.read<GetBuyerChatListCubit>().fetch();
       context.read<GetSellerChatListCubit>().fetch();
       context.read<BlockedUsersListCubit>().blockedUsersList();
@@ -95,8 +93,8 @@ class _ChatListScreenState extends State<ChatListScreen>
             bottom: [
               TabBar(
                 tabs: [
-                  Tab(text: 'buying'.translate(context)),
                   Tab(text: 'selling'.translate(context)),
+                  Tab(text: 'buying'.translate(context)),
                 ],
 
                 indicatorColor: context.color.textDefaultColor,
@@ -106,7 +104,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                 labelColor: context.color.textDefaultColor,
                 // Selected tab text color
                 unselectedLabelColor:
-                    context.color.textDefaultColor.withOpacity(0.5),
+                    context.color.textDefaultColor.withValues(alpha: 0.5),
                 // Unselected tab text color
                 labelStyle:
                     TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -119,16 +117,16 @@ class _ChatListScreenState extends State<ChatListScreen>
                 height: 0, // Set height to 0 to make it full width
                 thickness: 0.5, // Divider thickness
                 color: context.color.textDefaultColor
-                    .withOpacity(0.2), // Divider color
+                    .withValues(alpha: 0.2), // Divider color
               ),
             ],
           ),
           body: TabBarView(
             children: [
-              // Content of the 'Buying' tab
-              buyingChatListData(),
               // Content of the 'Selling' tab
               sellingChatListData(),
+              // Content of the 'Buying' tab
+              buyingChatListData(),
             ],
           ),
         ),
@@ -139,8 +137,6 @@ class _ChatListScreenState extends State<ChatListScreen>
   Widget buyingChatListData() {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<GetBuyerChatListCubit>().setContext(context);
-
         context.read<GetBuyerChatListCubit>().fetch();
       },
       color: context.color.territoryColor,
@@ -174,18 +170,20 @@ class _ChatListScreenState extends State<ChatListScreen>
                       controller: chatBuyerScreenController,
                       shrinkWrap: true,
                       itemCount: state.chatedUserList.length,
-                      padding: const EdgeInsetsDirectional.all(16),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 8, vertical: 4),
                       itemBuilder: (
                         context,
                         index,
                       ) {
-                        ChatedUser chatedUser = state.chatedUserList[index];
+                        ChatUser chatedUser = state.chatedUserList[index];
 
                         return Padding(
-                          padding: const EdgeInsets.only(top: 9.0),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: ChatTile(
                             id: chatedUser.sellerId.toString(),
                             itemId: chatedUser.itemId.toString(),
+                            isBuyerList: true,
                             profilePicture: chatedUser.seller != null &&
                                     chatedUser.seller!.profile != null
                                 ? chatedUser.seller!.profile!
@@ -209,15 +207,16 @@ class _ChatListScreenState extends State<ChatListScreen>
                                     chatedUser.item!.price != null
                                 ? chatedUser.item!.price!
                                 : 0.0,
-                            itemAmount: chatedUser.amount??null,
+                            itemAmount: chatedUser.amount ?? null,
                             status: chatedUser.item != null &&
                                     chatedUser.item!.status != null
                                 ? chatedUser.item!.status!
                                 : null,
                             buyerId: chatedUser.buyerId.toString(),
-                            isPurchased: chatedUser.item!.isPurchased??0,
+                            isPurchased: chatedUser.item!.isPurchased ?? 0,
                             alreadyReview:
                                 chatedUser.item!.review == null ? false : true,
+                            unreadCount: chatedUser.unreadCount,
                           ),
                         );
                       }),
@@ -236,8 +235,6 @@ class _ChatListScreenState extends State<ChatListScreen>
   Widget sellingChatListData() {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<GetSellerChatListCubit>().setContext(context);
-
         context.read<GetSellerChatListCubit>().fetch();
       },
       color: context.color.territoryColor,
@@ -271,20 +268,22 @@ class _ChatListScreenState extends State<ChatListScreen>
                       controller: chatSellerScreenController,
                       shrinkWrap: true,
                       itemCount: state.chatedUserList.length,
-                      padding: const EdgeInsetsDirectional.all(16),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 8, vertical: 4),
                       itemBuilder: (
                         context,
                         index,
                       ) {
-                        ChatedUser chatedUser = state.chatedUserList[index];
+                        ChatUser chatedUser = state.chatedUserList[index];
 
                         return Padding(
-                          padding: const EdgeInsets.only(top: 9.0),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: ChatTile(
                             id: chatedUser.buyerId.toString(),
                             itemId: chatedUser.itemId.toString(),
-                            profilePicture: chatedUser.buyer!.profile ?? "",
-                            userName: chatedUser.buyer!.name ?? "",
+                            isBuyerList: false,
+                            profilePicture: chatedUser.buyer?.profile ?? "",
+                            userName: chatedUser.buyer?.name ?? "",
                             itemPicture: chatedUser.item != null &&
                                     chatedUser.item!.image != null
                                 ? chatedUser.item!.image!
@@ -294,21 +293,22 @@ class _ChatListScreenState extends State<ChatListScreen>
                                 ? chatedUser.item!.name!
                                 : "",
                             pendingMessageCount: "5",
-                            date: chatedUser.createdAt!,
+                            date: chatedUser.createdAt ?? '',
                             itemOfferId: chatedUser.id!,
                             itemPrice: chatedUser.item != null &&
                                     chatedUser.item!.price != null
                                 ? chatedUser.item!.price!
                                 : 0,
-                            itemAmount: chatedUser.amount??null,
+                            itemAmount: chatedUser.amount ?? null,
                             status: chatedUser.item != null &&
                                     chatedUser.item!.status != null
                                 ? chatedUser.item!.status!
                                 : null,
                             buyerId: chatedUser.buyerId.toString(),
-                            isPurchased: chatedUser.item!.isPurchased!,
+                            isPurchased: chatedUser.item?.isPurchased ?? 0,
                             alreadyReview:
                                 chatedUser.item!.review == null ? false : true,
+                            unreadCount: chatedUser.unreadCount,
                           ),
                         );
                       }),
